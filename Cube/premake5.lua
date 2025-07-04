@@ -9,7 +9,18 @@ project "Cube"
 
     files {
         "src/**.h",
-        "src/**.cpp"
+        "src/**.cpp",
+        "external/glad/src/glad.c"
+    }
+
+    includedirs{
+        "external/spdlog-1.15.3/include",
+        "external/glfw-3.4/include",
+        "external/glad/include"
+    }
+
+    links{
+        "external/glfw-3.4/lib-vc2022/glfw3.lib"
     }
 
     filter "configurations:Debug"

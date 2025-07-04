@@ -1,7 +1,7 @@
-#include <test.h>
+#include <Cube.h>
 
 int main(){
-    print();
-    while (true);
+    Cube::Application app;
+    app.run();
     return 0;
 }
