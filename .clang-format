@@ -8,3 +8,5 @@ IndentCaseLabels: false
 ColumnLimit: 800
 AccessModifierOffset: -4 
 AllowShortFunctionsOnASingleLine: false
+SpaceBeforeParens: Never
+NamespaceIndentation: All

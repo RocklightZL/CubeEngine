@@ -14,6 +14,7 @@ project "Cube"
     }
 
     includedirs{
+        "src",
         "external/spdlog-1.15.3/include",
         "external/glfw-3.4/include",
         "external/glad/include"
@@ -35,3 +36,10 @@ project "Cube"
         defines "CB_DIST"
         runtime "Release"
         optimize "on"
+
+    filter "files:external/**"
+        pchheader ""
+        
+    filter "toolset:msc"
+        pchheader "pch.h"
+        pchsource "src/pch.cpp"

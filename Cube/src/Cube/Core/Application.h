@@ -1,4 +1,7 @@
 #pragma once
+#include "Cube/Event/Event.h"
+#include "Window.h"
+
 namespace Cube {
 	class Application {
 	public:
@@ -6,5 +9,12 @@ namespace Cube {
 		virtual ~Application();
 
 		void run();
+		void init();
+		// 事件处理
+		bool onWindowClose(const Event& e);
+	private:
+		EventDispatcher dispatcher;
+		Window* mainWindow;
+		bool running;
 	};
 }
