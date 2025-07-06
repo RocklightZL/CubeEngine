@@ -9,7 +9,7 @@ namespace Cube {
 			return keyCode;
 		}
 	protected:
-		KeyEvent(KeyCode keyCode) :keyCode(keyCode) {};
+		KeyEvent(KeyCode keyCode) :keyCode(keyCode) {}
 		virtual ~KeyEvent() = default;
 	private:
 		KeyCode keyCode;
@@ -18,8 +18,11 @@ namespace Cube {
 	class KeyPressedEvent : public KeyEvent {
 	public:
 		KeyPressedEvent(KeyCode keyCode) : KeyEvent(keyCode){}
+		KeyPressedEvent(KeyCode keyCode, bool isRepeat) : KeyEvent(keyCode), isRepeat(isRepeat){}
 		virtual ~KeyPressedEvent() = default;
 		EVENT_TYPE(KeyPressed)
+	private:
+		bool isRepeat;
 	};
 
 	class KeyReleasedEvent : public KeyEvent {

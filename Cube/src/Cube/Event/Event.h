@@ -26,7 +26,7 @@ namespace Cube {
     public:
         EventDispatcher() = default;
         ~EventDispatcher() = default;
-        void subscribe(Handler handler, EventType type);
+        void subscribe(const Handler& handler, EventType type);
         void dispatch(const Event& e);
     private:
         // ¼àÌıÆ÷

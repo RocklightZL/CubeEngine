@@ -3,10 +3,10 @@ UseTab: Never
 IndentWidth: 4
 TabWidth: 4
 BreakBeforeBraces: Attach
-AllowShortIfStatementsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: true
 IndentCaseLabels: false
 ColumnLimit: 800
-AccessModifierOffset: -4 
-AllowShortFunctionsOnASingleLine: false
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: true
 SpaceBeforeParens: Never
 NamespaceIndentation: All

@@ -1,7 +1,7 @@
 #include "Event.h"
 namespace Cube {
 
-	void EventDispatcher::subscribe(Handler handler, EventType type) {
+	void EventDispatcher::subscribe(const Handler& handler, const EventType type) {
 		listener[type].push_back(handler);
 		CB_CORE_TRACE("listener subscribe");
 	}
@@ -12,5 +12,4 @@ namespace Cube {
 			CB_CORE_TRACE("{} was handled", e.toString());
 		}
 	}
-
 }
