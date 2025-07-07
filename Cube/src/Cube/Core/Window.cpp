@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Window.h"
 
 #include <iostream>
@@ -5,7 +6,6 @@
 #include "Cube/Event/ApplicationEvent.h"
 #include "Cube/Event/KeyEvent.h"
 #include "Cube/Event/MouseEvent.h"
-#include "pch.h"
 
 namespace Cube {
 
@@ -34,14 +34,10 @@ namespace Cube {
 
         glfwMakeContextCurrent(window);
 
-        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
+        if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
             CB_CORE_ERROR("Failed to initialize GLAD!");
         }
         glViewport(0, 0, pros.width, pros.height);
-
-        glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
-            glViewport(0, 0, width, height);
-        });
 
         glfwSetErrorCallback(windowErrorCallBack);
 
@@ -101,9 +97,7 @@ namespace Cube {
         });
     }
 
-    EventDispatcher* Window::getDispatcher() const {
-        return dispatcher;
-    }
+    EventDispatcher* Window::getDispatcher() const { return dispatcher; }
 
     const WindowPros& Window::getPros() const { return pros; }
 
@@ -112,7 +106,5 @@ namespace Cube {
         glfwPollEvents();
     }
 
-    void Window::windowErrorCallBack(int error_code, const char* description) {
-        CB_CORE_ERROR("glfwWindowError: {}", description);
-    }
+    void Window::windowErrorCallBack(int error_code, const char* description) { CB_CORE_ERROR("glfwWindowError: {}", description); }
 }  // namespace Cube

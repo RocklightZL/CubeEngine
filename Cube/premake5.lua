@@ -7,6 +7,9 @@ project "Cube"
     targetdir ("%{wks.location}/bin/"..outputdir.."/%{prj.name}")
     objdir ("%{wks.location}/bin-obj/"..outputdir.."/%{prj.name}")
 
+    pchheader "pch.h"
+    pchsource "src/pch.cpp"
+
     files {
         "src/**.h",
         "src/**.cpp",
@@ -38,8 +41,4 @@ project "Cube"
         optimize "on"
 
     filter "files:external/**"
-        pchheader ""
-        
-    filter "toolset:msc"
-        pchheader "pch.h"
-        pchsource "src/pch.cpp"
+        buildoptions { "/Y-"}

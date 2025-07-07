@@ -1,11 +1,12 @@
+#include "pch.h"
 #include "Application.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
 #include "Cube/Event/ApplicationEvent.h"
-#include "pch.h"
 #include "Window.h"
+#include "Cube/Renderer/Renderer.h"
 #include "glad/glad.h"
 
 namespace Cube {
@@ -19,11 +20,7 @@ namespace Cube {
         CB_CORE_INFO("Application run");
 
         unsigned int VBO;
-        float vertices[3*3] {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f, 0.5f, 0.0f
-        };
+        float vertices[3 * 3]{-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -41,6 +38,7 @@ namespace Cube {
             glClear(GL_COLOR_BUFFER_BIT);
 
             glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
+            glBindVertexArray(0);
 
             mainWindow->update();
         }
@@ -62,6 +60,8 @@ namespace Cube {
     }
 
     bool Application::onWindowResize(const Event& e) {
+        const auto ee = dynamic_cast<const WindowResizeEvent&>(e);
+        Renderer::setViewport(ee.getWidth(), ee.getHeight());
         CB_CORE_INFO("mainWindow resize {} {}", mainWindow->getPros().width, mainWindow->getPros().height);
         return true;
     }

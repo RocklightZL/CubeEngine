@@ -10,3 +10,4 @@ AccessModifierOffset: -4
 AllowShortFunctionsOnASingleLine: true
 SpaceBeforeParens: Never
 NamespaceIndentation: All
+SortIncludes: false
