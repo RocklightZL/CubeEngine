@@ -35,3 +35,6 @@ namespace Cube {
 #define CB_WARN(...) ::Cube::Log::getClientLogger()->warn(__VA_ARGS__)
 #define CB_ERROR(...) ::Cube::Log::getClientLogger()->error(__VA_ARGS__)
 #define CB_CRITICAL(...) ::Cube::Log::getClientLogger()->critical(__VA_ARGS__)
+
+// ╤оят
+#define CB_ASSERT(...) assert(__VA_ARGS__)

@@ -34,11 +34,6 @@ namespace Cube {
 
         glfwMakeContextCurrent(window);
 
-        if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-            CB_CORE_ERROR("Failed to initialize GLAD!");
-        }
-        glViewport(0, 0, pros.width, pros.height);
-
         glfwSetErrorCallback(windowErrorCallBack);
 
         glfwSetWindowCloseCallback(window, [](GLFWwindow* w) {

@@ -7,7 +7,7 @@ namespace Cube {
 		static void beginFrame();
 		static void endFrame();
 		static void setViewport(int width, int height);
-		static void setClearColor();
+		static void setClearColor(float r, float g, float b, float a);
 
 	};
 
