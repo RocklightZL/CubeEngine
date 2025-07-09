@@ -20,7 +20,8 @@ project "Cube"
         "src",
         "external/spdlog-1.15.3/include",
         "external/glfw-3.4/include",
-        "external/glad/include"
+        "external/glad/include",
+        "external"
     }
 
     links{

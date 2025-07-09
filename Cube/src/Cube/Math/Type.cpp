@@ -69,9 +69,9 @@ namespace Cube {
 
 	Mat2 Mat2::operator*(const Mat2& other) {
 		Mat2 res;
-		res.data = {0};
 		for(int j = 0; j < 2; ++j) {
 		    for(int i = 0; i < 2; ++i) {
+				res.data[i + j * 2] = 0;
 		        for(int k = 0; k < 2; ++k) {
 		            res.data[i + j * 2] += data[i + k * 2] * other.data[k + j * 2];
 		        }
@@ -103,9 +103,9 @@ namespace Cube {
 
 	Mat3 Mat3::operator*(const Mat3& other) {
 		Mat3 res;
-		res.data = {0};
 		for(int j = 0; j < 3; ++j) {
 			for(int i = 0; i < 3; ++i) {
+				res.data[i + j * 3] = 0;
 				for(int k = 0; k < 3; ++k) {
 					res.data[i + j * 3] += data[i + k * 3] * other.data[k + j * 3];
 				}
@@ -137,9 +137,9 @@ namespace Cube {
 
 	Mat4 Mat4::operator*(const Mat4& other) {
 		Mat4 res;
-		res.data = {0};
 		for(int j = 0; j < 4; ++j) {
 			for(int i = 0; i < 4; ++i) {
+				res.data[i + j * 4] = 0;
 				for(int k = 0; k < 4; ++k) {
 					res.data[i + j * 4] += data[i + k * 4] * other.data[k + j * 4];
 				}

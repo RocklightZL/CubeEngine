@@ -1,5 +1,9 @@
 #pragma once
 #include <glad/glad.h>
+#include <cstdint>
+#include <string>
+#include <vector>
+
 namespace Cube {
 
     // 顶点属性数据类型

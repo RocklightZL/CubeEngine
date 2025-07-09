@@ -76,24 +76,24 @@ namespace Cube {
         glUniform1i(glGetUniformLocation(id, name.c_str()), val);
     }
 
-    void Shader::setVec2(const std::string& name, Vec2 val) {
+    void Shader::setVec2(const std::string& name, glm::vec2 val) {
         glUniform2f(glGetUniformLocation(id, name.c_str()), val.x, val.y);
     }
 
-    void Shader::setVec3(const std::string& name, Vec3 val) {
+    void Shader::setVec3(const std::string& name, glm::vec3 val) {
         glUniform3f(glGetUniformLocation(id, name.c_str()), val.x, val.y, val.z);
     }
 
-    void Shader::setVec4(const std::string& name, Vec4 val) {
+    void Shader::setVec4(const std::string& name, glm::vec4 val) {
         glUniform4f(glGetUniformLocation(id, name.c_str()), val.x, val.y, val.z, val.w);
     }
 
-    void Shader::setMat3(const std::string& name, Mat3 val) {
-        glUniformMatrix3fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, val.data);
+    void Shader::setMat3(const std::string& name, glm::mat3 val) {
+        glUniformMatrix3fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, &val[0][0]);
     }
 
-    void Shader::setMat4(const std::string& name, Mat4 val) {
-        glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, val.data);
+    void Shader::setMat4(const std::string& name, glm::mat4 val) {
+        glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE, &val[0][0]);
     }
 
 }  // namespace Cube

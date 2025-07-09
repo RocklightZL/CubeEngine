@@ -27,5 +27,8 @@ namespace Cube {
             delete layer;
         }
     }
+    const std::deque<Layer*>& LayerStack::getData() const {
+        return layers;
+    }
 
-}
+}  // namespace Cube

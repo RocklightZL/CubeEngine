@@ -13,6 +13,9 @@ namespace Cube {
         static void unbind();
         void addVertexBuffer(const std::shared_ptr<VertexBuffer>& vb);
         void setIndexBuffer(const std::shared_ptr<IndexBuffer>& ib);
+
+        const std::shared_ptr<IndexBuffer>& getIndexBuffer() const;
+        const std::vector<std::shared_ptr<VertexBuffer>>& getVertexBuffers() const;
     private:
         uint32_t id;
         std::vector<std::shared_ptr<VertexBuffer>> vbs;

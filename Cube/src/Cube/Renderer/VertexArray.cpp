@@ -35,4 +35,12 @@ namespace Cube {
         this->ib = ib;
     }
 
+    const std::shared_ptr<IndexBuffer>& VertexArray::getIndexBuffer() const {
+        return ib;
+    }
+
+    const std::vector<std::shared_ptr<VertexBuffer>>& VertexArray::getVertexBuffers() const {
+        return vbs;
+    }
+
 }  // namespace Cube
