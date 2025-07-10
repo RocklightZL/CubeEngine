@@ -13,10 +13,15 @@
 
 namespace Cube {
 
-    Application::Application() : mainWindow(nullptr), running(true) {
+    Application::Application(const WindowPros& windowPros) : mainWindow(nullptr), running(true) {
+        Log::init();
+        mainWindow = new Window(windowPros, &dispatcher);
         init();
     }
-    Application::~Application() = default;
+
+    Application::~Application() {
+        delete mainWindow;
+    }
 
     void Application::run()
     {
@@ -32,16 +37,14 @@ namespace Cube {
     }
 
     void Application::init() {
-        Log::init();
-        mainWindow = new Window(WindowPros(800, 600, "Cube Engine"), &dispatcher);
         Renderer::init();
         dispatcher.subscribe(std::bind(&Application::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
         dispatcher.subscribe(std::bind(&Application::onWindowResize, this, std::placeholders::_1), EventType::WindowResize);
     }
 
-    LayerStack* Application::getLayers() {
-        return &layers;
-    }
+    LayerStack* Application::getLayers() { return &layers; }
+
+    Window* Application::getWindow() {return mainWindow;}
 
     bool Application::onWindowClose(const Event& e) {
         delete mainWindow;

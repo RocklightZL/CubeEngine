@@ -2,10 +2,6 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 
-namespace spdlog{
-	class logger;
-}
-
 namespace Cube {
 	class Log {
 	public:

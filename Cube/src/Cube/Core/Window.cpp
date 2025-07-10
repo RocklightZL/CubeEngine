@@ -101,5 +101,19 @@ namespace Cube {
         glfwPollEvents();
     }
 
+    bool Window::isKeyPressed(KeyCode keyCode) {
+        return glfwGetKey(window, keyCode) == GLFW_PRESS;
+    }
+
+    bool Window::isMouseButtonPressed(MouseCode mouseCode) {
+        return glfwGetMouseButton(window, mouseCode) == GLFW_PRESS;
+    }
+
+    const MousePos& Window::getMousePosition() {
+        double x, y;
+        glfwGetCursorPos(window, &x, &y);
+        return {x, y};
+    }
+
     void Window::windowErrorCallBack(int error_code, const char* description) { CB_CORE_ERROR("glfwWindowError: {}", description); }
 }  // namespace Cube

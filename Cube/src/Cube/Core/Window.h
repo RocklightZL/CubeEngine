@@ -1,5 +1,8 @@
 #pragma once
 
+#include "KeyCodes.h"
+#include "MouseCodes.h"
+
 #include <string>
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
@@ -14,6 +17,11 @@ struct WindowPros{
 	WindowPros(int width, int height, const std::string& title) : width(width), height(height), title(title){}
 };
 
+struct MousePos {
+    double x;
+	double y;
+};
+
 class Window {
 public:
 	Window(const WindowPros& pros, EventDispatcher* dispatcher);
@@ -23,8 +31,14 @@ public:
     const WindowPros& getPros() const;
 	void update();
 
-	static void windowErrorCallBack(int error_code, const char* description);
+	//  ‰»Î¬÷—Ø
+	bool isKeyPressed(KeyCode keyCode);
+	bool isMouseButtonPressed(MouseCode mouseCode);
+	const MousePos& getMousePosition();
+
 private:
+	static void windowErrorCallBack(int error_code, const char* description);\
+
 	static int windowCnt;
 	WindowPros pros;
 	GLFWwindow* window;

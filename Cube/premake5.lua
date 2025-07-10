@@ -13,7 +13,8 @@ project "Cube"
     files {
         "src/**.h",
         "src/**.cpp",
-        "external/glad/src/glad.c"
+        "external/glad/src/glad.c",
+        "external/stb_image/stb_image.cpp"
     }
 
     includedirs{
