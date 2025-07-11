@@ -6,9 +6,13 @@ namespace Cube {
     class VertexBuffer {
     public:
         VertexBuffer(const std::vector<float>& vertices, uint32_t usage = GL_STATIC_DRAW);
+        VertexBuffer();
         ~VertexBuffer();
         void bind();
         static void unbind();
+
+        void uploadData(const std::vector<float>& vertices, uint32_t usage = GL_STATIC_DRAW);
+        void uploadData(float* data, uint32_t size, uint32_t usage = GL_STATIC_DRAW);
 
         void setLayout(const BufferLayout& layout);
         const BufferLayout& getLayout() const;
@@ -21,6 +25,7 @@ namespace Cube {
     class IndexBuffer {
     public:
         IndexBuffer(const std::vector<uint32_t>& indices, uint32_t usage = GL_STATIC_DRAW);
+        IndexBuffer(const uint32_t* data, uint32_t size, uint32_t usage = GL_STATIC_DRAW);
         ~IndexBuffer();
         void bind();
         static void unbind();

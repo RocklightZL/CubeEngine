@@ -10,6 +10,12 @@
 
 namespace Cube {
 
+    struct QuadData {
+        glm::mat4 modelMatrix;
+        glm::vec4 color;
+        glm::vec4 textureCoord;
+    };
+
 	class Renderer {
 	public:
 		static void init();
@@ -26,30 +32,48 @@ namespace Cube {
 		static void beginFrame(const Camera2D& camera);
 		static void endFrame();
 		static void shutdown();
-		static void drawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color = glm::vec4(1.0f), const glm::mat4& transform = glm::mat4(1.0f));
-		static void drawQuad(const glm::vec2& pos, const glm::vec2& size, const Texture2D& texture, const glm::vec4& tintColor = glm::vec4(1.0f), const glm::mat4& transform = glm::mat4(1.0f));
+        static void drawQuad(const glm::mat4& modelMatrix, const glm::vec4& color, std::shared_ptr<Texture2D>& texture, const glm::vec4& texCoord);
+        static void drawQuad(const glm::vec2& pos, const glm::vec2& size, std::shared_ptr<Texture2D> texture, const glm::vec4& tintColor = glm::vec4(1.0f), float degree = 0.0f, const glm::vec4& texCoord = {0.0f, 0.0f, 1.0f, 1.0f});
 		static void setShader(const std::shared_ptr<Shader>& inShader); // 自定义着色器
     private:
+        static void startNewBatch();
+        static void flushBatch();
+
 		static std::shared_ptr<Shader> shader;
 		static std::shared_ptr<VertexArray> vao;
+        static std::shared_ptr<VertexBuffer> vbo;
+        static std::vector<QuadData> batchData;
+        static unsigned int batchCnt;
+        static std::shared_ptr<Texture2D> currentTex;
+        static bool useTexture;
+        static std::shared_ptr<Texture2D> whiteTex;
+
+        static int drawCallCnt; // 调试用
+
+        static constexpr uint32_t MAX_QUADS_PER_BATCH = 1000;
+        static constexpr uint32_t MAX_VERTICES_PER_BATCH = MAX_QUADS_PER_BATCH * 4;
+        static constexpr uint32_t MAX_INDICES_PER_BATCH = MAX_QUADS_PER_BATCH * 6;
     };
+
 
 	// 默认着色器
 	// clang-format off
 	const std::string DEFAULT_2D_VERTEX_SHADER_SRC = R"(
         #version 330 core
 
-        layout (location = 0) in vec3 aPos;
-        layout (location = 1) in vec2 aTextureCoord;
+        layout (location = 0) in vec4 aPos;
+        layout (location = 1) in vec4 aColor;
+        layout (location = 2) in vec2 aTexCoord;
 
         uniform mat4 u_ViewProjectMatrix;
-        uniform mat4 u_ModelMatrix;
 
         out vec2 textureCoord;
+        out vec4 color;
 
         void main(){
-            textureCoord = aTextureCoord;
-            gl_Position = u_ViewProjectMatrix * u_ModelMatrix * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+            textureCoord = aTexCoord;
+            color = aColor;
+            gl_Position = u_ViewProjectMatrix * vec4(aPos.x, aPos.y, aPos.z, aPos.w);
         }
 
     )";
@@ -57,19 +81,14 @@ namespace Cube {
         #version 330 core
 
         in vec2 textureCoord;
+        in vec4 color;
 
         uniform sampler2D u_Texture;
-        uniform int u_UseTexture;
-        uniform vec4 u_Color;
 
-        out vec4 color;
+        out vec4 o_color;
 
         void main(){
-            if(bool(u_UseTexture)){
-                color = texture(u_Texture, textureCoord) * u_Color;
-            } else{
-                color = u_Color;
-            }
+            o_color = texture(u_Texture, textureCoord) * color;
         }
     )";
 	// clang-format on

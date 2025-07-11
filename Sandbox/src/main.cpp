@@ -83,10 +83,14 @@ TestLayer2::TestLayer2() {
 }
 
 void TestLayer2::onUpdate() {
-    Cube::Renderer2D::setClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+    Cube::Renderer2D::setClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     camera->setPosition({cameraX, cameraY});
     Cube::Renderer2D::beginFrame(*camera);
-    Cube::Renderer2D::drawQuad({x, y}, {100.0f, 100.0f}, *texture, {1.0f, 1.0f, 1.0f, 1.0f});
+    for(int i = 0; i < 50; i++) {
+        for(int j = 0; j < 50; j++) {
+            Cube::Renderer2D::drawQuad({x + 105 * i, y + 105 * j}, {100.0f, 100.0f}, texture, {1.0f, 1.0f, 1.0f, 1.0f}, 0.0f, {0.0f, 0.0f, 0.5f, 0.5f});
+        }
+    }
     Cube::Renderer2D::endFrame();
     processInput();
 }
@@ -123,6 +127,5 @@ int main() {
     TestLayer2* testLayer2 = new TestLayer2();
     app->getLayers()->pushLayer(testLayer2);
     app->run();
-    system("pause");
     return 0;
 }

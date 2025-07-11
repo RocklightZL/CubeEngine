@@ -35,6 +35,14 @@ namespace Cube {
 
     std::shared_ptr<Shader> Renderer2D::shader = nullptr;
     std::shared_ptr<VertexArray> Renderer2D::vao = nullptr;
+    std::shared_ptr<VertexBuffer> Renderer2D::vbo = nullptr;
+    std::vector<QuadData> Renderer2D::batchData;
+    unsigned int Renderer2D::batchCnt = 0;
+    std::shared_ptr<Texture2D> Renderer2D::currentTex = nullptr;
+    bool Renderer2D::useTexture = false;
+    std::shared_ptr<Texture2D> Renderer2D::whiteTex = nullptr;
+
+    int Renderer2D::drawCallCnt = 0;
 
     void Renderer2D::init() {
 
@@ -49,67 +57,121 @@ namespace Cube {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         shader = std::make_shared<Shader>(DEFAULT_2D_VERTEX_SHADER_SRC, DEFAULT_2D_FRAGMENT_SHADER_SRC);
-        // clang-format off
-        std::vector<float> vertices = {
-            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-             0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-             0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-            -0.5f,  0.5f, 0.0f, 0.0f, 1.0f
-        };
-        // clang-format on
-        std::vector<unsigned int> indices = {0, 1, 2, 0, 2, 3};
-        auto vbo = std::make_shared<VertexBuffer>(vertices);
-        auto ibo = std::make_shared<IndexBuffer>(indices);
+
+        vbo = std::make_shared<VertexBuffer>();
+
+        uint32_t* indices = new uint32_t[MAX_INDICES_PER_BATCH];
+        uint32_t offset = 0;
+        for(unsigned int i = 0; i < MAX_INDICES_PER_BATCH; i += 6) {
+            indices[i] = 0 + offset;
+            indices[i+1] = 1 + offset;
+            indices[i+2] = 2 + offset;
+            indices[i+3] = 0 + offset;
+            indices[i+4] = 2 + offset;
+            indices[i+5] = 3 + offset;
+            offset += 4;
+        }
+        auto ibo = std::make_shared<IndexBuffer>(indices, MAX_INDICES_PER_BATCH * sizeof(uint32_t));
+        delete[] indices;
+
         BufferLayout layout = {
-            {ShaderDataType::Float3, "position"},
+            {ShaderDataType::Float4, "position"},
+            {ShaderDataType::Float4, "color"},
             {ShaderDataType::Float2, "texCoord"}
         };
         vbo->setLayout(layout);
         vao = std::make_shared<VertexArray>();
         vao->setIndexBuffer(ibo);
         vao->addVertexBuffer(vbo);
+
+        uint32_t data = 0xFFFFFFFF;
+        whiteTex = std::make_shared<Texture2D>(1, 1, &data);
     }
 
     void Renderer2D::beginFrame(const Camera2D& camera) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        startNewBatch();
 
         shader->bind();
         shader->setMat4("u_ViewProjectMatrix", camera.getPVMatrix());
     }
 
     void Renderer2D::endFrame() {
+        flushBatch();
+        CB_CORE_INFO("Drawcall count: {}", drawCallCnt);
+        drawCallCnt = 0;
     }
 
     void Renderer2D::shutdown() {}
 
-    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, const glm::vec4& color, const glm::mat4& transform) {
-        glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0.0f));
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(size, 1.0f));
-
-        shader->setMat4("u_ModelMatrix", modelMatrix);
-        shader->setVec4("u_Color", color);
-        shader->setInt("u_UseTexture", 0);
-
-        vao->bind();
-        glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
+    void Renderer2D::drawQuad(const glm::mat4& modelMatrix, const glm::vec4& tintColor, std::shared_ptr<Texture2D>& texture, const glm::vec4& texCoord) {
+        if(texture == nullptr) {
+            texture = whiteTex;
+        }
+        if(texture != currentTex) {
+            flushBatch();
+            startNewBatch();
+            currentTex = texture;
+        }else if(batchCnt >= MAX_QUADS_PER_BATCH) {
+            flushBatch();
+            startNewBatch();
+        }
+        batchData.push_back({modelMatrix, tintColor, texCoord});
+        batchCnt++;
     }
 
-    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, const Texture2D& texture, const glm::vec4& tintColor, const glm::mat4& transform) {
+    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, std::shared_ptr<Texture2D> texture, const glm::vec4& tintColor, float degree, const glm::vec4& texCoord) {
         glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0.0f));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(size, 1.0f));
-        modelMatrix = transform * modelMatrix;
-
-        shader->setMat4("u_ModelMatrix", modelMatrix);
-        shader->setVec4("u_Color", tintColor);
-        shader->setInt("u_UseTexture", 1);
-
-        texture.bind();
-        vao->bind();
-        glDrawElements(GL_TRIANGLES, vao->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(degree), {0.0f, 0.0f, 1.0f});
+        drawQuad(modelMatrix, tintColor, texture, texCoord);
     }
 
-    void Renderer2D::setShader(const std::shared_ptr<Shader>& inShader) {
-        shader = inShader;
+    void Renderer2D::setShader(const std::shared_ptr<Shader>& inShader) { shader = inShader; }
+
+    void Renderer2D::startNewBatch() {
+        batchData.clear();
+        batchCnt = 0;
+    }
+
+    void Renderer2D::flushBatch() {
+        std::vector<float> data;
+        for(const QuadData& qd : batchData) {
+            glm::vec4 pos[4] = {
+                {-0.5f, -0.5f, 0.0f, 1.0f},
+                {0.5f, -0.5f, 0.0f, 1.0f},
+                {0.5f, 0.5f, 0.0f, 1.0f},
+                {-0.5f, 0.5f, 0.0f, 1.0f}
+            };
+            glm::vec2 texCoords[4] = {
+                {qd.textureCoord.x, qd.textureCoord.y},
+                {qd.textureCoord.z, qd.textureCoord.y},
+                {qd.textureCoord.z, qd.textureCoord.w},
+                {qd.textureCoord.x, qd.textureCoord.w}
+            };
+            for(int i = 0; i < 4; ++i) {
+                glm::vec4 p = qd.modelMatrix * pos[i];
+                data.push_back(p.x);
+                data.push_back(p.y);
+                data.push_back(p.z);
+                data.push_back(p.w);
+                data.push_back(qd.color.r);
+                data.push_back(qd.color.g);
+                data.push_back(qd.color.b);
+                data.push_back(qd.color.a);
+                data.push_back(texCoords[i].x);
+                data.push_back(texCoords[i].y);
+            }
+        }
+        vbo->uploadData(data, GL_DYNAMIC_DRAW);
+        if(currentTex != nullptr){
+            currentTex->bind();
+        }
+        shader->bind();
+        vao->bind();
+        glDrawElements(GL_TRIANGLES, batchData.size() * 6, GL_UNSIGNED_INT, nullptr);
+        drawCallCnt++;
     }
 
 }  // namespace Cube

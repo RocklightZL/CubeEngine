@@ -29,13 +29,22 @@ namespace Cube {
         }
         glGenTextures(1, &id);
         bind();
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat,GL_UNSIGNED_BYTE, data);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);   
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glGenerateMipmap(GL_TEXTURE_2D);
         stbi_image_free(data);
+    }
+    
+    Texture2D::Texture2D(int width, int height, void* data) : width(width), height(height){
+        // white texture
+        glGenTextures(1, &id);
+        bind();
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
     Texture2D::~Texture2D() {
@@ -55,8 +64,24 @@ namespace Cube {
     int Texture2D::getHeight() const {
         return height;
     }
-    GLuint Texture2D::getId() const {
-        return id;
+    GLuint Texture2D::getId() const { return id; }
+
+    TextureAlas::TextureAlas(const std::string& filePath) : Texture2D(filePath) {}
+
+    TextureAlas::TextureAlas(const std::string& filePath, const std::string& metaDataPath) : Texture2D(filePath) {
+        // 元数据，用于解析纹理图集
+    }
+
+    void TextureAlas::addSubTexture(const std::string& name, const SubTexture& subTexture) {
+        subTextures.insert(std::make_pair(name, subTexture));
+    }
+
+    const SubTexture& TextureAlas::getSubTexture(const std::string& name) {
+        auto res = subTextures.find(name);
+        if(res == subTextures.end()) {
+            CB_CORE_ERROR("Failed to find subTexture: {}", name);
+        }
+        return res->second;
     }
 
 }  // namespace Cube
