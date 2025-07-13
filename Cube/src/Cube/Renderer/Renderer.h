@@ -34,6 +34,7 @@ namespace Cube {
 		static void shutdown();
         static void drawQuad(const glm::mat4& modelMatrix, const glm::vec4& color, std::shared_ptr<Texture2D>& texture, const glm::vec4& texCoord);
         static void drawQuad(const glm::vec2& pos, const glm::vec2& size, std::shared_ptr<Texture2D> texture, const glm::vec4& tintColor = glm::vec4(1.0f), float degree = 0.0f, const glm::vec4& texCoord = {0.0f, 0.0f, 1.0f, 1.0f});
+        static void drawQuad(const glm::vec2& pos, const glm::vec2& size, std::shared_ptr<Texture2D> texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4 transform);
 		static void setShader(const std::shared_ptr<Shader>& inShader); // 自定义着色器
     private:
         static void startNewBatch();

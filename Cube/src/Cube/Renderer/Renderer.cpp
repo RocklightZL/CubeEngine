@@ -128,6 +128,13 @@ namespace Cube {
         drawQuad(modelMatrix, tintColor, texture, texCoord);
     }
 
+    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, std::shared_ptr<Texture2D> texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4 transform) {
+        glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0.0f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(size, 1.0f));
+        modelMatrix = transform * modelMatrix;
+        drawQuad(modelMatrix, color, texture, texCoord);
+    }
+
     void Renderer2D::setShader(const std::shared_ptr<Shader>& inShader) { shader = inShader; }
 
     void Renderer2D::startNewBatch() {

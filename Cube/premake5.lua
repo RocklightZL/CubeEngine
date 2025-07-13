@@ -22,7 +22,9 @@ project "Cube"
         "external/spdlog-1.15.3/include",
         "external/glfw-3.4/include",
         "external/glad/include",
-        "external"
+        "external/glm",
+        "external/stb_image",
+        "external/nlohmann-json"
     }
 
     links{

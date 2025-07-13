@@ -10,7 +10,7 @@ namespace Cube {
     public:
         Texture2D(const std::string& filePath);
         Texture2D(int width, int height, void* data);
-        ~Texture2D();
+        virtual ~Texture2D();
         void bind(unsigned int slot = 0) const;
         void unbind();
 

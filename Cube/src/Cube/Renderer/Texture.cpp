@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "Texture.h"
 
-#include <stb_image/stb_image.h>
+#include <fstream>
+#include <stb_image.h>
+#include <json.hpp>
 
 namespace Cube {
 
@@ -68,8 +70,52 @@ namespace Cube {
 
     TextureAlas::TextureAlas(const std::string& filePath) : Texture2D(filePath) {}
 
+    /*
+     * 元数据，用于解析纹理图集
+     * 约定json格式：
+     * {
+         "textureWidth": 1024,
+         "textureHeight": 1024,
+         "subTextures": [
+           {
+             "name": "player_idle",
+             "x": 0,
+             "y": 0,
+             "width": 64,
+             "height": 64
+           },
+           ...
+         ]
+       }
+     */
     TextureAlas::TextureAlas(const std::string& filePath, const std::string& metaDataPath) : Texture2D(filePath) {
-        // 元数据，用于解析纹理图集
+        std::ifstream file(metaDataPath);
+        if(!file.is_open()) {
+            CB_CORE_ERROR("Failed to open metadata file: {}", metaDataPath);
+            CB_ASSERT(true);
+        }
+        nlohmann::json jsonData;
+        file >> jsonData;
+        file.close();
+
+        int textureWidth = jsonData["textureWidth"];
+        int textureHeight = jsonData["textureHeight"];
+
+        // 检查纹理尺寸是否与实际加载的纹理尺寸一致
+        if(textureWidth != getWidth() || textureHeight != getHeight()) {
+            CB_CORE_ERROR("Texture size mismatch: expected {}x{}, got {}x{}", textureWidth, textureHeight, getWidth(), getHeight());
+            CB_ASSERT(true);
+        }
+        
+        for(const auto& subTexture : jsonData["subTextures"]) {
+            SubTexture st;
+            st.name = subTexture["name"];
+            st.position = glm::vec2(subTexture["x"], subTexture["y"]);
+            st.size = glm::vec2(subTexture["width"], subTexture["height"]);
+            st.uvMin = glm::vec2(st.position.x / (float)textureWidth, st.position.y / (float)textureHeight);
+            st.uvMax = glm::vec2((st.position.x + st.size.x) / (float)textureWidth, (st.position.y + st.size.y) / (float)textureHeight);
+            addSubTexture(st.name, st);
+        }
     }
 
     void TextureAlas::addSubTexture(const std::string& name, const SubTexture& subTexture) {

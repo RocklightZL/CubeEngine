@@ -17,7 +17,7 @@ project "Sandbox"
         "%{wks.location}/Cube/external/spdlog-1.15.3/include",
         "%{wks.location}/Cube/external/glfw-3.4/include",
         "%{wks.location}/Cube/external/glad/include",
-        "%{wks.location}/Cube/external"
+        "%{wks.location}/Cube/external/glm"
     }
 
     links {
