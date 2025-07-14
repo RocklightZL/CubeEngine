@@ -23,13 +23,22 @@ namespace Cube {
         template <typename... Components>
         std::vector<Entity*> getEntitiesWith() {
             std::vector<Entity*> res;
+
             for(auto e : entities) {
-                if(e->hasComponent<Components>() && ...) {
+                bool hasAll = true;
+
+                // 使用初始化列表展开参数包
+                using expander = bool[];
+                (void)expander{ (hasAll = hasAll && e->hasComponent<Components>(), false)... };
+
+                if(hasAll) {
                     res.push_back(e);
                 }
             }
             return res;
         }
+
+        const std::vector<Entity*>& getEntities();
 
     private:
         void processDestruction();

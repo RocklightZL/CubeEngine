@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Cube/Renderer/Camera.h"
 #include "Cube/Renderer/Texture.h"
 
 #include <cstdint>
@@ -27,12 +28,14 @@ namespace Cube {
 	};
 
 	// basic built-in components
+	// only entities with both TransformComponent and SpriteComponent can be rendered
 	class TransformComponent : public Component {
 	public:
 		glm::vec2 position = {0.0f, 0.0f};
 		float rotation = 0.0f;
-		glm::vec2 scale = {1.0f, 1.0f};
+		glm::vec2 scale = {1.0f, 1.0f}; // size
 
+		// = modelMatrix
 		glm::mat4 getTransformMatrix();
 	};
 
@@ -43,4 +46,8 @@ namespace Cube {
 		glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 	};
 
+	class CameraComponent : public Component {
+	public:
+		bool available = false;
+	};
 }

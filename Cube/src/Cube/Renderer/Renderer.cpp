@@ -88,13 +88,13 @@ namespace Cube {
         whiteTex = std::make_shared<Texture2D>(1, 1, &data);
     }
 
-    void Renderer2D::beginFrame(const Camera2D& camera) {
+    void Renderer2D::beginFrame(const glm::mat4& pvMatrix) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         startNewBatch();
 
         shader->bind();
-        shader->setMat4("u_ViewProjectMatrix", camera.getPVMatrix());
+        shader->setMat4("u_ViewProjectMatrix", pvMatrix);
     }
 
     void Renderer2D::endFrame() {
@@ -105,7 +105,7 @@ namespace Cube {
 
     void Renderer2D::shutdown() {}
 
-    void Renderer2D::drawQuad(const glm::mat4& modelMatrix, const glm::vec4& tintColor, std::shared_ptr<Texture2D>& texture, const glm::vec4& texCoord) {
+    void Renderer2D::drawQuad(const glm::mat4& modelMatrix, const glm::vec4& tintColor, std::shared_ptr<Texture2D> texture, const glm::vec4& texCoord) {
         if(texture == nullptr) {
             texture = whiteTex;
         }
@@ -123,8 +123,8 @@ namespace Cube {
 
     void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, std::shared_ptr<Texture2D> texture, const glm::vec4& tintColor, float degree, const glm::vec4& texCoord) {
         glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0.0f));
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(size, 1.0f));
         modelMatrix = glm::rotate(modelMatrix, glm::radians(degree), {0.0f, 0.0f, 1.0f});
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(size, 1.0f));
         drawQuad(modelMatrix, tintColor, texture, texCoord);
     }
 

@@ -29,6 +29,7 @@ namespace Cube {
         glm::vec2 uvMax;
         glm::vec2 position;
         glm::vec2 size;
+
     };
 
     class TextureAlas : public Texture2D{

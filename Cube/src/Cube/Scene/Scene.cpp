@@ -35,6 +35,10 @@ namespace Cube {
         }
     }
 
+    const std::vector<Entity*>& Scene::getEntities() {
+        return entities;
+    }
+
     void Scene::processDestruction() {
         auto it = std::remove_if(entities.begin(), entities.end(),
             [](Entity* entity) { return !entity->isAlive(); });

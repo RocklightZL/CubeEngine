@@ -9,3 +9,8 @@
 #include "Cube/Renderer/Shader.h"
 #include "Cube/Renderer/VertexArray.h"
 #include "Cube/Renderer/Texture.h"
+
+#include "Cube/Scene/Scene.h"
+#include "Cube/Scene/System.h"
+#include "Cube/Scene/Component.h"
+#include "Cube/Scene/Entity.h"
