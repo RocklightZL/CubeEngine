@@ -2,6 +2,7 @@
 #include "Cube/Event/Event.h"
 #include "Window.h"
 #include "LayerStack.h"
+#include "Cube/Scene/Scene.h"
 
 namespace Cube {
 	class Application {
@@ -14,6 +15,8 @@ namespace Cube {
 
 		LayerStack* getLayers();
 		Window* getWindow();
+
+		void setMainScene(Scene* scene);
 		// 事件处理
 		bool onWindowClose(const Event& e);
 		bool onWindowResize(const Event& e);
@@ -22,5 +25,6 @@ namespace Cube {
 		Window* mainWindow;
 		bool running;
 		LayerStack layers;
+		Scene* mainScene;
 	};
 }

@@ -26,6 +26,7 @@ namespace Cube {
     }
 
     void Scene::addSystem(System* system) {
+        system->onAttach();
         systems.push_back(system);
     }
 

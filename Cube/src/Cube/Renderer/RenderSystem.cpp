@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "RendererSystem.h"
+#include "RenderSystem.h"
 
 #include "Cube/Scene/Entity.h"
 #include "Cube/Scene/Scene.h"
@@ -10,9 +10,9 @@
 
 namespace Cube {
 
-    RendererSystem::RendererSystem(float viewportWidth, float viewportHeight) : viewportWidth(viewportWidth), viewportHeight(viewportHeight){}
+    RenderSystem::RenderSystem(float viewportWidth, float viewportHeight) : viewportWidth(viewportWidth), viewportHeight(viewportHeight){}
 
-    void RendererSystem::onUpdate(Scene* scene) {
+    void RenderSystem::onUpdate(Scene* scene) {
         std::vector<Entity*> cameras(scene->getEntitiesWith<TransformComponent, CameraComponent>());
         Entity* mainCamera = nullptr;
         for(auto e : cameras) {
@@ -34,7 +34,7 @@ namespace Cube {
         Renderer2D::endFrame();
     }
 
-    void RendererSystem::onAttach() {
+    void RenderSystem::onAttach() {
         Renderer2D::init();
         Renderer2D::setViewport((int)viewportWidth, (int)viewportHeight);
     }

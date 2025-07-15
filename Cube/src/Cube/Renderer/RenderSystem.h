@@ -4,9 +4,9 @@
 
 namespace Cube {
 
-    class RendererSystem : public System {
+    class RenderSystem : public System {
     public:
-        RendererSystem(float viewportWidth, float viewportHeight);
+        RenderSystem(float viewportWidth, float viewportHeight);
 
         void onUpdate(Scene* scene) override;
 

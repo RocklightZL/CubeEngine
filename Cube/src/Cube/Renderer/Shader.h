@@ -12,6 +12,7 @@ namespace Cube {
     class Shader {
     public:
         Shader(const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc);
+        Shader(const std::string& shaderSrc);
         ~Shader();
 
         void bind();
@@ -30,6 +31,7 @@ namespace Cube {
 
     private:
         uint32_t compileShader(GLenum type, const std::string src);
+        void init(const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc);
 
         uint32_t id;
     };
