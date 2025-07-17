@@ -14,7 +14,7 @@ namespace Cube {
         Scene() = default;
         virtual ~Scene();
 
-        virtual void onUpdate();
+        virtual void onUpdate(float deltaTime);
 
         Entity* createEntity();
         void addSystem(System* system);

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Cube/Renderer/Camera.h"
 #include "Cube/Renderer/Texture.h"
 
 #include <cstdint>
@@ -39,10 +38,16 @@ namespace Cube {
 		glm::mat4 getTransformMatrix();
 	};
 
+    struct TextureRegion {
+        glm::vec2 uvMin;
+		glm::vec2 uvMax;
+    };
+
 	class SpriteComponent : public Component {
 	public:
 		std::string name;
-		std::shared_ptr<TextureAlas> alas = nullptr;
+		TextureAlas* alas = nullptr;
+		TextureRegion region;
 		glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 	};
 
@@ -50,4 +55,9 @@ namespace Cube {
 	public:
 		bool available = false;
 	};
+
+    class AnimatorComponent {
+    public:
+
+    };
 }

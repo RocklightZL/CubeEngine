@@ -28,14 +28,35 @@ namespace Cube {
             newResource->path = path;
             newResource->refCount = 1;
 
-            if constexpr (std::is_base_of_v<T, Shader>) {
+            if constexpr (std::is_same_v<T, Shader>) {
                 newResource->data = new Shader(readFileToString(path));
-            } else if constexpr (std::is_base_of_v<T, Texture2D>) {
+            } else if constexpr (std::is_same_v<T, Texture2D>) {
                 newResource->data = new Texture2D(path);
             } else {
                 static_assert(false, "Unsupported resource type");
             }
             resourcesCache[path] = newResource;
+            return newResource;
+        }
+
+        // with metaData
+        template<typename T>
+        Resource<T>* load(const std::string& filePath, const std::string& metaDataPath) {
+            auto it = resourcesCache.find(filePath);
+            if(it != resourcesCache.end()) {
+                it->second->refCount++;
+                return static_cast<Resource<T>*>(it->second);
+            }
+
+            Resource<T>* newResource = new Resource<T>();
+            newResource->path = filePath;
+            newResource->refCount = 1;
+            if constexpr (std::is_same_v<T, TextureAlas>) {
+                newResource->data = new TextureAlas(filePath, metaDataPath);
+            } else {
+                static_assert(false, "Unsupported resource type with metadata");
+            }
+            resourcesCache[filePath] = newResource;
             return newResource;
         }
 
@@ -48,11 +69,14 @@ namespace Cube {
             }
         }
 
+        void releaseAll();
+
     private:
         ResourceManager() = default;
-        ~ResourceManager() = default;
 
-        std::map<std::string, ResourceBase*> resourcesCache;
+        ~ResourceManager();
+
+        std::unordered_map<std::string, ResourceBase*> resourcesCache;
     };
 
     template Resource<Texture2D>* ResourceManager::load(const std::string&);

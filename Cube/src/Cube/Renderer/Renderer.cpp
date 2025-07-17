@@ -38,9 +38,9 @@ namespace Cube {
     std::shared_ptr<VertexBuffer> Renderer2D::vbo = nullptr;
     std::vector<QuadData> Renderer2D::batchData;
     unsigned int Renderer2D::batchCnt = 0;
-    std::shared_ptr<Texture2D> Renderer2D::currentTex = nullptr;
+    Texture2D* Renderer2D::currentTex = nullptr;
     bool Renderer2D::useTexture = false;
-    std::shared_ptr<Texture2D> Renderer2D::whiteTex = nullptr;
+    Texture2D* Renderer2D::whiteTex = nullptr;
 
     int Renderer2D::drawCallCnt = 0;
 
@@ -85,7 +85,7 @@ namespace Cube {
         vao->addVertexBuffer(vbo);
 
         uint32_t data = 0xFFFFFFFF;
-        whiteTex = std::make_shared<Texture2D>(1, 1, &data);
+        whiteTex = new Texture2D(1, 1, &data);
     }
 
     void Renderer2D::beginFrame(const glm::mat4& pvMatrix) {
@@ -103,9 +103,11 @@ namespace Cube {
         drawCallCnt = 0;
     }
 
-    void Renderer2D::shutdown() {}
+    void Renderer2D::shutdown() {
+        delete whiteTex;
+    }
 
-    void Renderer2D::drawQuad(const glm::mat4& modelMatrix, const glm::vec4& tintColor, std::shared_ptr<Texture2D> texture, const glm::vec4& texCoord) {
+    void Renderer2D::drawQuad(const glm::mat4& modelMatrix, const glm::vec4& tintColor, Texture2D* texture, const glm::vec4& texCoord) {
         if(texture == nullptr) {
             texture = whiteTex;
         }
@@ -121,14 +123,14 @@ namespace Cube {
         batchCnt++;
     }
 
-    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, std::shared_ptr<Texture2D> texture, const glm::vec4& tintColor, float degree, const glm::vec4& texCoord) {
+    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& tintColor, float degree, const glm::vec4& texCoord) {
         glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0.0f));
         modelMatrix = glm::rotate(modelMatrix, glm::radians(degree), {0.0f, 0.0f, 1.0f});
         modelMatrix = glm::scale(modelMatrix, glm::vec3(size, 1.0f));
         drawQuad(modelMatrix, tintColor, texture, texCoord);
     }
 
-    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, std::shared_ptr<Texture2D> texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4 transform) {
+    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4 transform) {
         glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0.0f));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(size, 1.0f));
         modelMatrix = transform * modelMatrix;

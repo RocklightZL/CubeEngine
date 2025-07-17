@@ -10,9 +10,16 @@
 
 namespace Cube {
 
-    RenderSystem::RenderSystem(float viewportWidth, float viewportHeight) : viewportWidth(viewportWidth), viewportHeight(viewportHeight){}
+    RenderSystem::RenderSystem(float viewportWidth, float viewportHeight) : viewportWidth(viewportWidth), viewportHeight(viewportHeight) {
+        Renderer2D::init();
+        Renderer2D::setViewport((int)viewportWidth, (int)viewportHeight);
+    }
 
-    void RenderSystem::onUpdate(Scene* scene) {
+    RenderSystem::~RenderSystem() {
+        Renderer2D::shutdown();
+    }
+
+    void RenderSystem::onUpdate(Scene* scene, float deltaTime) {
         std::vector<Entity*> cameras(scene->getEntitiesWith<TransformComponent, CameraComponent>());
         Entity* mainCamera = nullptr;
         for(auto e : cameras) {
@@ -35,7 +42,6 @@ namespace Cube {
     }
 
     void RenderSystem::onAttach() {
-        Renderer2D::init();
-        Renderer2D::setViewport((int)viewportWidth, (int)viewportHeight);
+        
     }
 }  // namespace Cube

@@ -1,13 +1,12 @@
 #include "pch.h"
 #include "Application.h"
 
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
-
 #include "Cube/Event/ApplicationEvent.h"
 #include "Window.h"
 #include "Cube/Renderer/Buffer.h"
 #include "Cube/Renderer/Renderer.h"
+
+#include <chrono>
 
 namespace Cube {
 
@@ -27,12 +26,19 @@ namespace Cube {
         running = true;
         CB_CORE_INFO("Application run");
 
+        std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
         while(running) {
+            // º∆À„÷° ±º‰
+            std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
+            std::chrono::duration<float> frameDuration = currentTime - lastTime;
+            lastTime = currentTime;
+            float deltaTime = frameDuration.count();
+
             for(Layer* layer : layers.getData()) {
                 layer->onUpdate();
             }
             if(mainScene) {
-                mainScene->onUpdate();
+                mainScene->onUpdate(deltaTime);
             }
             mainWindow->update();
         }

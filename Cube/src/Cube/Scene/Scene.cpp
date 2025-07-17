@@ -12,9 +12,9 @@ namespace Cube {
         }
     }
 
-    void Scene::onUpdate() {
+    void Scene::onUpdate(float deltaTime) {
         for(auto& system : systems) {
-            system->onUpdate(this);
+            system->onUpdate(this, deltaTime);
         }
         processDestruction();
     }

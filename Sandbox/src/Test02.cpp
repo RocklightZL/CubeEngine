@@ -1,3 +1,4 @@
+/*
 #include <Cube.h>
 
 
@@ -68,3 +69,4 @@ void TestLayer2::processInput() {
         y -= 1.0f;
     }
 }
+*/

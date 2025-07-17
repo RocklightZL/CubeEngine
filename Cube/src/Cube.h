@@ -15,3 +15,5 @@
 #include "Cube/Scene/System.h"
 #include "Cube/Scene/Component.h"
 #include "Cube/Scene/Entity.h"
+
+#include "Cube/Resource/ResourceManager.h"
