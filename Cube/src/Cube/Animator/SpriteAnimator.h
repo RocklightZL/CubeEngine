@@ -2,6 +2,9 @@
 
 #include "Animator.h"
 
+#include <unordered_map>
+#include <string>
+
 namespace Cube {
 
     class SpriteAnimator {
@@ -10,6 +13,7 @@ namespace Cube {
         ~SpriteAnimator();
 
         void update(float deltaTime);
+        TextureRegion getCurrentFrame();
 
         void addClip(AnimatorClip* clip);
 
@@ -17,10 +21,10 @@ namespace Cube {
         void stop();
 
     private:
-        bool playing = false; 
+        bool playing = false;
         float currentTime = 0.0f;
         AnimatorClip* currentClip = nullptr;
         std::unordered_map<std::string, AnimatorClip*> clips;
     };
 
-}
+}  // namespace Cube

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Cube/Renderer/Texture.h"
+#include "Cube/Animator/SpriteAnimator.h"
+#include "Cube/Renderer/TextureRegion.h"
 
 #include <cstdint>
 #include <glm/glm.hpp>
@@ -38,11 +40,6 @@ namespace Cube {
 		glm::mat4 getTransformMatrix();
 	};
 
-    struct TextureRegion {
-        glm::vec2 uvMin;
-		glm::vec2 uvMax;
-    };
-
 	class SpriteComponent : public Component {
 	public:
 		std::string name;
@@ -56,8 +53,8 @@ namespace Cube {
 		bool available = false;
 	};
 
-    class AnimatorComponent {
+    class AnimatorComponent : public Component{
     public:
-
+		SpriteAnimator animator;
     };
 }

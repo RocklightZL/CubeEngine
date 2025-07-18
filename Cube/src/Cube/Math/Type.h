@@ -1,7 +1,8 @@
 #pragma once
 
-// 暂不使用，有时间再写完整的数学库
 namespace Cube {
+
+    // 暂不使用，有时间再写完整的数学库
     struct Vec2 {
         float x, y;
 

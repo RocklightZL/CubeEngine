@@ -1,4 +1,5 @@
-/*
+// Animator System Test
+
 #include "Cube/Resource/ResourceManager.h"
 
 #include <Cube.h>
@@ -28,28 +29,28 @@ public:
 private:
     void processInput(float deltaTime) {
         if(app->getWindow()->isKeyPressed(Cube::Key::Up)) {
-            cameraY += 100.0f * deltaTime;
+            cameraY += 1000.0f * deltaTime;
         }
         if(app->getWindow()->isKeyPressed(Cube::Key::Down)) {
-            cameraY -= 100.0f * deltaTime;
+            cameraY -= 1000.0f * deltaTime;
         }
         if(app->getWindow()->isKeyPressed(Cube::Key::Right)) {
-            cameraX += 100.0f * deltaTime;
+            cameraX += 1000.0f * deltaTime;
         }
         if(app->getWindow()->isKeyPressed(Cube::Key::Left)) {
-            cameraX -= 100.0f * deltaTime;
+            cameraX -= 1000.0f * deltaTime;
         }
         if(app->getWindow()->isKeyPressed(Cube::Key::D)) {
-            x += 100.0f * deltaTime;
+            x += 1000.0f * deltaTime;
         }
         if(app->getWindow()->isKeyPressed(Cube::Key::A)) {
-            x -= 100.0f * deltaTime;
+            x -= 1000.0f * deltaTime;
         }
         if(app->getWindow()->isKeyPressed(Cube::Key::W)) {
-            y += 100.0f * deltaTime;
+            y += 1000.0f * deltaTime;
         }
         if(app->getWindow()->isKeyPressed(Cube::Key::S)) {
-            y -= 100.0f * deltaTime;
+            y -= 1000.0f * deltaTime;
         }
     }
 
@@ -58,23 +59,31 @@ private:
 class MainScene : public Cube::Scene {
 public:
     MainScene() {
-        // Cube::Renderer2D::setVSync(true);
-        // ≥ı ºªØ≥°æ∞
-        for(int i = 0; i < 250; i++){
-            Cube::Entity* player = createEntity();
-            auto tr = player->addComponent<Cube::TransformComponent>();
-            tr->position = {100.0f, 100.0f};
-            tr->scale = {100.0f, 100.0f};
-            auto sp = player->addComponent<Cube::SpriteComponent>();
-            sp->name = "player";
-            // sp->alas = std::make_shared<Cube::TextureAlas>("assets/texture/test03.jpg");
-            // sp->alas->addSubTexture("player", {"player", {0,0}, {1.0,1.0},{0,0}});
-            sp->alas = Cube::ResourceManager::getInstance().load<Cube::TextureAlas>("assets/texture/test03.jpg", "assets/texture/test03.json")->data;
+        Cube::Entity* player = createEntity();
+        auto* tr = player->addComponent<Cube::TransformComponent>();
+        tr->scale = {130 * 3, 114 * 3};
+        tr->position = {500, 500};
+
+        Cube::SpriteComponent* sc = player->addComponent<Cube::SpriteComponent>();
+        sc->alas = new Cube::TextureAlas("assets/texture/flower.png");
+
+        Cube::AnimatorClip* animatorClip = new Cube::AnimatorClip("idle");
+        float iWidth = 130.0f;
+        float iHeight = 114.0f;
+        for(int j = 2; j >= 0; j--) {
+            for(int i = 0; i < 4; i++) {
+                animatorClip->addFrame({{i * iWidth / 520.0f, j * iHeight / 342.0f}, {(i + 1) * iWidth / 520.0f, (j + 1) * iHeight / 342.0f}}, 0.1f);
+            }
         }
+        Cube::AnimatorComponent* ac = player->addComponent<Cube::AnimatorComponent>();
+        ac->animator.addClip(animatorClip);
+        ac->animator.play("idle");
 
         Cube::Entity* camera = createEntity();
         camera->addComponent<Cube::TransformComponent>();
         camera->addComponent<Cube::CameraComponent>()->available = true;
+
+        addSystem(new Cube::AnimatorSystem);
         addSystem(new Cube::RenderSystem(width, height));
         addSystem(new TransformSystem);
     }
@@ -89,7 +98,7 @@ public:
     }
 };
 
-int main03() {
+int main() {
     app = new Cube::Application({width, height, "Sandbox"});
     MainScene* scene = new MainScene;
     app->setMainScene(scene);
@@ -97,4 +106,3 @@ int main03() {
     delete app;
     return 0;
 }
-*/

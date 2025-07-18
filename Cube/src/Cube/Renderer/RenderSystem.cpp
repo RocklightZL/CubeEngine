@@ -36,7 +36,7 @@ namespace Cube {
         for(auto entity : target) {
             SpriteComponent* sprite = entity->getComponent<SpriteComponent>();
             TransformComponent* transform = entity->getComponent<TransformComponent>();
-            Renderer2D::drawQuad(transform->getTransformMatrix(), sprite->color, sprite->alas, {sprite->alas->getSubTexture(sprite->name).uvMin, sprite->alas->getSubTexture(sprite->name).uvMax});
+            Renderer2D::drawQuad(transform->getTransformMatrix(), sprite->color, sprite->alas, {sprite->region.uvMin, sprite->region.uvMax});
         }
         Renderer2D::endFrame();
     }

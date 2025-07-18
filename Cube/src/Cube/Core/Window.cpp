@@ -109,7 +109,7 @@ namespace Cube {
         return glfwGetMouseButton(window, mouseCode) == GLFW_PRESS;
     }
 
-    const MousePos& Window::getMousePosition() {
+    MousePos Window::getMousePosition() {
         double x, y;
         glfwGetCursorPos(window, &x, &y);
         return {x, y};

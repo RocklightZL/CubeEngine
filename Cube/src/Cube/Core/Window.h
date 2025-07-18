@@ -34,7 +34,7 @@ public:
 	//  ‰»Î¬÷—Ø
 	bool isKeyPressed(KeyCode keyCode);
 	bool isMouseButtonPressed(MouseCode mouseCode);
-	const MousePos& getMousePosition();
+	MousePos getMousePosition();
 
 private:
 	static void windowErrorCallBack(int error_code, const char* description);\
