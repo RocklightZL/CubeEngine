@@ -3,6 +3,7 @@
 #include "Cube/Resource/ResourceManager.h"
 
 #include <Cube.h>
+#include <iostream>
 
 static Cube::Application* app = nullptr;
 static int width = 1920;
@@ -11,6 +12,7 @@ static float x = 0.0f;
 static float y = 0.0f;
 static float cameraX = 0.0f;
 static float cameraY = 0.0f;
+static Cube::Timer timer;
 
 class TransformSystem : public Cube::System {
 public:
@@ -52,6 +54,9 @@ private:
         if(app->getWindow()->isKeyPressed(Cube::Key::S)) {
             y -= 1000.0f * deltaTime;
         }
+        if(app->getWindow()->isKeyPressed(Cube::Key::B)) {
+            std::cout << "FPS: " << 1/deltaTime << "\n";
+        }
     }
 
 };
@@ -86,6 +91,7 @@ public:
         addSystem(new Cube::AnimatorSystem);
         addSystem(new Cube::RenderSystem(width, height));
         addSystem(new TransformSystem);
+        Cube::Renderer2D::setVSync(true);
     }
 
     ~MainScene() override {

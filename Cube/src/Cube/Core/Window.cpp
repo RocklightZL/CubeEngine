@@ -6,6 +6,7 @@
 #include "Cube/Event/ApplicationEvent.h"
 #include "Cube/Event/KeyEvent.h"
 #include "Cube/Event/MouseEvent.h"
+#include "Timer.h"
 
 namespace Cube {
 
@@ -97,8 +98,13 @@ namespace Cube {
     const WindowPros& Window::getPros() const { return pros; }
 
     void Window::update() {
+        Timer t;
+
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        CB_CORE_INFO("Window::update {}", t.stop());
+
     }
 
     bool Window::isKeyPressed(KeyCode keyCode) {

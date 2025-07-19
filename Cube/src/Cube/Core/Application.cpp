@@ -7,8 +7,11 @@
 #include "Cube/Renderer/Renderer.h"
 
 #include <chrono>
+#include <iostream>
 
 namespace Cube {
+
+    Application::Application() : Application({1920, 1080, "Cube Engine"}){}
 
     Application::Application(const WindowPros& windowPros) : mainWindow(nullptr), running(true), mainScene(nullptr) {
         Log::init();
@@ -33,6 +36,9 @@ namespace Cube {
             std::chrono::duration<float> frameDuration = currentTime - lastTime;
             lastTime = currentTime;
             float deltaTime = frameDuration.count();
+
+            CB_CORE_INFO("FPS: {}", 1/deltaTime);
+            // std::cout << "FPS: " << 1 / deltaTime << "\n";
 
             for(Layer* layer : layers.getData()) {
                 layer->onUpdate();

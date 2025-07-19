@@ -3,6 +3,7 @@
 #include "Cube/Core/Application.h"
 #include "Cube/Core/KeyCodes.h"
 #include "Cube/Core/MouseCodes.h"
+#include "Cube/Core/Timer.h"
 
 #include "Cube/Renderer/Buffer.h"
 #include "Cube/Renderer/Renderer.h"
@@ -10,6 +11,7 @@
 #include "Cube/Renderer/VertexArray.h"
 #include "Cube/Renderer/Texture.h"
 #include "Cube/Renderer/RenderSystem.h"
+#include "Cube/Renderer/Camera.h"
 
 #include "Cube/Scene/Scene.h"
 #include "Cube/Scene/System.h"

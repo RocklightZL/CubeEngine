@@ -7,6 +7,7 @@
 namespace Cube {
 	class Application {
 	public:
+		Application();
 		Application(const WindowPros& windowPros);
 		virtual ~Application();
 

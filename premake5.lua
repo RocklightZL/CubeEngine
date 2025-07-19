@@ -1,6 +1,6 @@
 workspace "CubeEngine"
     architecture "x64"
-    startproject "Sandbox"
+    startproject "CubeEditor"
 
     configurations{
         "Debug",
@@ -15,3 +15,4 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 include "Cube"
 include "Sandbox"
+include "CubeEditor"
