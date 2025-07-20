@@ -37,7 +37,7 @@ namespace Cube {
             lastTime = currentTime;
             float deltaTime = frameDuration.count();
 
-            CB_CORE_INFO("FPS: {}", 1/deltaTime);
+            // CB_CORE_INFO("FPS: {}", 1/deltaTime);
             // std::cout << "FPS: " << 1 / deltaTime << "\n";
 
             for(Layer* layer : layers.getData()) {
@@ -59,6 +59,10 @@ namespace Cube {
     LayerStack* Application::getLayers() { return &layers; }
 
     Window* Application::getWindow() { return mainWindow; }
+
+    void Application::pushLayer(Layer* layer) {
+        layers.pushLayer(layer);
+    }
 
     void Application::setMainScene(Scene* scene) {
         mainScene = scene;

@@ -97,14 +97,11 @@ namespace Cube {
 
     const WindowPros& Window::getPros() const { return pros; }
 
-    void Window::update() {
-        Timer t;
+    GLFWwindow* Window::getNativeWindow() const { return window; }
 
+    void Window::update() {
         glfwSwapBuffers(window);
         glfwPollEvents();
-
-        CB_CORE_INFO("Window::update {}", t.stop());
-
     }
 
     bool Window::isKeyPressed(KeyCode keyCode) {

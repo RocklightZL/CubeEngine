@@ -29,13 +29,14 @@ public:
 	void init();
 	EventDispatcher* getDispatcher() const;
     const WindowPros& getPros() const;
+	GLFWwindow* getNativeWindow() const;
+
 	void update();
 
 	//  ‰»Î¬÷—Ø
 	bool isKeyPressed(KeyCode keyCode);
 	bool isMouseButtonPressed(MouseCode mouseCode);
 	MousePos getMousePosition();
-
 private:
 	static void windowErrorCallBack(int error_code, const char* description);\
 

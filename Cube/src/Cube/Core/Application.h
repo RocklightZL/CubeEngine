@@ -17,6 +17,8 @@ namespace Cube {
 		LayerStack* getLayers();
 		Window* getWindow();
 
+		void pushLayer(Layer* layer);
+
 		void setMainScene(Scene* scene);
 		// 事件处理
 		bool onWindowClose(const Event& e);

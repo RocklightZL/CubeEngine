@@ -9,7 +9,9 @@ project "CubeEditor"
 
     files{
         "src/**.cpp",
-        "src/**.h"
+        "src/**.h",
+        "external/imgui/imgui/**.h",
+        "external/imgui/imgui/**.cpp"
     }
 
     includedirs {
@@ -18,7 +20,7 @@ project "CubeEditor"
         "%{wks.location}/Cube/external/glfw-3.4/include",
         "%{wks.location}/Cube/external/glad/include",
         "%{wks.location}/Cube/external/glm",
-        "%{wks.location}/Cube/external/imgui"
+        "external/imgui"
     }
 
     links {
