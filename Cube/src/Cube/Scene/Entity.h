@@ -8,6 +8,7 @@ namespace Cube {
 	class Entity {
 	public:
 		Entity();
+		Entity(const std::string& name);
 		virtual ~Entity();
 
 		template<typename T, typename... Args>
@@ -45,12 +46,15 @@ namespace Cube {
 
         uint32_t getID() const { return id; }
 
+		const std::string& getName() const { return name; }
+
 		void destroy();
 
 	    bool isAlive();
 
     private:
 		uint32_t id;
+		std::string name;
 		bool alive = true;
 		std::unordered_map<ComponentID, Component*> components;
 

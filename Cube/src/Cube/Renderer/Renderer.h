@@ -18,6 +18,7 @@ namespace Cube {
 	class Renderer {
 	public:
 		static void init();
+        static void clearBuffer();
 		static void beginFrame();
 		static void endFrame();
 		static void setViewport(int width, int height);

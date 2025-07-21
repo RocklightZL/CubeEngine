@@ -40,8 +40,10 @@ namespace Cube {
             // CB_CORE_INFO("FPS: {}", 1/deltaTime);
             // std::cout << "FPS: " << 1 / deltaTime << "\n";
 
+            Renderer::clearBuffer();
+
             for(Layer* layer : layers.getData()) {
-                layer->onUpdate();
+                layer->onUpdate(deltaTime);
             }
             if(mainScene) {
                 mainScene->onUpdate(deltaTime);

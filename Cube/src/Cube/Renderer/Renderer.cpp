@@ -19,11 +19,12 @@ namespace Cube {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
     }
-    void Renderer::beginFrame() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 
-    void Renderer::endFrame() {
-        
-    }
+    void Renderer::clearBuffer() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
+
+    void Renderer::beginFrame() {}
+
+    void Renderer::endFrame() {}
 
     void Renderer::setViewport(int width, int height) { glViewport(0, 0, width, height); }
 
@@ -89,8 +90,6 @@ namespace Cube {
     }
 
     void Renderer2D::beginFrame(const glm::mat4& pvMatrix) {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         startNewBatch();
 
         shader->bind();

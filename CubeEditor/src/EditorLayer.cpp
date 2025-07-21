@@ -1,7 +1,8 @@
 ﻿#include "EditorLayer.h"
 
 #include "Cube/Core/Application.h"
-#include "Cube/Renderer/Renderer.h"
+#include "Views/ScenePanel.h"
+#include "Views/SceneView.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
@@ -12,21 +13,25 @@ extern Cube::Application* app;
 namespace Cube {
 
     EditorLayer::~EditorLayer() {
+		for(View* view : views) {
+		    delete view;
+		}
+
 		ImGui_ImplGlfw_Shutdown();
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui::DestroyContext();
     }
 
-    void EditorLayer::onUpdate() {
+    void EditorLayer::onUpdate(float deltaTime) {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		Renderer::beginFrame();
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->Flags);
 		// content
 		// ImGui::ShowDemoWindow();
 
+		// MenuBar
 		if(ImGui::BeginMainMenuBar()) {
 		    if(ImGui::BeginMenu("Project")) {
 		        if(ImGui::MenuItem("New Project")){}
@@ -38,6 +43,10 @@ namespace Cube {
 				ImGui::EndMenu();
 			}
 			ImGui::EndMainMenuBar();
+		}
+
+		for(View* view : views) {
+		    view->render(deltaTime);
 		}
 
 		ImGui::Render();
@@ -57,6 +66,8 @@ namespace Cube {
 		ImGui_ImplGlfw_InitForOpenGL(app->getWindow()->getNativeWindow(), true);
 		ImGui_ImplOpenGL3_Init("#version 330 core");
 
+		views.push_back(new ScenePanel);
+		views.push_back(new SceneView);
 	}
 
     void EditorLayer::onDetach() {

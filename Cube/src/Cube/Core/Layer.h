@@ -11,7 +11,7 @@ namespace Cube {
         virtual void onAttach() {}  // 入层栈时调用
         virtual void onDetach() {}  // 出栈时调用
         virtual void onEvent() {}
-        virtual void onUpdate() {}
+        virtual void onUpdate(float deltaTime) {}
 
     private:
         std::string name;
