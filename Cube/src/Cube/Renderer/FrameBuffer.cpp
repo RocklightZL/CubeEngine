@@ -39,7 +39,7 @@ namespace Cube {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
 
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            CB_ERROR("FrameBuffer is not complete!");
+            CB_CORE_ERROR("FrameBuffer is not complete!");
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }

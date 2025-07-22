@@ -17,6 +17,7 @@ namespace Cube {
         virtual void onUpdate(float deltaTime);
 
         Entity* createEntity();
+        Entity* createEntity(const std::string& name);
         void addSystem(System* system);
         void markToDestroy(Entity* entity);
 

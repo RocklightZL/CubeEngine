@@ -18,8 +18,38 @@ namespace Cube {
 
     void Entity::destroy() { alive = false; }
 
-    bool Entity::isAlive() {
-        return alive;
+    bool Entity::isAlive() { return alive; }
+
+    Component* Entity::addComponent(const std::string& componentTypeName) {
+        ComponentID id = Component::getTypeID(componentTypeName);
+        if(hasComponent(componentTypeName)) {
+            removeComponent(componentTypeName);
+        }
+        Component* component = Component::createComponent(componentTypeName);
+        components[id] = component;
+        return component;
+    }
+
+    Component* Entity::getComponent(const std::string& componentTypeName) {
+        ComponentID id = Component::getTypeID(componentTypeName);
+        auto it = components.find(id);
+        if(it != components.end()) {
+            return it->second;
+        }
+        CB_CORE_ERROR("{} not found in {}", componentTypeName, name);
+        return nullptr;
+    }
+
+    bool Entity::hasComponent(const std::string& componentTypeName) {
+        return components.find(Component::getTypeID(componentTypeName)) != components.end(); 
+    }
+
+    void Entity::removeComponent(const std::string& componentTypeName) {
+        auto it = components.find(Component::getTypeID(componentTypeName));
+        if(it != components.end()) {
+            delete it->second;
+            components.erase(it);
+        }
     }
 
 }  // namespace Cube

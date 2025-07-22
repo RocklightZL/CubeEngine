@@ -1,6 +1,7 @@
 #pragma once
 
 #include "View.h"
+#include "Cube/Scene/Entity.h"
 
 #include <string>
 #include <vector>
@@ -14,6 +15,8 @@ namespace Cube {
 
         void render(float deltaTime) override;
     private:
+        void drawComponentSelectionCheckBox();
+
         bool showAddComponentModal = false;
         std::vector<std::pair<std::string, bool>> componentsCheckBox = {
             {"TransformComponent", false},

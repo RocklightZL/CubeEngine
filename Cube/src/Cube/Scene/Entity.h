@@ -52,12 +52,18 @@ namespace Cube {
 
 	    bool isAlive();
 
+		//-----------------------------------------------------
+		// based on the component type name
+        Component* addComponent(const std::string& componentTypeName);
+		Component* getComponent(const std::string& componentTypeName);
+		bool hasComponent(const std::string& componentTypeName);
+		void removeComponent(const std::string& componentTypeName);
+
     private:
 		uint32_t id;
 		std::string name;
 		bool alive = true;
 		std::unordered_map<ComponentID, Component*> components;
-
 		static uint32_t currentID;
 	};
 

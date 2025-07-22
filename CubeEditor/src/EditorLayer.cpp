@@ -1,6 +1,7 @@
 ﻿#include "EditorLayer.h"
 
 #include "Cube/Core/Application.h"
+#include "Views/EntityPropertyPanel.h"
 #include "Views/ScenePanel.h"
 #include "Views/SceneView.h"
 
@@ -68,6 +69,7 @@ namespace Cube {
 
 		views.push_back(new ScenePanel);
 		views.push_back(new SceneView);
+		views.push_back(new EntityPropertyPanel);
 	}
 
     void EditorLayer::onDetach() {

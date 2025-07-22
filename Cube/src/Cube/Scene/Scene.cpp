@@ -25,6 +25,12 @@ namespace Cube {
         return entity;
     }
 
+    Entity* Scene::createEntity(const std::string& name) {
+        Entity* entity = new Entity(name);
+        entities.push_back(entity);
+        return entity;
+    }
+
     void Scene::addSystem(System* system) {
         system->onAttach();
         systems.push_back(system);
