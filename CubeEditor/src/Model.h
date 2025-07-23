@@ -8,5 +8,6 @@ namespace Cube {
     public:
         Scene scene;
         FrameBuffer frameBuffer;
+        Entity* selectedEntity = nullptr;
     };
 }

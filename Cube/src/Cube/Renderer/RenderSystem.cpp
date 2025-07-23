@@ -28,6 +28,11 @@ namespace Cube {
                 break;
             }
         }
+
+        if(!mainCamera) {
+            return;
+        }
+
         glm::mat4 pvMatrix = glm::ortho(0.0f, viewportWidth, 0.0f, viewportHeight, -0.0f, 1.0f) * glm::inverse(mainCamera->getComponent<TransformComponent>()->getTransformMatrix());
 
         std::vector<Entity*> target(scene->getEntitiesWith<TransformComponent, SpriteComponent>());

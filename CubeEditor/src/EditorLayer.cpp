@@ -1,6 +1,8 @@
 ﻿#include "EditorLayer.h"
 
+#include "Model.h"
 #include "Cube/Core/Application.h"
+#include "Cube/Renderer/RenderSystem.h"
 #include "Views/EntityPropertyPanel.h"
 #include "Views/ScenePanel.h"
 #include "Views/SceneView.h"
@@ -10,6 +12,7 @@
 #include <imgui/imgui_impl_opengl3.h>
 
 extern Cube::Application* app;
+extern Cube::Model* data;
 
 namespace Cube {
 
@@ -30,7 +33,7 @@ namespace Cube {
 
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport()->Flags);
 		// content
-		// ImGui::ShowDemoWindow();
+		ImGui::ShowDemoWindow();
 
 		// MenuBar
 		if(ImGui::BeginMainMenuBar()) {
@@ -70,6 +73,8 @@ namespace Cube {
 		views.push_back(new ScenePanel);
 		views.push_back(new SceneView);
 		views.push_back(new EntityPropertyPanel);
+
+		data->scene.addSystem(new RenderSystem(800, 600));
 	}
 
     void EditorLayer::onDetach() {

@@ -20,6 +20,10 @@ namespace Cube {
 
     bool Entity::isAlive() { return alive; }
 
+    const std::unordered_map<ComponentID, Component*>& Entity::getAllComponents() const {
+        return components;
+    }
+
     Component* Entity::addComponent(const std::string& componentTypeName) {
         ComponentID id = Component::getTypeID(componentTypeName);
         if(hasComponent(componentTypeName)) {

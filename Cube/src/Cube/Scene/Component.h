@@ -7,10 +7,10 @@
 #include <cstdint>
 #include <glm/glm.hpp>
 #include <unordered_map>
+#include <memory>
 
 namespace Cube {
-
-	using ComponentID = uint32_t;
+    using ComponentID = uint32_t;
 
 	class ComponentFactory;
 
@@ -47,7 +47,7 @@ namespace Cube {
 	};
 
 	template<typename T>
-	class ComponentImpl : public ComponentFactory{
+	class ComponentFactoryImpl : public ComponentFactory{
 	public:
 		T* create() override {
 			return new T();

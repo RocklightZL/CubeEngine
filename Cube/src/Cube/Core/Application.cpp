@@ -5,6 +5,7 @@
 #include "Window.h"
 #include "Cube/Renderer/Buffer.h"
 #include "Cube/Renderer/Renderer.h"
+#include "Cube/Scene/Component.h"
 
 #include <chrono>
 #include <iostream>
@@ -56,6 +57,12 @@ namespace Cube {
         Renderer::init();
         dispatcher.subscribe(std::bind(&Application::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
         dispatcher.subscribe(std::bind(&Application::onWindowResize, this, std::placeholders::_1), EventType::WindowResize);
+
+        // register built-in component
+        Component::registerComponentType("TransformComponent", new ComponentFactoryImpl<TransformComponent>());
+        Component::registerComponentType("SpriteComponent", new ComponentFactoryImpl<SpriteComponent>());
+        Component::registerComponentType("CameraComponent", new ComponentFactoryImpl<CameraComponent>());
+        Component::registerComponentType("AnimatorComponent", new ComponentFactoryImpl<AnimatorComponent>());
     }
 
     LayerStack* Application::getLayers() { return &layers; }

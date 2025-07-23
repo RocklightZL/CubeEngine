@@ -7,6 +7,8 @@
 
 namespace Cube {
 
+    class SceneSerializer;
+
 	// 协调所有游戏实体（Entity）、组件（Component）和系统（System）
 	// 管理实体和系统的生命周期
 	class Scene {
@@ -46,6 +48,8 @@ namespace Cube {
 
         std::vector<Entity*> entities;
         std::vector<System*> systems;
+
+        friend SceneSerializer;
     };
 
     

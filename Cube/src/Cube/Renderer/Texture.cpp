@@ -68,7 +68,7 @@ namespace Cube {
     }
     GLuint Texture2D::getId() const { return id; }
 
-    TextureAlas::TextureAlas(const std::string& filePath) : Texture2D(filePath) {}
+    TextureAlas::TextureAlas(const std::string& filePath) : Texture2D(filePath), filePath(filePath) {}
 
     /*
      * 元数据，用于解析纹理图集
@@ -88,7 +88,7 @@ namespace Cube {
          ]
        }
      */
-    TextureAlas::TextureAlas(const std::string& filePath, const std::string& metaDataPath) : Texture2D(filePath) {
+    TextureAlas::TextureAlas(const std::string& filePath, const std::string& metaDataPath) : Texture2D(filePath), filePath(filePath) {
         std::ifstream file(metaDataPath);
         if(!file.is_open()) {
             CB_CORE_ERROR("Failed to open metadata file: {}", metaDataPath);
@@ -128,6 +128,10 @@ namespace Cube {
             CB_CORE_ERROR("Failed to find subTexture: {}", name);
         }
         return res->second;
+    }
+
+    const std::string& TextureAlas::getFilePath() const {
+        return filePath;
     }
 
 }  // namespace Cube

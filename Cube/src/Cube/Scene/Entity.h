@@ -52,6 +52,7 @@ namespace Cube {
 
 	    bool isAlive();
 
+		const std::unordered_map<ComponentID, Component*>& getAllComponents() const;
 		//-----------------------------------------------------
 		// based on the component type name
         Component* addComponent(const std::string& componentTypeName);

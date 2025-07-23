@@ -15,8 +15,12 @@ namespace Cube {
         if(ImGui::TreeNodeEx("Entities")) {
             for(Entity* entity : data->scene.getEntities()) {
                 ImGui::PushID(entity->getID());
-                if(ImGui::TreeNode(entity->getName().c_str())) {
-                    ImGui::TreePop();
+                bool f = false;
+                if(data->selectedEntity == entity) {
+                    f = true;
+                }
+                if(ImGui::Selectable(entity->getName().c_str(), &f)) {
+                    data->selectedEntity = entity;
                 }
                 ImGui::PopID();
             }
@@ -32,7 +36,6 @@ namespace Cube {
             ImGui::OpenPopup("addEntity");
         }
         if(ImGui::BeginPopupModal("addEntity", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-            char name[256] = "";
             ImGui::InputText("name##input", name, IM_ARRAYSIZE(name));
 
             drawComponentSelectionCheckBox();
@@ -45,7 +48,7 @@ namespace Cube {
                 auto* entity = data->scene.createEntity(name);
                 for(auto& selectedComponent : componentsCheckBox) {
                     if(selectedComponent.second) {
-                        entity->addComponent<>()
+                        entity->addComponent(selectedComponent.first);
                     }
                 }
                 ImGui::CloseCurrentPopup();
