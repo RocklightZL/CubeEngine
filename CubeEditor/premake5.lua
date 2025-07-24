@@ -20,6 +20,7 @@ project "CubeEditor"
         "%{wks.location}/Cube/external/glfw-3.4/include",
         "%{wks.location}/Cube/external/glad/include",
         "%{wks.location}/Cube/external/glm",
+        "%{wks.location}/Cube/external/nlohmann-json",
         "external/imgui"
     }
 

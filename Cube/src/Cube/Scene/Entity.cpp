@@ -16,6 +16,11 @@ namespace Cube {
         }
     }
 
+    uint32_t Entity::getID() const { return id; }
+
+    const std::string& Entity::getName() const { return name; }
+    void Entity::setName(const std::string& name) { this->name = name; }
+
     void Entity::destroy() { alive = false; }
 
     bool Entity::isAlive() { return alive; }

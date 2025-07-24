@@ -4,12 +4,7 @@
 namespace Cube {
 
     Scene::~Scene() {
-        for(auto e : entities) {
-            delete e;
-        }
-        for(auto s : systems) {
-            delete s;
-        }
+        clearAll();
     }
 
     void Scene::onUpdate(float deltaTime) {
@@ -40,6 +35,17 @@ namespace Cube {
         if(entity) {
             entity->destroy();
         }
+    }
+
+    void Scene::clearAll() {
+        for(auto e : entities) {
+            delete e;
+        }
+        for(auto s : systems) {
+            delete s;
+        }
+        entities.clear();
+        systems.clear();
     }
 
     const std::vector<Entity*>& Scene::getEntities() {

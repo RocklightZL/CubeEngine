@@ -88,7 +88,7 @@ namespace Cube {
          ]
        }
      */
-    TextureAlas::TextureAlas(const std::string& filePath, const std::string& metaDataPath) : Texture2D(filePath), filePath(filePath) {
+    TextureAlas::TextureAlas(const std::string& filePath, const std::string& metaDataPath) : Texture2D(filePath), filePath(filePath), metaDataPath(metaDataPath) {
         std::ifstream file(metaDataPath);
         if(!file.is_open()) {
             CB_CORE_ERROR("Failed to open metadata file: {}", metaDataPath);
@@ -130,8 +130,7 @@ namespace Cube {
         return res->second;
     }
 
-    const std::string& TextureAlas::getFilePath() const {
-        return filePath;
-    }
+    const std::string& TextureAlas::getFilePath() const { return filePath; }
+    const std::string& TextureAlas::getMetaDataPath() const { return metaDataPath; }
 
 }  // namespace Cube

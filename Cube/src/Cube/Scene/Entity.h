@@ -44,9 +44,10 @@ namespace Cube {
             return nullptr;
         }
 
-        uint32_t getID() const { return id; }
+        uint32_t getID() const;
 
-		const std::string& getName() const { return name; }
+		const std::string& getName() const;
+		void setName(const std::string& name);
 
 		void destroy();
 

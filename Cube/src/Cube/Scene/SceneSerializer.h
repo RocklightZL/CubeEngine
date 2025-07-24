@@ -39,6 +39,11 @@ namespace Cube {
 		static nlohmann::json spriteComponentSerializer(Entity* entity);
 		static nlohmann::json cameraComponentSerializer(Entity* entity);
 		static nlohmann::json animatorComponentSerializer(Entity* entity);
+
+		static void transformComponentDeserializer(Entity* entity, const nlohmann::json& componentData);
+		static void spriteComponentDeserializer(Entity* entity, const nlohmann::json& componentData);
+		static void cameraComponentDeserializer(Entity* entity, const nlohmann::json& componentData);
+		static void animatorComponentDeserializer(Entity* entity, const nlohmann::json& componentData);
 	};
 
 }

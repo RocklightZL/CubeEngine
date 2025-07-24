@@ -13,6 +13,13 @@ namespace Cube {
         // Ó²±àÂë
         if(data->selectedEntity) {
 
+            char name[256];
+            strcpy_s(name, data->selectedEntity->getName().c_str());
+            ImGui::Text("name: ");
+            ImGui::SameLine();
+            ImGui::InputText("##InputTextEntityName", name, IM_ARRAYSIZE(name));
+            data->selectedEntity->setName(name);
+
             if(data->selectedEntity->hasComponent<TransformComponent>()) {
                 TransformComponent* tc = data->selectedEntity->getComponent<TransformComponent>();
                 if(ImGui::TreeNode("TransformComponent")) {

@@ -23,6 +23,8 @@ namespace Cube {
         void addSystem(System* system);
         void markToDestroy(Entity* entity);
 
+        void clearAll();
+
         template <typename... Components>
         std::vector<Entity*> getEntitiesWith() {
             std::vector<Entity*> res;

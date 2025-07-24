@@ -40,8 +40,11 @@ namespace Cube {
         void addSubTexture(const std::string& name, const SubTexture& subTexture);
         const SubTexture& getSubTexture(const std::string& name);
         const std::string& getFilePath() const;
+        const std::string& getMetaDataPath() const;
+
     private:
         std::string filePath;
+        std::string metaDataPath;
         std::unordered_map<std::string, SubTexture> subTextures;
     };
 }
