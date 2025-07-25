@@ -1,4 +1,4 @@
-/*
+
 #include "Cube/Resource/ResourceManager.h"
 
 #include <Cube.h>
@@ -69,7 +69,7 @@ public:
             sp->name = "player";
             // sp->alas = std::make_shared<Cube::TextureAlas>("assets/texture/test03.jpg");
             // sp->alas->addSubTexture("player", {"player", {0,0}, {1.0,1.0},{0,0}});
-            sp->alas = Cube::ResourceManager::getInstance().load<Cube::TextureAlas>("assets/texture/test03.jpg", "assets/texture/test03.json")->data;
+            // sp->alas = Cube::ResourceManager::getInstance().load<Cube::TextureAlas>("assets/texture/test03.jpg", "assets/texture/test03.json")->data;
         }
 
         Cube::Entity* camera = createEntity();
@@ -89,12 +89,13 @@ public:
     }
 };
 
-int main03() {
+int main() {
     app = new Cube::Application({width, height, "Sandbox"});
     MainScene* scene = new MainScene;
+    Cube::Renderer2D::init();
     app->setMainScene(scene);
     app->run();
+    Cube::Renderer2D::shutdown();
     delete app;
     return 0;
 }
-*/

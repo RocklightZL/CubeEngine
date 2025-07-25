@@ -43,8 +43,6 @@ namespace Cube {
     bool Renderer2D::useTexture = false;
     Texture2D* Renderer2D::whiteTex = nullptr;
 
-    int Renderer2D::drawCallCnt = 0;
-
     void Renderer2D::init() {
 
         if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -98,8 +96,6 @@ namespace Cube {
 
     void Renderer2D::endFrame() {
         flushBatch();
-        CB_CORE_INFO("Drawcall count: {}", drawCallCnt);
-        drawCallCnt = 0;
     }
 
     void Renderer2D::shutdown() {
@@ -179,7 +175,6 @@ namespace Cube {
         shader->bind();
         vao->bind();
         glDrawElements(GL_TRIANGLES, batchData.size() * 6, GL_UNSIGNED_INT, nullptr);
-        drawCallCnt++;
     }
 
 }  // namespace Cube

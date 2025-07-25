@@ -68,7 +68,7 @@ namespace Cube {
     }
     GLuint Texture2D::getId() const { return id; }
 
-    TextureAlas::TextureAlas(const std::string& filePath) : Texture2D(filePath), filePath(filePath) {}
+    TextureAtlas::TextureAtlas(const std::string& filePath) : Texture2D(filePath), filePath(filePath) {}
 
     /*
      * 元数据，用于解析纹理图集
@@ -88,7 +88,7 @@ namespace Cube {
          ]
        }
      */
-    TextureAlas::TextureAlas(const std::string& filePath, const std::string& metaDataPath) : Texture2D(filePath), filePath(filePath), metaDataPath(metaDataPath) {
+    TextureAtlas::TextureAtlas(const std::string& filePath, const std::string& metaDataPath) : Texture2D(filePath), filePath(filePath), metaDataPath(metaDataPath) {
         std::ifstream file(metaDataPath);
         if(!file.is_open()) {
             CB_CORE_ERROR("Failed to open metadata file: {}", metaDataPath);
@@ -118,11 +118,11 @@ namespace Cube {
         }
     }
 
-    void TextureAlas::addSubTexture(const std::string& name, const SubTexture& subTexture) {
+    void TextureAtlas::addSubTexture(const std::string& name, const SubTexture& subTexture) {
         subTextures.insert(std::make_pair(name, subTexture));
     }
 
-    const SubTexture& TextureAlas::getSubTexture(const std::string& name) {
+    const SubTexture& TextureAtlas::getSubTexture(const std::string& name) {
         auto res = subTextures.find(name);
         if(res == subTextures.end()) {
             CB_CORE_ERROR("Failed to find subTexture: {}", name);
@@ -130,7 +130,7 @@ namespace Cube {
         return res->second;
     }
 
-    const std::string& TextureAlas::getFilePath() const { return filePath; }
-    const std::string& TextureAlas::getMetaDataPath() const { return metaDataPath; }
+    const std::string& TextureAtlas::getFilePath() const { return filePath; }
+    const std::string& TextureAtlas::getMetaDataPath() const { return metaDataPath; }
 
 }  // namespace Cube

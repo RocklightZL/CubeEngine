@@ -72,8 +72,8 @@ namespace Cube {
         nlohmann::json componentData;
         SpriteComponent* sc = entity->getComponent<SpriteComponent>();
         componentData["name"] = sc->name;
-        if(sc->alas){
-            componentData["alas"] = nlohmann::json::array({sc->alas->getFilePath(), sc->alas->getMetaDataPath()});
+        if(sc->atlas){
+            componentData["atlas"] = nlohmann::json::array({sc->atlas->getFilePath(), sc->atlas->getMetaDataPath()});
         }
         componentData["region"] = nlohmann::json::array({sc->region.uvMax.x, sc->region.uvMax.y, sc->region.uvMin.x, sc->region.uvMin.y});
         componentData["color"] = nlohmann::json::array({sc->color.r, sc->color.g, sc->color.b, sc->color.a});
@@ -103,8 +103,8 @@ namespace Cube {
     void SceneSerializer::spriteComponentDeserializer(Entity* entity, const nlohmann::json& componentData) {
         SpriteComponent* sc = entity->addComponent<SpriteComponent>();
         sc->name = componentData["name"];
-        if(componentData.find("alas") != componentData.end()) {
-            sc->alas = ResourceManager::getInstance().load<TextureAlas>(componentData["alas"][0], componentData["alas"][1])->data;
+        if(componentData.find("atlas") != componentData.end()) {
+            sc->atlas = ResourceManager::getInstance().load<TextureAtlas>(componentData["atlas"][0], componentData["atlas"][1])->data;
         }
         sc->region = {{componentData["region"][0], componentData["region"][1]}, {componentData["region"][2], componentData["region"][3]}};
         sc->color = {componentData["color"][0], componentData["color"][1], componentData["color"][2], componentData["color"][3]};

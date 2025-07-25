@@ -25,8 +25,8 @@ namespace Cube {
         }
 
         data->frameBuffer.bind();
-        Renderer::setViewport((int)sceneViewSize.x, (int)sceneViewSize.y);
-        Renderer::clearBuffer();
+        Renderer2D::setViewport((int)sceneViewSize.x, (int)sceneViewSize.y);
+        Renderer2D::clearBuffer();
         // scene render
         data->scene.onUpdate(deltaTime);
 

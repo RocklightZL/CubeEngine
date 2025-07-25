@@ -51,8 +51,8 @@ namespace Cube {
             Resource<T>* newResource = new Resource<T>();
             newResource->path = filePath;
             newResource->refCount = 1;
-            if constexpr (std::is_same_v<T, TextureAlas>) {
-                newResource->data = new TextureAlas(filePath, metaDataPath);
+            if constexpr (std::is_same_v<T, TextureAtlas>) {
+                newResource->data = new TextureAtlas(filePath, metaDataPath);
             } else {
                 static_assert(false, "Unsupported resource type with metadata");
             }

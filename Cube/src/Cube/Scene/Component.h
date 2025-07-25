@@ -72,7 +72,7 @@ namespace Cube {
 	class SpriteComponent : public Component {
 	public:
 		std::string name;
-		TextureAlas* alas = nullptr;
+		TextureAtlas* atlas = nullptr;
 		TextureRegion region;
 		glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 	};

@@ -4,7 +4,7 @@
 class TestLayer : public Cube::Layer {
 public:
     TestLayer();
-    void onUpdate() override;
+    void onUpdate(float deltaTime) override;
 
 private:
     std::shared_ptr<Cube::Shader> shader;
@@ -40,7 +40,7 @@ TestLayer::TestLayer() {
     vao->setIndexBuffer(ibo);
 }
 
-void TestLayer::onUpdate() {
+void TestLayer::onUpdate(float deltaTime) {
     Cube::Renderer::setClearColor(1.0f, 0.0f, 1.0f, 1.0f);
     Cube::Renderer::beginFrame();
 

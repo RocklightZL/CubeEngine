@@ -49,8 +49,6 @@ namespace Cube {
         static bool useTexture;
         static Texture2D* whiteTex;
 
-        static int drawCallCnt; // µ˜ ‘”√
-
         static constexpr uint32_t MAX_QUADS_PER_BATCH = 1000;
         static constexpr uint32_t MAX_VERTICES_PER_BATCH = MAX_QUADS_PER_BATCH * 4;
         static constexpr uint32_t MAX_INDICES_PER_BATCH = MAX_QUADS_PER_BATCH * 6;

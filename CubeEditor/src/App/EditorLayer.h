@@ -1,6 +1,6 @@
 #pragma once
 #include "Cube/Core/Layer.h"
-#include "Views/View.h"
+#include "../Views/View.h"
 
 #include <vector>
 
@@ -8,7 +8,7 @@ namespace Cube {
 
     class EditorLayer : public Layer {
     public:
-        EditorLayer() = default;
+        EditorLayer();
         ~EditorLayer() override;
 
         void onUpdate(float deltaTime) override;

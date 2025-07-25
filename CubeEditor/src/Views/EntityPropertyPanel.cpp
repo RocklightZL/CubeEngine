@@ -13,7 +13,7 @@ namespace Cube {
         // Ó²±àÂë
         if(data->selectedEntity) {
 
-            char name[256];
+            char name[256] = {};
             strcpy_s(name, data->selectedEntity->getName().c_str());
             ImGui::Text("name: ");
             ImGui::SameLine();
