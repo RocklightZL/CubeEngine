@@ -10,6 +10,8 @@ namespace Cube {
         ~AnimatorSystem() override = default;
 
 		void onUpdate(Scene* scene, float deltaTime) override;
+
+		std::string getName() const override;
 	};
 
 }

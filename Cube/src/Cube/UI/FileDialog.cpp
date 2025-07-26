@@ -3,6 +3,7 @@
 
 #include <commctrl.h>
 #include <commdlg.h>
+#include <ShlObj.h>
 
 namespace Cube {
 
@@ -41,4 +42,21 @@ namespace Cube {
         }
         return "";
     }
+
+    std::string FileDialog::selectDir(HWND owner) {
+        BROWSEINFOA bi;
+        char path[260] = {};
+
+        ZeroMemory(&bi, sizeof(bi));
+        bi.hwndOwner = owner;
+        bi.pszDisplayName = path;
+        bi.ulFlags = BIF_NEWDIALOGSTYLE| BIF_EDITBOX;
+
+        LPITEMIDLIST idl = SHBrowseForFolderA(&bi);
+        if (idl != NULL && SHGetPathFromIDListA(idl, path)) {
+            return path;
+        }
+        return "";
+    }
+    
 }  // namespace Cube

@@ -16,6 +16,7 @@ namespace Cube {
 
     private:
         void init();
+        void imGuiInit();
 
         bool onWindowClose(const Event& e);
         bool onWindowResize(const Event& e);

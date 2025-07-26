@@ -14,6 +14,7 @@ namespace Cube {
 	class Scene {
     public:
         Scene() = default;
+        Scene(const glm::vec2& viewportSize, const std::string& name);
         virtual ~Scene();
 
         virtual void onUpdate(float deltaTime);
@@ -43,13 +44,22 @@ namespace Cube {
             return res;
         }
 
-        const std::vector<Entity*>& getEntities();
+        const std::vector<Entity*>& getEntities() const;
+        const std::vector<System*>& getSystems() const;
+
+        const glm::vec2& getViewportSize() const;
+        void setViewportSize(const glm::vec2& size);
+
+        const std::string& getName() const;
 
     private:
         void processDestruction();
 
         std::vector<Entity*> entities;
         std::vector<System*> systems;
+
+        glm::vec2 viewportSize = {800, 600};
+        std::string name = "Scene";
 
         friend SceneSerializer;
     };

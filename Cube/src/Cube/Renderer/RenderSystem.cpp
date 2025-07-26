@@ -10,13 +10,6 @@
 
 namespace Cube {
 
-    RenderSystem::RenderSystem(float viewportWidth, float viewportHeight) : viewportWidth(viewportWidth), viewportHeight(viewportHeight) {
-        Renderer2D::setViewport((int)viewportWidth, (int)viewportHeight);
-    }
-
-    RenderSystem::~RenderSystem() {
-    }
-
     void RenderSystem::onUpdate(Scene* scene, float deltaTime) {
         std::vector<Entity*> cameras(scene->getEntitiesWith<TransformComponent, CameraComponent>());
         Entity* mainCamera = nullptr;
@@ -31,7 +24,7 @@ namespace Cube {
             return;
         }
 
-        glm::mat4 pvMatrix = glm::ortho(0.0f, viewportWidth, 0.0f, viewportHeight, -0.0f, 1.0f) * glm::inverse(mainCamera->getComponent<TransformComponent>()->getTransformMatrix());
+        glm::mat4 pvMatrix = glm::ortho(0.0f, scene->getViewportSize().x, 0.0f, scene->getViewportSize().y, 0.0f, 1.0f) * glm::inverse(mainCamera->getComponent<TransformComponent>()->getTransformMatrix());
 
         std::vector<Entity*> target(scene->getEntitiesWith<TransformComponent, SpriteComponent>());
         std::sort(target.begin(), target.end(), [](Entity* a, Entity* b) {
@@ -54,7 +47,7 @@ namespace Cube {
         Renderer2D::endFrame();
     }
 
-    void RenderSystem::onAttach() {
-        
-    }
+    void RenderSystem::onAttach() {}
+
+    std::string RenderSystem::getName() const { return "RenderSystem"; }
 }  // namespace Cube

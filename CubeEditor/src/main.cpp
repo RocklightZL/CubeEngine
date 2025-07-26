@@ -1,15 +1,18 @@
-#include "Model.h"
+#include "Project.h"
 #include "App/EditorApp.h"
 #include "App/EditorLayer.h"
+#include "App/GuidanceLayer.h"
 
 Cube::EditorApp* app = nullptr;
-Cube::Model* data = nullptr;
+Cube::Project* proj = nullptr;
 
 int main() {
     app = new Cube::EditorApp({1920, 1080, "Cube Editor"});
-    data = new Cube::Model();
-    app->switchLayer(new Cube::EditorLayer());
+
+    app->switchLayer(new Cube::GuidanceLayer());
+
     app->run();
-    delete data;
+    delete proj;
+    delete app;
     return 0;
 }

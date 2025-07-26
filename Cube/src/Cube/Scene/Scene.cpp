@@ -3,6 +3,8 @@
 
 namespace Cube {
 
+    Scene::Scene(const glm::vec2& viewportSize, const std::string& name) : viewportSize(viewportSize), name(name){}
+
     Scene::~Scene() {
         clearAll();
     }
@@ -48,9 +50,15 @@ namespace Cube {
         systems.clear();
     }
 
-    const std::vector<Entity*>& Scene::getEntities() {
-        return entities;
-    }
+    const std::vector<Entity*>& Scene::getEntities() const{ return entities; }
+
+    const std::vector<System*>& Scene::getSystems() const { return systems; }
+
+    const glm::vec2& Scene::getViewportSize() const { return viewportSize; }
+
+    void Scene::setViewportSize(const glm::vec2& size) { viewportSize = size; }
+
+    const std::string& Scene::getName() const { return name; }
 
     void Scene::processDestruction() {
         auto it = std::remove_if(entities.begin(), entities.end(),

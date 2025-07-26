@@ -8,6 +8,8 @@
 #include "Cube/Event/MouseEvent.h"
 #include "Timer.h"
 
+#include <GLFW/glfw3native.h>
+
 namespace Cube {
 
     int Window::windowCnt = 0;
@@ -98,6 +100,10 @@ namespace Cube {
     const WindowPros& Window::getPros() const { return pros; }
 
     GLFWwindow* Window::getNativeWindow() const { return window; }
+
+    HWND Window::getWin32Window() {
+        return glfwGetWin32Window(window);
+    }
 
     void Window::update() {
         glfwSwapBuffers(window);

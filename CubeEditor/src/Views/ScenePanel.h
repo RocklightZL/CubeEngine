@@ -24,7 +24,7 @@ namespace Cube {
             {"CameraComponent", false},
             {"AnimatorComponent", false}
         };
-        char name[256] = "";
+        char name[50] = {};
     };
 
 }

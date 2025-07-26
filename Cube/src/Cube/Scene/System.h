@@ -11,6 +11,8 @@ namespace Cube {
         virtual void onUpdate(Scene* scene, float deltaTime) = 0;
         virtual void onAttach(){}
         virtual void onDetach(){}
+
+        virtual std::string getName() const = 0;
     };
 
 }

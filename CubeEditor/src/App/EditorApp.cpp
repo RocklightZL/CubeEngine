@@ -19,6 +19,11 @@ namespace Cube {
 
     EditorApp::~EditorApp() {
         Renderer2D::shutdown();
+
+        ImGui_ImplGlfw_Shutdown();
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui::DestroyContext();
+
         delete mainWindow;
         delete currentLayer;
     }
@@ -32,6 +37,8 @@ namespace Cube {
             std::chrono::duration<float> frameDuration = currentTime - lastTime;
             lastTime = currentTime;
             float deltaTime = frameDuration.count();
+
+            Renderer::clearBuffer();
 
             if(currentLayer) {
                 currentLayer->onUpdate(deltaTime);
@@ -51,6 +58,7 @@ namespace Cube {
 
     void EditorApp::init() {
         Renderer2D::init();
+        Renderer2D::setViewport(800, 600);
 
         dispatcher.subscribe(std::bind(&EditorApp::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
         dispatcher.subscribe(std::bind(&EditorApp::onWindowResize, this, std::placeholders::_1), EventType::WindowResize);
@@ -61,6 +69,10 @@ namespace Cube {
         Component::registerComponentType("CameraComponent", new ComponentFactoryImpl<CameraComponent>());
         Component::registerComponentType("AnimatorComponent", new ComponentFactoryImpl<AnimatorComponent>());
 
+        imGuiInit();
+    }
+
+    void EditorApp::imGuiInit() {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();

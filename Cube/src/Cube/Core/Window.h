@@ -5,6 +5,7 @@
 
 #include <string>
 #include <glad/glad.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
 #include "Cube/Event/Event.h"
 
@@ -30,6 +31,8 @@ public:
 	EventDispatcher* getDispatcher() const;
     const WindowPros& getPros() const;
 	GLFWwindow* getNativeWindow() const;
+
+	HWND getWin32Window();
 
 	void update();
 

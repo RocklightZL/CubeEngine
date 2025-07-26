@@ -25,6 +25,10 @@ public:
             // c->getComponent<Cube::TransformComponent>()->scale = {cameraX + 1, cameraX + 1};
         }
     }
+
+    std::string getName() const override {
+        return "TransformSystem";
+    }
 private:
     void processInput(float deltaTime) {
         if(app->getWindow()->isKeyPressed(Cube::Key::Up)) {

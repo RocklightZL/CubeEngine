@@ -1,20 +1,23 @@
 ﻿#include "EditorLayer.h"
 
 #include "EditorApp.h"
-#include "../Model.h"
+#include "../Project.h"
 #include "Cube/Core/Application.h"
 #include "Cube/Renderer/RenderSystem.h"
 #include "Cube/UI/FileDialog.h"
 #include "Cube/Scene/SceneSerializer.h"
 #include "../Views/EntityPropertyPanel.h"
+#include "../Views/ResourcesPanel.h"
 #include "../Views/ScenePanel.h"
+#include "../Views/SceneSelectPanel.h"
 #include "../Views/SceneView.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
-extern Cube::Model* data;
+extern Cube::EditorApp* app;
+extern Cube::Project* proj;
 
 namespace Cube {
 
@@ -23,18 +26,14 @@ namespace Cube {
         views.push_back(new ScenePanel);
         views.push_back(new SceneView);
         views.push_back(new EntityPropertyPanel);
-
-        data->scene.addSystem(new RenderSystem(800, 600));
+        views.push_back(new SceneSelectPanel);
+        views.push_back(new ResourcesPanel);
     }
 
     EditorLayer::~EditorLayer() {
         for(View* view : views) {
             delete view;
         }
-
-        ImGui_ImplGlfw_Shutdown();
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui::DestroyContext();
     }
 
     void EditorLayer::onUpdate(float deltaTime) {
@@ -55,24 +54,49 @@ namespace Cube {
                 }
                 ImGui::EndMenu();
             }
+            static bool showAddNewScene = false;
             if(ImGui::BeginMenu("Scene")) {
                 if(ImGui::MenuItem("Add New Scene")) {
+                    showAddNewScene = true;
                 }
+
                 if(ImGui::MenuItem("Load Scene")) {
-                    std::string filePath = FileDialog::openFile();
+                    std::string filePath = FileDialog::openFile("Scene File\0*.scene\0" ,app->getWindow()->getWin32Window());
                     if(!filePath.empty()) {
-                        SceneSerializer::deserialize(&data->scene, filePath);
-                        data->selectedEntity = nullptr;
-                        data->scene.addSystem(new RenderSystem(800, 600)); // TODO: temporary line
+                        Scene* scene = new Scene();
+                        proj->addScene(scene);
+                        SceneSerializer::deserialize(scene, filePath);
+                        scene->addSystem(new RenderSystem()); // TODO: temporary line
                     }
                 }
-                if(ImGui::MenuItem("Save Scene")) {
-                    std::string filePath = FileDialog::saveFile();
+                if(ImGui::MenuItem("Save Scene") && proj->selectedScene) {
+                    std::string filePath = FileDialog::saveFile("Scene File\0*.scene\0" ,app->getWindow()->getWin32Window());
                     if(!filePath.empty()) {
-                        SceneSerializer::serialize(&data->scene, filePath);
+                        SceneSerializer::serialize(proj->selectedScene, filePath);
                     }
                 }
                 ImGui::EndMenu();
+            }
+            if(showAddNewScene) ImGui::OpenPopup("Add New Scene##1");
+            if(ImGui::BeginPopupModal("Add New Scene##1")) {
+                static char name[50] = {};
+                ImGui::Text("Name: ");
+                ImGui::SameLine();
+                ImGui::InputText("##NameInputText", name, IM_ARRAYSIZE(name));
+
+                if(ImGui::Button("Add##3")) {
+                    proj->addScene(new Scene({800, 600}, name));
+                    memset(name, '\0', sizeof(name));
+                    showAddNewScene = false;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SameLine();
+                if(ImGui::Button("Cancel##3")) {
+                    memset(name, '\0', sizeof(name));
+                    showAddNewScene = false;
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
             }
             ImGui::EndMainMenuBar();
         }

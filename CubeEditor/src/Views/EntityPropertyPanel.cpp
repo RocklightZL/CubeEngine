@@ -1,9 +1,9 @@
 #include "EntityPropertyPanel.h"
 
-#include "../Model.h"
+#include "../Project.h"
 #include "imgui/imgui.h"
 
-extern Cube::Model* data;
+extern Cube::Project* proj;
 
 namespace Cube {
 
@@ -11,17 +11,17 @@ namespace Cube {
         ImGui::Begin("Entity Properties");
 
         // Ó²±àÂë
-        if(data->selectedEntity) {
+        if(proj->selectedEntity) {
 
             char name[256] = {};
-            strcpy_s(name, data->selectedEntity->getName().c_str());
+            strcpy_s(name, proj->selectedEntity->getName().c_str());
             ImGui::Text("name: ");
             ImGui::SameLine();
             ImGui::InputText("##InputTextEntityName", name, IM_ARRAYSIZE(name));
-            data->selectedEntity->setName(name);
+            proj->selectedEntity->setName(name);
 
-            if(data->selectedEntity->hasComponent<TransformComponent>()) {
-                TransformComponent* tc = data->selectedEntity->getComponent<TransformComponent>();
+            if(proj->selectedEntity->hasComponent<TransformComponent>()) {
+                TransformComponent* tc = proj->selectedEntity->getComponent<TransformComponent>();
                 if(ImGui::TreeNode("TransformComponent")) {
                     ImGui::Text("Position: ");
                     ImGui::SameLine();
@@ -43,8 +43,8 @@ namespace Cube {
                 }
             }
 
-            if(data->selectedEntity->hasComponent<SpriteComponent>()) {
-                SpriteComponent* sc = data->selectedEntity->getComponent<SpriteComponent>();
+            if(proj->selectedEntity->hasComponent<SpriteComponent>()) {
+                SpriteComponent* sc = proj->selectedEntity->getComponent<SpriteComponent>();
                 if(ImGui::TreeNode("SpriteComponent")) {
                     ImGui::Text("TextureRegion: ");
                     ImGui::SameLine();
@@ -63,8 +63,8 @@ namespace Cube {
                 }
             }
 
-            if(data->selectedEntity->hasComponent<CameraComponent>()) {
-                CameraComponent* cc = data->selectedEntity->getComponent<CameraComponent>();
+            if(proj->selectedEntity->hasComponent<CameraComponent>()) {
+                CameraComponent* cc = proj->selectedEntity->getComponent<CameraComponent>();
                 if(ImGui::TreeNode("CameraComponent")) {
                     ImGui::Text("Available");
                     ImGui::SameLine();

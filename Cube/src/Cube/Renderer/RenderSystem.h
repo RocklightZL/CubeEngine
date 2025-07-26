@@ -6,15 +6,14 @@ namespace Cube {
 
     class RenderSystem : public System {
     public:
-        RenderSystem(float viewportWidth, float viewportHeight);
-        virtual ~RenderSystem();
+        RenderSystem() = default;
+        ~RenderSystem() override = default;
 
         void onUpdate(Scene* scene, float deltaTime) override;
 
         void onAttach() override;
-    private:
-        float viewportWidth;
-        float viewportHeight;
+
+        std::string getName() const override;
     };
 
 }  // namespace Cube
