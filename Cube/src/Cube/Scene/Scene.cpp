@@ -60,6 +60,15 @@ namespace Cube {
 
     const std::string& Scene::getName() const { return name; }
 
+    void Scene::setName(const std::string& name) { this->name = name; }
+
+    bool Scene::hasSystem(const std::string& systemName) const {
+        auto it = std::find_if(systems.begin(), systems.end(), [systemName](System* s) {
+            return s->getName() == systemName;
+        });
+        return it != systems.end();
+    }
+
     void Scene::processDestruction() {
         auto it = std::remove_if(entities.begin(), entities.end(),
             [](Entity* entity) { return !entity->isAlive(); });

@@ -6,9 +6,6 @@
 
 namespace Cube {
 
-    // file to string
-    std::string readFileToString(const std::string& filePath);
-
     class Shader {
     public:
         Shader(const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc);

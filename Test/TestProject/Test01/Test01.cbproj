@@ -1,0 +1,7 @@
+{
+    "name": "Test01",
+    "projectDataDirectory": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/.cube",
+    "resourcesDirectory": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Resources",
+    "rootPath": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01",
+    "sceneDirectory": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Scenes"
+}

@@ -1,6 +1,7 @@
 #include "EditorApp.h"
 
 #include "EditorLayer.h"
+#include "../Project.h"
 #include "Cube/Event/ApplicationEvent.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Scene/Component.h"
@@ -8,6 +9,8 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui.h>
+
+extern Cube::Project* proj;
 
 namespace Cube {
 

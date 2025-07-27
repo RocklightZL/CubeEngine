@@ -5,9 +5,10 @@
 #include "../Project.h"
 #include "Cube/Core/Log.h"
 #include "Cube/UI/FileDialog.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 
 extern Cube::Project* proj;
 extern Cube::EditorApp* app;
@@ -44,12 +45,12 @@ namespace Cube {
             ImGui::SameLine();
             if(ImGui::Button("...##1")) {
                 std::string pathStr = FileDialog::selectDir(app->getWindow()->getWin32Window());
-                strcpy_s(path, pathStr.c_str());
+                strcpy_s(path, pathStr.append("/").append(name).c_str());
             }
 
             if(ImGui::Button("OK##2")) {
                 delete proj;
-                proj = new Project(name, path);
+                proj = new Project(name, path); // TODO: check if the path is valid
                 memset(name, '\0', sizeof(name));
                 memset(path, '\0', sizeof(path));
                 openNewProjectPopup = false;

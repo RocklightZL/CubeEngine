@@ -1,0 +1,7 @@
+{
+    "scenes": [
+        "scene",
+        "TestScene01"
+    ],
+    "selectedScene": "TestScene01"
+}

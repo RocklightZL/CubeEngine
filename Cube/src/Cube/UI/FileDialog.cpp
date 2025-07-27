@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "FileDialog.h"
 
+#include"Cube/Utils/Utils.h"
+
 #include <commctrl.h>
 #include <commdlg.h>
 #include <ShlObj.h>
@@ -20,7 +22,9 @@ namespace Cube {
         ofn.nFilterIndex = 1;
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
         if(GetOpenFileNameA(&ofn)) {
-            return filePath;
+            std::string res(filePath);
+            Utils::normalizePath(res);
+            return res;
         }
         return "";
     }
@@ -38,7 +42,9 @@ namespace Cube {
         ofn.nFilterIndex = 1;
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
         if(GetOpenFileNameA(&ofn)) {
-            return filePath;
+            std::string res(filePath);
+            Utils::normalizePath(res);
+            return res;
         }
         return "";
     }
@@ -54,7 +60,9 @@ namespace Cube {
 
         LPITEMIDLIST idl = SHBrowseForFolderA(&bi);
         if (idl != NULL && SHGetPathFromIDListA(idl, path)) {
-            return path;
+            std::string res(path);
+            Utils::normalizePath(res);
+            return res;
         }
         return "";
     }

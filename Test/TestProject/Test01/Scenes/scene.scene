@@ -1,4 +1,5 @@
 {
+    "name": "scene",
     "entities": [
         {
             "ID": 0,
@@ -52,5 +53,8 @@
             },
             "name": "mainCamera"
         }
+    ],
+    "systems": [
+        "RenderSystem"
     ]
 }

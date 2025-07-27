@@ -2,6 +2,7 @@
 #include "Resource.h"
 #include "Cube/Renderer/Shader.h"
 #include "Cube/Renderer/Texture.h"
+#include "Cube/Utils/Utils.h"
 
 namespace Cube {
 
@@ -29,7 +30,7 @@ namespace Cube {
             newResource->refCount = 1;
 
             if constexpr (std::is_same_v<T, Shader>) {
-                newResource->data = new Shader(readFileToString(path));
+                newResource->data = new Shader(Utils::readFileToString(path));
             } else if constexpr (std::is_same_v<T, Texture2D>) {
                 newResource->data = new Texture2D(path);
             } else {

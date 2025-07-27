@@ -28,13 +28,13 @@ namespace Cube {
                 sceneViewSize = currentSize;
                 frameBuffer->resize((int)sceneViewSize.x, (int)sceneViewSize.y);
             }
-            proj->selectedScene->setViewportSize({sceneViewSize.x, sceneViewSize.y});
+            proj->selectedScene->scene->setViewportSize({sceneViewSize.x, sceneViewSize.y});
 
             frameBuffer->bind();
             Renderer2D::setViewport((int)sceneViewSize.x, (int)sceneViewSize.y);
             Renderer2D::clearBuffer();
             // scene render
-            proj->selectedScene->onUpdate(deltaTime);
+            proj->selectedScene->scene->onUpdate(deltaTime);
 
             FrameBuffer::bindDefaultFrameBuffer();
 

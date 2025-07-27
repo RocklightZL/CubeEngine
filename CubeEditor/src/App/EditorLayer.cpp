@@ -11,6 +11,7 @@
 #include "../Views/ScenePanel.h"
 #include "../Views/SceneSelectPanel.h"
 #include "../Views/SceneView.h"
+#include "Cube/Utils/Utils.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
@@ -61,19 +62,28 @@ namespace Cube {
                 }
 
                 if(ImGui::MenuItem("Load Scene")) {
-                    std::string filePath = FileDialog::openFile("Scene File\0*.scene\0" ,app->getWindow()->getWin32Window());
+                    std::string filePath = FileDialog::openFile("Scene File(.scene)\0*.scene\0" ,app->getWindow()->getWin32Window());
                     if(!filePath.empty()) {
                         Scene* scene = new Scene();
-                        proj->addScene(scene);
                         SceneSerializer::deserialize(scene, filePath);
-                        scene->addSystem(new RenderSystem()); // TODO: temporary line
+                        if(Utils::getFileName(filePath) == scene->getName()){
+                            if(!proj->hasScene(scene->getName())){
+                                proj->addScene(scene);
+                            }else {
+                                delete scene;
+                                CB_WARN("The scene has existed"); // TODO: 提醒用户
+                            }
+                        }else {
+                            delete scene;
+                            CB_ERROR("The scene file name does not match the scene name"); // TODO: 提醒用户
+                        }
                     }
                 }
                 if(ImGui::MenuItem("Save Scene") && proj->selectedScene) {
-                    std::string filePath = FileDialog::saveFile("Scene File\0*.scene\0" ,app->getWindow()->getWin32Window());
-                    if(!filePath.empty()) {
-                        SceneSerializer::serialize(proj->selectedScene, filePath);
-                    }
+                    // if(!proj->selectedScene->isSaved){
+                        SceneSerializer::serialize(proj->selectedScene->scene, proj->getConfig().sceneDirectory + "/" + proj->selectedScene->scene->getName() + ".scene");
+                        proj->selectedScene->isSaved = true;
+                    // } // TODO: 保存机制还未完善
                 }
                 ImGui::EndMenu();
             }
@@ -84,16 +94,25 @@ namespace Cube {
                 ImGui::SameLine();
                 ImGui::InputText("##NameInputText", name, IM_ARRAYSIZE(name));
 
+                static bool showTip = false;
+                if(showTip) ImGui::Text("This scene has existed!");
+
                 if(ImGui::Button("Add##3")) {
-                    proj->addScene(new Scene({800, 600}, name));
-                    memset(name, '\0', sizeof(name));
-                    showAddNewScene = false;
-                    ImGui::CloseCurrentPopup();
+                    if(!proj->hasScene(name)){
+                        proj->addScene(new Scene({800, 600}, name));
+                        memset(name, '\0', sizeof(name));
+                        showAddNewScene = false;
+                        showTip = false;
+                        ImGui::CloseCurrentPopup();
+                    }else {
+                        showTip = true;
+                    }
                 }
                 ImGui::SameLine();
                 if(ImGui::Button("Cancel##3")) {
                     memset(name, '\0', sizeof(name));
                     showAddNewScene = false;
+                    showTip = false;
                     ImGui::CloseCurrentPopup();
                 }
                 ImGui::EndPopup();

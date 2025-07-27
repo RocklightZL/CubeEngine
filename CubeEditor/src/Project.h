@@ -1,6 +1,7 @@
 #pragma once
 #include "Cube/Scene/Entity.h"
 #include "Cube/Scene/Scene.h"
+#include "Views/SceneSelectPanel.h"
 
 #include <string>
 
@@ -14,24 +15,36 @@ namespace Cube {
 		std::string sceneDirectory;
     };
 
+    struct SceneData {
+        Scene* scene = nullptr;
+		bool isSaved = false;
+    };
+
 	class Project {
 	public:
-		Project(const std::string& name, const std::string& rootPath);
+		friend SceneSelectPanel;
+
+        Project(const std::string& name, const std::string& rootPath);
 		Project(const std::string& configFilePath);
 		virtual ~Project();
 
-		const std::vector<Scene*>& getScenes() const;
+		const std::vector<SceneData>& getScenes() const;
 		void addScene(Scene* scene);
+		bool hasScene(const std::string& sceneName) const;
 
+		const ProjectConfig& getConfig() const;
+
+		void save();
 		// global data
-		Scene* selectedScene = nullptr;
+		SceneData* selectedScene = nullptr;
 		Entity* selectedEntity = nullptr;
 
 	private:
 		void writeToConfigFile(const std::string& configFilePath) const;
+		void load();
 
 		ProjectConfig config;
-		std::vector<Scene*> scenes;
+		std::vector<SceneData> scenes;
 	};
 
 }

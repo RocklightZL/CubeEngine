@@ -26,7 +26,7 @@ TestLayer::TestLayer() {
 
     // shader = std::make_shared<Cube::Shader>(vertexShaderSrc, fragmentShaderSrc);
     // Shader shader(readFileToString("D:/mycode/vsProject/CubeEngine/bin/Debug-windows-x86_64/Sandbox/VertexShaderTest.vs"), readFileToString("D:/mycode/vsProject/CubeEngine/bin/Debug-windows-x86_64/Sandbox/FragmentShaderTest.fs"));
-    shader = std::make_shared<Cube::Shader>(Cube::readFileToString("assets/shaders/VertexShaderTest.vs"), Cube::readFileToString("assets/shaders/FragmentShaderTest.fs"));
+    shader = std::make_shared<Cube::Shader>(Cube::Utils::readFileToString("assets/shaders/VertexShaderTest.vs"), Cube::Utils::readFileToString("assets/shaders/FragmentShaderTest.fs"));
 
     std::vector<uint32_t> indices = {0, 1, 2, 0, 2, 3};
 

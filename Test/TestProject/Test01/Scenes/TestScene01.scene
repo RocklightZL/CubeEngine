@@ -1,0 +1,60 @@
+{
+    "entities": [
+        {
+            "ID": 2,
+            "components": {
+                "0": {
+                    "position": [
+                        200.0,
+                        200.0
+                    ],
+                    "rotation": 0.0,
+                    "scale": [
+                        200.0,
+                        200.0
+                    ]
+                },
+                "1": {
+                    "color": [
+                        0.5115089416503906,
+                        0.20538848638534546,
+                        0.20538848638534546,
+                        1.0
+                    ],
+                    "name": "",
+                    "region": [
+                        0.0,
+                        0.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            },
+            "name": "Player"
+        },
+        {
+            "ID": 3,
+            "components": {
+                "0": {
+                    "position": [
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": 0.0,
+                    "scale": [
+                        1.0,
+                        1.0
+                    ]
+                },
+                "2": {
+                    "available": true
+                }
+            },
+            "name": "Camera"
+        }
+    ],
+    "name": "TestScene01",
+    "systems": [
+        "RenderSystem"
+    ]
+}

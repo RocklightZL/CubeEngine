@@ -1,21 +1,8 @@
 #include "pch.h"
 #include "Shader.h"
 #include <fstream>
-#include <sstream>
 
 namespace Cube {
-
-    std::string readFileToString(const std::string& filePath)  {
-        std::ifstream file(filePath);
-        if(!file.is_open()) {
-            CB_CORE_ERROR("cannot open file " + filePath);
-            CB_ASSERT("Failed to open file!");
-            return "";
-        }
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-        return buffer.str();
-    }
 
     Shader::Shader(const std::string& vertexShaderSrc, const std::string& fragmentShaderSrc) {
         init(vertexShaderSrc, fragmentShaderSrc);

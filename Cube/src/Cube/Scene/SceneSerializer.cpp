@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "SceneSerializer.h"
 
+#include "Cube/Animator/AnimatorSystem.h"
+#include "Cube/Renderer/RenderSystem.h"
 #include "Cube/Resource/ResourceManager.h"
 
 #include <fstream>
@@ -11,12 +13,16 @@ namespace Cube {
         // to json
         nlohmann::json sceneData;
 
-        // sceneData["name"] = "untitled"; // TODO: get scene name
+        sceneData["name"] = scene->getName();
         // sceneData["version"] = "1.0"; // TODO: get version
         // sceneData["date"] = "";
         sceneData["entities"] = nlohmann::json::array();
         for(Entity* entity : scene->entities) {
             sceneData["entities"].push_back(serializeEntity(entity));
+        }
+        sceneData["systems"] = nlohmann::json::array();
+        for(System* system : scene->systems) {
+            sceneData["systems"].push_back(system->getName());
         }
 
         std::ofstream file(filePath);
@@ -36,8 +42,17 @@ namespace Cube {
         nlohmann::json sceneData;
         file >> sceneData;
         scene->clearAll();
+        scene->setName(sceneData["name"]);
         for(auto& entityData : sceneData["entities"]) {
             deserializeEntity(scene, entityData);
+        }
+        for(auto& system : sceneData["systems"]) {
+            std::string systemName = system.get<std::string>();
+            if(systemName == "RenderSystem") {
+                scene->addSystem(new RenderSystem());
+            }else if(systemName == "AnimatorSystem") {
+                scene->addSystem(new AnimatorSystem());
+            }
         }
     }
 
