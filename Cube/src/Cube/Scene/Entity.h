@@ -67,6 +67,7 @@ namespace Cube {
 		bool alive = true;
 		std::unordered_map<ComponentID, Component*> components;
 		static uint32_t currentID;
+
 	};
 
 }

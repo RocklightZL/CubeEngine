@@ -62,12 +62,12 @@ namespace Cube {
 
     void Scene::setName(const std::string& name) { this->name = name; }
 
+#ifdef EDITOR
     bool Scene::hasSystem(const std::string& systemName) const {
-        auto it = std::find_if(systems.begin(), systems.end(), [systemName](System* s) {
-            return s->getName() == systemName;
-        });
+        auto it = std::find_if(systems.begin(), systems.end(), [systemName](System* s) { return s->getName() == systemName; });
         return it != systems.end();
     }
+#endif
 
     void Scene::processDestruction() {
         auto it = std::remove_if(entities.begin(), entities.end(),

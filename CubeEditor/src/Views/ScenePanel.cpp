@@ -70,7 +70,7 @@ namespace Cube {
                 ImGui::TreePop();
             }
             if(ImGui::BeginPopupContextItem()) {
-                if(ImGui::BeginMenu("add system")) {
+                if(ImGui::BeginMenu("Add System#1")) {
                     if(ImGui::MenuItem("RenderSystem##1")) {
                         if(!proj->selectedScene->scene->hasSystem("RenderSystem")) {
                             proj->selectedScene->scene->addSystem(new RenderSystem());

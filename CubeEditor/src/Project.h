@@ -1,4 +1,5 @@
 #pragma once
+#include "App/EditorLayer.h"
 #include "Cube/Scene/Entity.h"
 #include "Cube/Scene/Scene.h"
 #include "Views/SceneSelectPanel.h"
@@ -23,6 +24,7 @@ namespace Cube {
 	class Project {
 	public:
 		friend SceneSelectPanel;
+		friend EditorLayer;
 
         Project(const std::string& name, const std::string& rootPath);
 		Project(const std::string& configFilePath);

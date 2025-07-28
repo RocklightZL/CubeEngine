@@ -53,7 +53,6 @@ namespace Cube {
         const std::string& getName() const;
         void setName(const std::string& name);
 
-#define EDITOR // TODO: 待完善：条件编译，只在编辑器中启用，内核不需要。
 #ifdef EDITOR
         bool hasSystem(const std::string& systemName) const;
 #endif

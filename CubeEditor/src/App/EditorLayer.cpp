@@ -80,10 +80,18 @@ namespace Cube {
                     }
                 }
                 if(ImGui::MenuItem("Save Scene") && proj->selectedScene) {
-                    // if(!proj->selectedScene->isSaved){
+                    if(!proj->selectedScene->isSaved){
                         SceneSerializer::serialize(proj->selectedScene->scene, proj->getConfig().sceneDirectory + "/" + proj->selectedScene->scene->getName() + ".scene");
                         proj->selectedScene->isSaved = true;
-                    // } // TODO: 保存机制还未完善
+                    }
+                }
+                if(ImGui::MenuItem("Save All Scene")) {
+                    for(auto& scene : proj->scenes){
+                        if(!scene.isSaved){
+                            SceneSerializer::serialize(scene.scene, proj->getConfig().sceneDirectory + "/" + scene.scene->getName() + ".scene");
+                            scene.isSaved = true;
+                        }
+                    }
                 }
                 ImGui::EndMenu();
             }

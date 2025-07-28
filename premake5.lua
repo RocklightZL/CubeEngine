@@ -10,6 +10,7 @@ workspace "CubeEngine"
     characterset "Unicode"
     buildoptions { "/utf-8" }
     
+    defines "EDITOR"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
