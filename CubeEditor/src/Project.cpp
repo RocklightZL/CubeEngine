@@ -41,6 +41,11 @@ namespace Cube {
         config.sceneDirectory = data["sceneDirectory"];
 
         load();
+
+        resRoot = std::make_shared<Node>();
+        resRoot->name = "root";
+        resRoot->isGroup = true;
+        currentNode = resRoot;
     }
 
     Project::~Project() {

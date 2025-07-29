@@ -2,9 +2,11 @@
 #include "App/EditorLayer.h"
 #include "Cube/Scene/Entity.h"
 #include "Cube/Scene/Scene.h"
+#include "Views/Node.h"
 #include "Views/SceneSelectPanel.h"
 
 #include <string>
+#include <memory>
 
 namespace Cube {
 
@@ -40,6 +42,8 @@ namespace Cube {
 		// global data
 		SceneData* selectedScene = nullptr;
 		Entity* selectedEntity = nullptr;
+		std::shared_ptr<Node> resRoot;
+		std::shared_ptr<Node> currentNode;
 
 	private:
 		void writeToConfigFile(const std::string& configFilePath) const;

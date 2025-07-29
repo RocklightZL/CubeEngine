@@ -69,6 +69,9 @@ namespace Cube {
                         if(Utils::getFileName(filePath) == scene->getName()){
                             if(!proj->hasScene(scene->getName())){
                                 proj->addScene(scene);
+                                if(!Utils::isFileInDirectory(filePath, proj->getConfig().sceneDirectory)) {
+                                    Utils::copyFile(filePath, proj->getConfig().sceneDirectory + "/" + scene->getName() + ".scene");
+                                }
                             }else {
                                 delete scene;
                                 CB_WARN("The scene has existed"); // TODO: 提醒用户
@@ -124,6 +127,13 @@ namespace Cube {
                     ImGui::CloseCurrentPopup();
                 }
                 ImGui::EndPopup();
+            }
+
+            if(ImGui::BeginMenu("Resources")) {
+                if(ImGui::MenuItem("Import Resources##1")) {
+                    ResourcesPanel::importResources();
+                }
+                ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
         }

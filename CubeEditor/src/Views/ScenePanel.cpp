@@ -13,7 +13,7 @@ extern Cube::Project* proj;
 namespace Cube {
 
     void ScenePanel::render(float deltaTime) {
-        ImGui::Begin("ScenePanel");
+        ImGui::Begin("ScenePanel"); 
         if(proj->selectedScene){
             if(ImGui::TreeNodeEx("Entities")) {
                 for(Entity* entity : proj->selectedScene->scene->getEntities()) {
