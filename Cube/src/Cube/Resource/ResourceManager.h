@@ -63,12 +63,14 @@ namespace Cube {
 
         template<typename T>
         void release(Resource<T>*& resource) {
-            if(resource && --(resource->refCount)) {
+            if(resource && (--resource->refCount) == 0) {
                 resourcesCache.erase(resource->path);
                 delete resource;
                 resource = nullptr;
             }
         }
+
+        void release(const std::string& path);
 
         void releaseAll();
 

@@ -8,6 +8,16 @@ namespace Cube {
         return instance;
     }
 
+    void ResourceManager::release(const std::string& path) {
+        auto it = resourcesCache.find(path);
+        if(it != resourcesCache.end()) {
+            if((--it->second->refCount) == 0) {
+                delete it->second;
+                resourcesCache.erase(path);
+            }
+        }
+    }
+
     void ResourceManager::releaseAll() {
         for(auto& resource : resourcesCache) {
             delete resource.second;

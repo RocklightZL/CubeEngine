@@ -1,6 +1,7 @@
 #include "EntityPropertyPanel.h"
 
 #include "../Project.h"
+#include "Cube/Resource/ResourceManager.h"
 #include "imgui/imgui.h"
 
 extern Cube::Project* proj;
@@ -59,6 +60,16 @@ namespace Cube {
                     float color[4] = {sc->color.r, sc->color.g, sc->color.b, sc->color.a};
                     if(ImGui::ColorEdit4("##Color", color)) proj->selectedScene->isSaved = false;
                     sc->color = {color[0], color[1], color[2], color[3]};
+
+                    static std::string texturePath = "Texture";
+                    if(ImGui::Button(texturePath.c_str())){}
+                    if(ImGui::BeginDragDropTarget()) {
+                        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePath")) {
+                            texturePath = (const char*)payload->Data;
+                            sc->atlas = new TextureAtlas(texturePath);
+                        }
+                        ImGui::EndDragDropTarget();
+                    }
 
                     ImGui::TreePop();
                 }

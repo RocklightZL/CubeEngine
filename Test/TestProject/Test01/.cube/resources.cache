@@ -1,0 +1,42 @@
+{
+    "children": [
+        {
+            "children": [
+                {
+                    "children": [],
+                    "isGroup": true,
+                    "name": "1"
+                },
+                {
+                    "children": [],
+                    "isGroup": true,
+                    "name": "2"
+                },
+                {
+                    "children": [],
+                    "isGroup": false,
+                    "name": "Directory.png"
+                },
+                {
+                    "children": [],
+                    "isGroup": false,
+                    "name": "File.png"
+                }
+            ],
+            "isGroup": true,
+            "name": "Texture"
+        },
+        {
+            "children": [],
+            "isGroup": true,
+            "name": "Shaders"
+        },
+        {
+            "children": [],
+            "isGroup": true,
+            "name": "Fonts"
+        }
+    ],
+    "isGroup": true,
+    "name": "root"
+}

@@ -38,7 +38,6 @@ namespace Cube {
 
 		const ProjectConfig& getConfig() const;
 
-		void save();
 		// global data
 		SceneData* selectedScene = nullptr;
 		Entity* selectedEntity = nullptr;
@@ -48,6 +47,7 @@ namespace Cube {
 	private:
 		void writeToConfigFile(const std::string& configFilePath) const;
 		void load();
+		void save();
 
 		ProjectConfig config;
 		std::vector<SceneData> scenes;

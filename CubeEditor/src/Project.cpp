@@ -22,6 +22,11 @@ namespace Cube {
         std::filesystem::create_directories(config.resourcesDirectory);
 
         writeToConfigFile(rootPath + "/" + name + ".cbproj");
+
+        resRoot = std::make_shared<Node>();
+        resRoot->name = "root";
+        resRoot->isGroup = true;
+        currentNode = resRoot;
     }
 
     Project::Project(const std::string& configFilePath) {
@@ -41,11 +46,6 @@ namespace Cube {
         config.sceneDirectory = data["sceneDirectory"];
 
         load();
-
-        resRoot = std::make_shared<Node>();
-        resRoot->name = "root";
-        resRoot->isGroup = true;
-        currentNode = resRoot;
     }
 
     Project::~Project() {
@@ -88,7 +88,16 @@ namespace Cube {
             return;
         }
         file << data.dump(4);
+        file.close();
 
+        std::ofstream resFile(config.projectDataDirectory + "/resources.cache");
+        if(!resFile.is_open()) {
+            CB_ERROR("Project::save: failed to open file: {}", config.projectDataDirectory + "/resources.cache");
+            CB_ASSERT(true);
+            return;
+        }
+        resFile << resRoot->toJson().dump(4);
+        resFile.close();
     }
 
     void Project::writeToConfigFile(const std::string& configFilePath) const {
@@ -109,6 +118,7 @@ namespace Cube {
     }
 
     void Project::load() {
+        // scenes.cache
         std::ifstream file(config.projectDataDirectory + "/scenes.cache");
         if(!file.is_open()) {
             CB_ERROR("Project::load: failed to open file: {}", config.projectDataDirectory + "/scenes.cache");
@@ -128,6 +138,21 @@ namespace Cube {
                 selectedScene = &s;
             }
         }
+        file.close();
+
+        // resources.cache
+        std::ifstream resFile(config.projectDataDirectory + "/resources.cache");
+        if(!resFile.is_open()) {
+            CB_ERROR("Project::load: failed to open file: {}", config.projectDataDirectory + "/resources.cache");
+            CB_ASSERT(true);
+            return;
+        }
+        nlohmann::json resData;
+        resFile >> resData;
+        resRoot = std::make_shared<Node>();
+        resRoot->fromJson(resData, resRoot);
+        currentNode = resRoot;
+        resFile.close();
     }
 
 }  // namespace Cube

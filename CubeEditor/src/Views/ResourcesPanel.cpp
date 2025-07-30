@@ -30,7 +30,7 @@ namespace Cube {
         ImGui::Begin("Resources Panel");
         if(!currentNode->parent.expired()) {
             if(ImGui::Button("<<<")) {
-                currentNode = currentNode->parent.lock();
+                proj->currentNode = currentNode->parent.lock();
             }
         }
         for(auto& n : currentNode->children) {
@@ -45,7 +45,7 @@ namespace Cube {
                 strcpy_s(renameBuf, n->name.c_str());
                 if(ImGui::InputText("##renameInput", renameBuf, IM_ARRAYSIZE(renameBuf), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll)) {
                     n->name = renameBuf;
-                    n->isRenaming = false;
+                    n->isRenaming = false; // TODO: 名称合法性检测
                 }
 
                 if(!ImGui::IsItemActive() && ImGui::IsMouseClicked(0)) {
@@ -56,10 +56,16 @@ namespace Cube {
                 if(n->isGroup) {
                     ImGui::Selectable(n->name.c_str());
                     if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                        currentNode = n;
+                        proj->currentNode = n;
                     }
                 } else {
                     ImGui::Selectable(n->name.c_str());
+                    if(ImGui::BeginDragDropSource()) {
+                        std::string texturePath = proj->getConfig().resourcesDirectory + "/" + n->name;
+                        ImGui::Text(texturePath.c_str());
+                        ImGui::SetDragDropPayload("TexturePath", texturePath.c_str(), texturePath.size() + 1);
+                        ImGui::EndDragDropSource();
+                    }
                 }
                 if(ImGui::IsItemHovered() && ImGui::IsMouseClicked(1)) {
                     ImGui::OpenPopup("NodeRightButtonMenu");
@@ -100,6 +106,9 @@ namespace Cube {
     void ResourcesPanel::importResources() {
         for(auto& path : FileDialog::openMultiFiles("Resources(.png.jpg)\0*.png;*.jpg\0", app->getWindow()->getWin32Window())) {
             std::string fileName = Utils::getFileName(path, true);
+            if(!Utils::isFileInDirectory(path, proj->getConfig().resourcesDirectory)) {
+                Utils::copyFile(path, proj->getConfig().resourcesDirectory + "/" + fileName);
+            }
             if(std::find_if(proj->currentNode->children.begin(), proj->currentNode->children.end(), [fileName](std::shared_ptr<Node> x){ return x->name == fileName; }) == proj->currentNode->children.end()){
                 std::shared_ptr<Node> n = std::make_shared<Node>();
                 n->isGroup = false;
