@@ -28,8 +28,8 @@ namespace Cube {
 
         std::vector<Entity*> target(scene->getEntitiesWith<TransformComponent, SpriteComponent>());
         std::sort(target.begin(), target.end(), [](Entity* a, Entity* b) {
-            auto* aa = a->getComponent<SpriteComponent>()->atlas;
-            auto* ba = b->getComponent<SpriteComponent>()->atlas;
+            auto* aa = a->getComponent<SpriteComponent>()->texture;
+            auto* ba = b->getComponent<SpriteComponent>()->texture;
             if(!aa) {
                 return ba != nullptr;
             }
@@ -42,7 +42,7 @@ namespace Cube {
         for(auto entity : target) {
             SpriteComponent* sprite = entity->getComponent<SpriteComponent>();
             TransformComponent* transform = entity->getComponent<TransformComponent>();
-            Renderer2D::drawQuad(transform->getTransformMatrix(), sprite->color, sprite->atlas, {sprite->region.uvMin, sprite->region.uvMax});
+            Renderer2D::drawQuad(transform->getTransformMatrix(), sprite->color, sprite->texture, {sprite->region.uvMin, sprite->region.uvMax});
         }
         Renderer2D::endFrame();
     }

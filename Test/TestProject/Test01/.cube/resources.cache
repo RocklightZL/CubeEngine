@@ -4,16 +4,6 @@
             "children": [
                 {
                     "children": [],
-                    "isGroup": true,
-                    "name": "1"
-                },
-                {
-                    "children": [],
-                    "isGroup": true,
-                    "name": "2"
-                },
-                {
-                    "children": [],
                     "isGroup": false,
                     "name": "Directory.png"
                 },

@@ -50,10 +50,10 @@ namespace Cube {
                 if(ImGui::TreeNode("SpriteComponent")) {
                     ImGui::Text("TextureRegion: ");
                     ImGui::SameLine();
-                    float in[4] = {sc->region.uvMax.x, sc->region.uvMax.y, sc->region.uvMin.x, sc->region.uvMin.y};
+                    float in[4] = {sc->region.uvMin.x, sc->region.uvMin.y, sc->region.uvMax.x, sc->region.uvMax.y};
                     if(ImGui::DragFloat4("##TextureRegion", in, 0.001f, 0, 1)) proj->selectedScene->isSaved = false;
-                    sc->region.uvMax = {in[0], in[1]};
-                    sc->region.uvMin = {in[2], in[3]};
+                    sc->region.uvMin = {in[0], in[1]};
+                    sc->region.uvMax = {in[2], in[3]};
 
                     ImGui::Text("Color: ");
                     ImGui::SameLine();
@@ -61,12 +61,16 @@ namespace Cube {
                     if(ImGui::ColorEdit4("##Color", color)) proj->selectedScene->isSaved = false;
                     sc->color = {color[0], color[1], color[2], color[3]};
 
-                    static std::string texturePath = "Texture";
+                    std::string texturePath = sc->texture ? Utils::getFileName(sc->texture->getFilePath(), true) : "Texture";
                     if(ImGui::Button(texturePath.c_str())){}
                     if(ImGui::BeginDragDropTarget()) {
                         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePath")) {
                             texturePath = (const char*)payload->Data;
-                            sc->atlas = new TextureAtlas(texturePath);
+                            if(sc->texture) {
+                                ResourceManager::getInstance().release(sc->texture->getFilePath());
+                            }
+                            sc->texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
+                            proj->selectedScene->isSaved = false;
                         }
                         ImGui::EndDragDropTarget();
                     }

@@ -21,13 +21,13 @@
                         0.5487684607505798,
                         1.0
                     ],
+                    "name": "",
                     "region": [
                         0.0,
                         0.0,
                         1.0,
                         1.0
-                    ],
-                    "texture": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Resources/Directory.png"
+                    ]
                 }
             },
             "name": "block"
@@ -73,13 +73,13 @@
                         0.4730476438999176,
                         1.0
                     ],
+                    "name": "",
                     "region": [
                         0.0,
                         0.0,
                         1.0,
                         1.0
-                    ],
-                    "texture": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Resources/File.png"
+                    ]
                 }
             },
             "name": "1"

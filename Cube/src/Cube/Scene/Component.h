@@ -71,9 +71,8 @@ namespace Cube {
 
 	class SpriteComponent : public Component {
 	public:
-		std::string name;
-		TextureAtlas* atlas = nullptr; // 指针浅拷贝应该也没关系，这是资源，由资源管理器统一管理
-		TextureRegion region;
+		Texture2D* texture = nullptr;
+		TextureRegion region = {{0.0f, 0.0f}, {1.0f, 1.0f}};
 		glm::vec4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 	};
 

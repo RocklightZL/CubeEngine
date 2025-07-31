@@ -27,6 +27,7 @@ namespace Cube {
 
     void ResourcesPanel::render(float deltaTime) {
         std::shared_ptr<Node> currentNode = proj->currentNode;
+        std::shared_ptr<Node> toDelete = nullptr;
         ImGui::Begin("Resources Panel");
         if(!currentNode->parent.expired()) {
             if(ImGui::Button("<<<")) {
@@ -76,6 +77,7 @@ namespace Cube {
                         n->justRenaming = true;
                     }
                     if(ImGui::MenuItem("Delete")) {
+                        toDelete = n;
                     }
                     ImGui::EndPopup();
                 }
@@ -101,6 +103,9 @@ namespace Cube {
             ImGui::EndPopup();
         }
         ImGui::End();
+        if(toDelete) {
+            currentNode->children.erase(std::find(currentNode->children.begin(), currentNode->children.end(), toDelete));
+        }
     }
 
     void ResourcesPanel::importResources() {

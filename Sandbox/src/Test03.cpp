@@ -1,4 +1,4 @@
-
+/*
 #include "Cube/Resource/ResourceManager.h"
 
 #include <Cube.h>
@@ -75,11 +75,11 @@ public:
             // sp->alas->addSubTexture("player", {"player", {0,0}, {1.0,1.0},{0,0}});
             // sp->alas = Cube::ResourceManager::getInstance().load<Cube::TextureAlas>("assets/texture/test03.jpg", "assets/texture/test03.json")->data;
         }
-
+        setViewportSize({width, height});
         Cube::Entity* camera = createEntity();
         camera->addComponent<Cube::TransformComponent>();
         camera->addComponent<Cube::CameraComponent>()->available = true;
-        addSystem(new Cube::RenderSystem(width, height));
+        addSystem(new Cube::RenderSystem());
         addSystem(new TransformSystem);
     }
 
@@ -103,3 +103,4 @@ int main() {
     delete app;
     return 0;
 }
+*/

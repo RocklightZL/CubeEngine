@@ -12,11 +12,13 @@
 #include "Cube/Renderer/Texture.h"
 #include "Cube/Renderer/RenderSystem.h"
 #include "Cube/Renderer/Camera.h"
+#include "Cube/Renderer/FrameBuffer.h"
 
 #include "Cube/Scene/Scene.h"
 #include "Cube/Scene/System.h"
 #include "Cube/Scene/Component.h"
 #include "Cube/Scene/Entity.h"
+#include "Cube/Scene/SceneSerializer.h"
 
 #include "Cube/Resource/ResourceManager.h"
 

@@ -1,12 +1,12 @@
 {
     "entities": [
         {
-            "ID": 4,
+            "ID": 0,
             "components": {
                 "0": {
                     "position": [
                         400.0,
-                        400.0
+                        200.0
                     ],
                     "rotation": 0.0,
                     "scale": [
@@ -21,19 +21,19 @@
                         0.5487684607505798,
                         1.0
                     ],
+                    "name": "",
                     "region": [
                         0.0,
                         0.0,
                         1.0,
                         1.0
-                    ],
-                    "texture": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Resources/Directory.png"
+                    ]
                 }
             },
             "name": "block"
         },
         {
-            "ID": 5,
+            "ID": 1,
             "components": {
                 "0": {
                     "position": [
@@ -51,41 +51,9 @@
                 }
             },
             "name": "mainCamera"
-        },
-        {
-            "ID": 6,
-            "components": {
-                "0": {
-                    "position": [
-                        200.0,
-                        200.0
-                    ],
-                    "rotation": 0.0,
-                    "scale": [
-                        200.0,
-                        200.0
-                    ]
-                },
-                "1": {
-                    "color": [
-                        0.8184143304824829,
-                        0.7751330733299255,
-                        0.4730476438999176,
-                        1.0
-                    ],
-                    "region": [
-                        0.0,
-                        0.0,
-                        1.0,
-                        1.0
-                    ],
-                    "texture": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Resources/File.png"
-                }
-            },
-            "name": "1"
         }
     ],
-    "name": "TestScene02",
+    "name": "scene",
     "systems": [
         "RenderSystem"
     ]

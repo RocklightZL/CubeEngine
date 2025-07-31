@@ -25,12 +25,12 @@ namespace Cube {
         delete mainScene;
     }
 
-    void Application::run()
-    {
+    void Application::run(){
         running = true;
         CB_CORE_INFO("Application run");
 
         std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
+
         while(running) {
             // º∆À„÷° ±º‰
             std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();

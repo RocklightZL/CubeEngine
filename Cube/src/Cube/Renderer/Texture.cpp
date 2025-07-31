@@ -7,7 +7,7 @@
 
 namespace Cube {
 
-    Texture2D::Texture2D(const std::string& filePath) {
+    Texture2D::Texture2D(const std::string& filePath) : filePath(filePath){
         stbi_set_flip_vertically_on_load(1);
         int channels;
         unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &channels, 0);
@@ -67,6 +67,8 @@ namespace Cube {
         return height;
     }
     GLuint Texture2D::getId() const { return id; }
+
+    const std::string& Texture2D::getFilePath() const { return filePath; }
 
     TextureAtlas::TextureAtlas(const std::string& filePath) : Texture2D(filePath), filePath(filePath) {}
 

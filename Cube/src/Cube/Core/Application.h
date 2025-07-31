@@ -11,7 +11,7 @@ namespace Cube {
 		Application(const WindowPros& windowPros);
 		virtual ~Application();
 
-		void run();
+		virtual void run();
 		void init();
 
 		LayerStack* getLayers();
@@ -23,7 +23,7 @@ namespace Cube {
 		// 事件处理
 		bool onWindowClose(const Event& e);
 		bool onWindowResize(const Event& e);
-	private:
+	protected:
 		EventDispatcher dispatcher;
 		Window* mainWindow;
 		bool running;
