@@ -232,3 +232,6 @@ terminate called after throwing an instance of 'std::bad_alloc'
 
 表示内存分配失败，只会导致应用层面的崩溃。
 
+# 8.1
+
+修复了选取实体的bug

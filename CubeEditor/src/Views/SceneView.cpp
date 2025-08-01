@@ -6,6 +6,8 @@
 
 #include "imgui/imgui.h"
 
+#include <glm/ext/matrix_clip_space.hpp>
+
 extern Cube::Project* proj;
 
 namespace Cube {
@@ -36,6 +38,17 @@ namespace Cube {
             Renderer2D::clearBuffer();
             // scene render
             proj->selectedScene->scene->onUpdate(deltaTime);
+
+            for(auto& e : proj->selectedScene->scene->getEntitiesWith<TransformComponent, CameraComponent>()) {
+                if(e->getComponent<CameraComponent>()->available) {
+                    auto tc = e->getComponent<TransformComponent>();
+                    glm::mat4 pvMatrix = glm::ortho(0.0f, proj->selectedScene->scene->getViewportSize().x, 0.0f, proj->selectedScene->scene->getViewportSize().y, 0.0f, 1.0f) * glm::inverse(tc->getTransformMatrix());
+                    Renderer2D::beginFrame(pvMatrix);
+                    Renderer2D::drawQuad({0, 0}, glm::vec2(1, 3000) * tc->scale, nullptr, {1.0f, 0.0f, 0.0f, 1.0f});
+                    Renderer2D::drawQuad({0, 0}, glm::vec2(3000, 1) * tc->scale, nullptr, {0.0f, 0.0f, 1.0f, 1.0f});
+                    Renderer2D::endFrame();
+                }
+            }
 
             FrameBuffer::bindDefaultFrameBuffer();
 
@@ -69,7 +82,7 @@ namespace Cube {
                     }
                     if(isPanning) {
                         ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeAll);
-                        glm::vec2 delta = {-io.MouseDelta.x, io.MouseDelta.y};
+                        glm::vec2 delta = {-io.MouseDelta.x * cameraTC->scale.x, io.MouseDelta.y * cameraTC->scale.y};
                         cameraTC->position += delta;
 
                         if(!ImGui::IsMouseDown(ImGuiMouseButton_Middle)) {
@@ -84,11 +97,14 @@ namespace Cube {
                     if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered()) {
                         bool choose = false;
                         glm::vec2 mousePos = {io.MousePos.x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (io.MousePos.y - ImGui::GetWindowPos().y)};
+                        mousePos += cameraTC->position / cameraTC->scale;
                         for(auto& e : proj->selectedScene->scene->getEntitiesWith<TransformComponent, SpriteComponent>()) {
                             TransformComponent* tc = e->getComponent<TransformComponent>();
                             glm::vec2 min = {tc->position.x - tc->scale.x / 2, tc->position.y - tc->scale.y / 2};
                             glm::vec2 max = {tc->position.x + tc->scale.x / 2, tc->position.y + tc->scale.y / 2};
-                            if(mousePos.x >= min.x && mousePos.x <= max.x && mousePos.y >= min.y && mousePos.y <= max.y) {
+                            glm::vec4 tMin = glm::inverse(cameraTC->getTransformMatrix()) * glm::vec4(min, 0, 0);
+                            glm::vec4 tMax = glm::inverse(cameraTC->getTransformMatrix()) * glm::vec4(max, 0, 0);
+                            if(mousePos.x >= tMin.x && mousePos.x <= tMax.x && mousePos.y >= tMin.y && mousePos.y <= tMax.y) {
                                 if(proj->selectedEntity == e) {
                                     isDragging = true;
                                 }
@@ -100,7 +116,7 @@ namespace Cube {
                     }
                     if(isDragging) {
                         ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-                        glm::vec2 delta = {io.MouseDelta.x, -io.MouseDelta.y};
+                        glm::vec2 delta = {io.MouseDelta.x * cameraTC->scale.x, -io.MouseDelta.y * cameraTC->scale.y};
                         if(proj->selectedEntity) {
                             proj->selectedEntity->getComponent<TransformComponent>()->position += delta;
                             proj->selectedScene->isSaved = false;
