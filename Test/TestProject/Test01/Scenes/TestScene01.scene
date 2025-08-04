@@ -55,6 +55,5 @@
     ],
     "name": "TestScene01",
     "systems": [
-        "RenderSystem"
     ]
 }

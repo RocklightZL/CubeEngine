@@ -86,7 +86,5 @@
         }
     ],
     "name": "TestScene02",
-    "systems": [
-        "RenderSystem"
-    ]
+    "systems": []
 }

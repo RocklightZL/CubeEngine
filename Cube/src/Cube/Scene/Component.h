@@ -66,7 +66,7 @@ namespace Cube {
 		glm::vec2 scale = {1.0f, 1.0f}; // size
 
 		// = modelMatrix
-		glm::mat4 getTransformMatrix();
+		glm::mat4 getTransformMatrix() const;
 	};
 
 	class SpriteComponent : public Component {

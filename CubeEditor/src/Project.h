@@ -2,6 +2,7 @@
 #include "App/EditorLayer.h"
 #include "Cube/Scene/Entity.h"
 #include "Cube/Scene/Scene.h"
+#include "Scene/EditorCamera.h"
 #include "Views/Node.h"
 #include "Views/SceneSelectPanel.h"
 
@@ -43,6 +44,7 @@ namespace Cube {
 		Entity* selectedEntity = nullptr;
 		std::shared_ptr<Node> resRoot;
 		std::shared_ptr<Node> currentNode;
+		EditorCamera editorCamera;
 
 	private:
 		void writeToConfigFile(const std::string& configFilePath) const;

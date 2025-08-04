@@ -55,6 +55,6 @@
     ],
     "name": "scene",
     "systems": [
-        "RenderSystem"
+
     ]
 }
