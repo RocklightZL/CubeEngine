@@ -2,10 +2,12 @@
 
 #include "EditorLayer.h"
 #include "../Project.h"
+#include "Cube/Core/Log.h"
 #include "Cube/Event/ApplicationEvent.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Scene/Component.h"
 
+#include <glm/ext/matrix_clip_space.hpp>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include <imgui/imgui.h>
@@ -14,7 +16,7 @@ extern Cube::Project* proj;
 
 namespace Cube {
 
-    EditorApp::EditorApp(const WindowPros& windowPros) : mainWindow(nullptr), running(false), currentLayer(nullptr){
+    EditorApp::EditorApp(const WindowPros& windowPros) {
         Log::init();
         mainWindow = new Window(windowPros, &dispatcher);
         init();
@@ -27,6 +29,7 @@ namespace Cube {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui::DestroyContext();
 
+        delete gameWindow;
         delete mainWindow;
         delete currentLayer;
     }
@@ -41,12 +44,21 @@ namespace Cube {
             lastTime = currentTime;
             float deltaTime = frameDuration.count();
 
+            mainWindow->makeContext();
             Renderer::clearBuffer();
-
             if(currentLayer) {
                 currentLayer->onUpdate(deltaTime);
             }
             mainWindow->update();
+
+            if(gameWindow) {
+                gameWindow->makeContext();
+                Renderer::clearBuffer();
+                if(proj->selectedScene) {
+                    proj->selectedScene->scene->onUpdate(deltaTime);
+                }
+                gameWindow->update();
+            }
         }
     }
 
@@ -55,11 +67,24 @@ namespace Cube {
         currentLayer = layer;
     }
 
+    void EditorApp::createGameWindow(const WindowPros& pros) {
+        delete gameWindow;
+        gameWindow = new Window(pros, &dispatcher, mainWindow->getNativeWindow());
+        Renderer2D::setViewport(pros.width, pros.height);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        // ÆôÓÃ»ìºÏ
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // TODO: temporary
+    }
+
     Window* EditorApp::getWindow() const {
         return mainWindow;
     }
 
     void EditorApp::init() {
+        mainWindow->makeContext();
         Renderer2D::init();
         Renderer2D::setViewport(800, 600);
 
@@ -89,13 +114,20 @@ namespace Cube {
     }
 
     bool EditorApp::onWindowClose(const Event& e) {
-        running = false;
+        const auto ee = static_cast<const WindowCloseEvent&>(e);
+        if(ee.getWindow() == mainWindow){
+            running = false;
+        }else if(ee.getWindow() == gameWindow) {
+            delete gameWindow;
+            gameWindow = nullptr;
+        }
         return true;
     }
 
     bool EditorApp::onWindowResize(const Event& e) {
-        // const auto ee = dynamic_cast<const WindowResizeEvent&>(e);
-        // Renderer2D::setViewport(ee.getWidth(), ee.getHeight());
+        // const auto ee = static_cast<const WindowResizeEvent&>(e);
+        // if(ee.getWindow() == gameWindow) {
+        // }
         return true;
     }
 }  // namespace Cube

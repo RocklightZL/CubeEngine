@@ -61,7 +61,6 @@ namespace Cube {
     const std::vector<SceneData>& Project::getScenes() const { return scenes; }
 
     void Project::addScene(Scene* scene) {
-        scene->addSystem(new EditorRenderSystem()); // TODO: temporary
         scenes.push_back({scene, false});
         selectedScene = &scenes.back();
     }
@@ -132,7 +131,6 @@ namespace Cube {
         for(auto& s : data["scenes"]) {
             Scene* scene = new Scene();
             SceneSerializer::deserialize(scene, config.sceneDirectory + "/" + s.get<std::string>() + ".scene");
-            scene->addSystem(new EditorRenderSystem()); // TODO: temporary
             scenes.push_back({scene, true});
         }
         std::string t(data["selectedScene"]);

@@ -63,7 +63,7 @@ namespace Cube {
         std::vector<Entity*> entities;
         std::vector<System*> systems;
 
-        glm::vec2 viewportSize = {800, 600};
+        glm::vec2 viewportSize = {800, 600}; // TODO: 这个不应该被随便修改
         std::string name = "Scene";
 
         friend SceneSerializer;

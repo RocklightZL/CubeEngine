@@ -11,7 +11,10 @@
 #include "../Views/ScenePanel.h"
 #include "../Views/SceneSelectPanel.h"
 #include "../Views/SceneView.h"
+#include "../Views/ToolBar.h"
+#include "Cube/Core/Log.h"
 #include "Cube/Utils/Utils.h"
+#include "imgui/imgui_internal.h"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
@@ -29,6 +32,7 @@ namespace Cube {
         views.push_back(new EntityPropertyPanel);
         views.push_back(new SceneSelectPanel);
         views.push_back(new ResourcesPanel);
+        views.push_back(new ToolBar);
     }
 
     EditorLayer::~EditorLayer() {

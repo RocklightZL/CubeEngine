@@ -7,45 +7,49 @@
 #include <glad/glad.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
+#include <Windows.h>
 #include "Cube/Event/Event.h"
 
-namespace Cube{
+namespace Cube {
 
-struct WindowPros{
-	int width = 800;
-	int height = 600;
-	std::string title = "Cube Engine";
-	WindowPros(int width, int height, const std::string& title) : width(width), height(height), title(title){}
-};
+    struct WindowPros {
+        int width = 800;
+        int height = 600;
+        std::string title = "Cube Engine";
+        WindowPros(int width, int height, const std::string& title) : width(width), height(height), title(title) {}
+    };
 
-struct MousePos {
-    double x;
-	double y;
-};
+    struct MousePos {
+        double x;
+        double y;
+    };
 
-class Window {
-public:
-	Window(const WindowPros& pros, EventDispatcher* dispatcher);
-	virtual ~Window();
-	void init();
-	EventDispatcher* getDispatcher() const;
-    const WindowPros& getPros() const;
-	GLFWwindow* getNativeWindow() const;
+    class Window {
+    public:
+        Window(const WindowPros& pros, EventDispatcher* dispatcher, GLFWwindow* shareContext = nullptr);
+        virtual ~Window();
+        void init(GLFWwindow* shareContext);
+        EventDispatcher* getDispatcher() const;
+        const WindowPros& getPros() const;
+        GLFWwindow* getNativeWindow() const;
 
-	HWND getWin32Window();
+        HWND getWin32Window();
 
-	void update();
+        void update();
 
-	//  ‰»Î¬÷—Ø
-	bool isKeyPressed(KeyCode keyCode);
-	bool isMouseButtonPressed(MouseCode mouseCode);
-	MousePos getMousePosition();
-private:
-	static void windowErrorCallBack(int error_code, const char* description);\
+        void makeContext() const;
 
-	static int windowCnt;
-	WindowPros pros;
-	GLFWwindow* window;
-	EventDispatcher* dispatcher;
-};
-}
+        //  ‰»Î¬÷—Ø
+        bool isKeyPressed(KeyCode keyCode);
+        bool isMouseButtonPressed(MouseCode mouseCode);
+        MousePos getMousePosition();
+
+    private:
+        static void windowErrorCallBack(int error_code, const char* description);
+
+        static int windowCnt;
+        WindowPros pros;
+        GLFWwindow* window;
+        EventDispatcher* dispatcher;
+    };
+}  // namespace Cube

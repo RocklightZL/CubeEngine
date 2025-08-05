@@ -14,7 +14,7 @@ namespace Cube {
 
     int Window::windowCnt = 0;
 
-    Window::Window(const WindowPros& pros, EventDispatcher* dispatcher) : pros(pros), dispatcher(dispatcher) { init(); }
+    Window::Window(const WindowPros& pros, EventDispatcher* dispatcher, GLFWwindow* shareContext) : pros(pros), dispatcher(dispatcher) { init(shareContext); }
 
     Window::~Window() {
         glfwDestroyWindow(window);
@@ -24,14 +24,14 @@ namespace Cube {
         }
     }
 
-    void Window::init() {
+    void Window::init(GLFWwindow* shareContext) {
         if(!windowCnt) {
             if(!glfwInit()) {
                 CB_CORE_ERROR("glfwInit failed!");
             }
             CB_CORE_INFO("glfw initialize");
         }
-        window = glfwCreateWindow(pros.width, pros.height, pros.title.c_str(), nullptr, nullptr);
+        window = glfwCreateWindow(pros.width, pros.height, pros.title.c_str(), nullptr, shareContext);
 
         glfwSetWindowUserPointer(window, this);
 
@@ -41,7 +41,7 @@ namespace Cube {
 
         glfwSetWindowCloseCallback(window, [](GLFWwindow* w) {
             Window* window = static_cast<Window*>(glfwGetWindowUserPointer(w));
-            window->getDispatcher()->dispatch(WindowCloseEvent());
+            window->dispatcher->dispatch(WindowCloseEvent(window));
         });
 
         glfwSetWindowSizeCallback(window, [](GLFWwindow* w, int width, int height) {
@@ -50,7 +50,7 @@ namespace Cube {
             window->pros.width = width;
             window->pros.height = height;
 
-            window->getDispatcher()->dispatch(WindowResizeEvent(width, height));
+            window->dispatcher->dispatch(WindowResizeEvent(window, width, height));
         });
 
         glfwSetKeyCallback(window, [](GLFWwindow* w, int key, int scancode, int action, int mods) {
@@ -108,6 +108,10 @@ namespace Cube {
     void Window::update() {
         glfwSwapBuffers(window);
         glfwPollEvents();
+    }
+
+    void Window::makeContext() const {
+        glfwMakeContextCurrent(window);
     }
 
     bool Window::isKeyPressed(KeyCode keyCode) {

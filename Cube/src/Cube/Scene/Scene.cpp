@@ -70,8 +70,7 @@ namespace Cube {
 #endif
 
     void Scene::processDestruction() {
-        auto it = std::remove_if(entities.begin(), entities.end(),
-            [](Entity* entity) { return !entity->isAlive(); });
+        auto it = std::remove_if(entities.begin(), entities.end(),[](Entity* entity) { return !entity->isAlive(); });
         for(auto iter = it; iter != entities.end(); ++iter) {
             delete *iter;
         }

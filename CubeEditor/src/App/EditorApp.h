@@ -12,6 +12,8 @@ namespace Cube {
         void run();
         void switchLayer(Layer* layer);
 
+        void createGameWindow(const WindowPros& pros);
+
         Window* getWindow() const;
 
     private:
@@ -21,10 +23,12 @@ namespace Cube {
         bool onWindowClose(const Event& e);
         bool onWindowResize(const Event& e);
 
-        Window* mainWindow;
-        bool running;
+        Window* mainWindow = nullptr;
+        Window* gameWindow = nullptr;
+
+        bool running = false;
         EventDispatcher dispatcher;
-        Layer* currentLayer;
+        Layer* currentLayer = nullptr;
     };
 
 }

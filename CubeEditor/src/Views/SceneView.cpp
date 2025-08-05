@@ -15,10 +15,12 @@ namespace Cube {
     SceneView::SceneView() {
         frameBuffer = new FrameBuffer;
         frameBuffer->bindAttachment((int)sceneViewSize.x, (int)sceneViewSize.y);
+        editorRenderSystem = new EditorRenderSystem();
     }
 
     SceneView::~SceneView() {
         delete frameBuffer;
+        delete editorRenderSystem;
     }
 
     void SceneView::render(float deltaTime) {
@@ -36,8 +38,9 @@ namespace Cube {
             frameBuffer->bind();
             Renderer2D::setViewport((int)sceneViewSize.x, (int)sceneViewSize.y);
             Renderer2D::clearBuffer();
+
             // scene render
-            proj->selectedScene->scene->onUpdate(deltaTime);
+            editorRenderSystem->onUpdate(proj->selectedScene->scene, deltaTime);
 
             FrameBuffer::bindDefaultFrameBuffer();
 
