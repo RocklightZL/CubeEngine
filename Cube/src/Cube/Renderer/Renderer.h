@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Context.h"
 #include "Texture.h"
 #include "Shader.h"
 #include "VertexArray.h"
@@ -8,12 +9,6 @@
 #include <memory>
 
 namespace Cube {
-
-    struct QuadData {
-        glm::mat4 modelMatrix;
-        glm::vec4 color;
-        glm::vec4 textureCoord;
-    };
 
 	class Renderer {
 	public:
@@ -24,6 +19,8 @@ namespace Cube {
 		static void setViewport(int width, int height);
 		static void setClearColor(float r, float g, float b, float a);
 		static void setVSync(bool val);
+	protected:
+        static bool isGladInitialized;
 	};
 
     class Renderer2D : public Renderer {
@@ -34,20 +31,13 @@ namespace Cube {
 		static void shutdown();
         static void drawQuad(const glm::mat4& modelMatrix, const glm::vec4& color, Texture2D* texture, const glm::vec4& texCoord);
         static void drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& tintColor = glm::vec4(1.0f), float degree = 0.0f, const glm::vec4& texCoord = {0.0f, 0.0f, 1.0f, 1.0f});
-        static void drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4 transform);
-		static void setShader(const std::shared_ptr<Shader>& inShader); // 自定义着色器
+        static void drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4& transform);
+		// TODO: 自定义着色器
+
+        static Context* currentContext;
     private:
         static void startNewBatch();
         static void flushBatch();
-
-		static std::shared_ptr<Shader> shader;
-		static std::shared_ptr<VertexArray> vao;
-        static std::shared_ptr<VertexBuffer> vbo;
-        static std::vector<QuadData> batchData;
-        static unsigned int batchCnt;
-        static Texture2D* currentTex;
-        static bool useTexture;
-        static Texture2D* whiteTex;
 
         static constexpr uint32_t MAX_QUADS_PER_BATCH = 1000;
         static constexpr uint32_t MAX_VERTICES_PER_BATCH = MAX_QUADS_PER_BATCH * 4;

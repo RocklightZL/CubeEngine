@@ -11,9 +11,15 @@
 
 namespace Cube {
 
+    bool Renderer::isGladInitialized = false;
+
     void Renderer::init() {
-        if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-            CB_CORE_ERROR("Failed to initialize GLAD!");
+        if(!isGladInitialized){
+            if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+                CB_CORE_ERROR("Failed to initialize GLAD!");
+            } else {
+                isGladInitialized = true;
+            }
         }
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glEnable(GL_DEPTH_TEST);
@@ -34,19 +40,15 @@ namespace Cube {
 
     //=========Renderer2D=================================
 
-    std::shared_ptr<Shader> Renderer2D::shader = nullptr;
-    std::shared_ptr<VertexArray> Renderer2D::vao = nullptr;
-    std::shared_ptr<VertexBuffer> Renderer2D::vbo = nullptr;
-    std::vector<QuadData> Renderer2D::batchData;
-    unsigned int Renderer2D::batchCnt = 0;
-    Texture2D* Renderer2D::currentTex = nullptr;
-    bool Renderer2D::useTexture = false;
-    Texture2D* Renderer2D::whiteTex = nullptr;
+    Context* Renderer2D::currentContext = nullptr;
 
     void Renderer2D::init() {
-
-        if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-            CB_CORE_ERROR("Failed to initialize GLAD!");
+        if(!isGladInitialized){
+            if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+                CB_CORE_ERROR("Failed to initialize GLAD!");
+            } else {
+                isGladInitialized = true;
+            }
         }
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glEnable(GL_DEPTH_TEST);
@@ -55,9 +57,9 @@ namespace Cube {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        shader = std::make_shared<Shader>(DEFAULT_2D_VERTEX_SHADER_SRC, DEFAULT_2D_FRAGMENT_SHADER_SRC);
+        currentContext->shader = std::make_shared<Shader>(DEFAULT_2D_VERTEX_SHADER_SRC, DEFAULT_2D_FRAGMENT_SHADER_SRC);
 
-        vbo = std::make_shared<VertexBuffer>();
+        currentContext->vbo = std::make_shared<VertexBuffer>();
 
         uint32_t* indices = new uint32_t[MAX_INDICES_PER_BATCH];
         uint32_t offset = 0;
@@ -78,20 +80,20 @@ namespace Cube {
             {ShaderDataType::Float4, "color"},
             {ShaderDataType::Float2, "texCoord"}
         };
-        vbo->setLayout(layout);
-        vao = std::make_shared<VertexArray>();
-        vao->setIndexBuffer(ibo);
-        vao->addVertexBuffer(vbo);
+        currentContext->vbo->setLayout(layout);
+        currentContext->vao = std::make_shared<VertexArray>();
+        currentContext->vao->setIndexBuffer(ibo);
+        currentContext->vao->addVertexBuffer(currentContext->vbo);
 
         uint32_t data = 0xFFFFFFFF;
-        whiteTex = new Texture2D(1, 1, &data);
+        currentContext->whiteTex = new Texture2D(1, 1, &data);
     }
 
     void Renderer2D::beginFrame(const glm::mat4& pvMatrix) {
         startNewBatch();
 
-        shader->bind();
-        shader->setMat4("u_ViewProjectMatrix", pvMatrix);
+        currentContext->shader->bind();
+        currentContext->shader->setMat4("u_ViewProjectMatrix", pvMatrix);
     }
 
     void Renderer2D::endFrame() {
@@ -99,23 +101,22 @@ namespace Cube {
     }
 
     void Renderer2D::shutdown() {
-        delete whiteTex;
     }
 
     void Renderer2D::drawQuad(const glm::mat4& modelMatrix, const glm::vec4& tintColor, Texture2D* texture, const glm::vec4& texCoord) {
         if(texture == nullptr) {
-            texture = whiteTex;
+            texture = currentContext->whiteTex;
         }
-        if(texture != currentTex) {
+        if(texture != currentContext->currentTex) {
             flushBatch();
             startNewBatch();
-            currentTex = texture;
-        }else if(batchCnt >= MAX_QUADS_PER_BATCH) {
+            currentContext->currentTex = texture;
+        }else if(currentContext->batchCnt >= MAX_QUADS_PER_BATCH) {
             flushBatch();
             startNewBatch();
         }
-        batchData.push_back({modelMatrix, tintColor, texCoord});
-        batchCnt++;
+        currentContext->batchData.push_back({modelMatrix, tintColor, texCoord});
+        currentContext->batchCnt++;
     }
 
     void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& tintColor, float degree, const glm::vec4& texCoord) {
@@ -125,23 +126,21 @@ namespace Cube {
         drawQuad(modelMatrix, tintColor, texture, texCoord);
     }
 
-    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4 transform) {
+    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4& transform) {
         glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0.0f));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(size, 1.0f));
         modelMatrix = transform * modelMatrix;
         drawQuad(modelMatrix, color, texture, texCoord);
     }
 
-    void Renderer2D::setShader(const std::shared_ptr<Shader>& inShader) { shader = inShader; }
-
     void Renderer2D::startNewBatch() {
-        batchData.clear();
-        batchCnt = 0;
+        currentContext->batchData.clear();
+        currentContext->batchCnt = 0;
     }
 
     void Renderer2D::flushBatch() {
         std::vector<float> data;
-        for(const QuadData& qd : batchData) {
+        for(const QuadData& qd : currentContext->batchData) {
             glm::vec4 pos[4] = {
                 {-0.5f, -0.5f, 0.0f, 1.0f},
                 {0.5f, -0.5f, 0.0f, 1.0f},
@@ -168,13 +167,13 @@ namespace Cube {
                 data.push_back(texCoords[i].y);
             }
         }
-        vbo->uploadData(data, GL_DYNAMIC_DRAW);
-        if(currentTex != nullptr){
-            currentTex->bind();
+        currentContext->vbo->uploadData(data, GL_DYNAMIC_DRAW);
+        if(currentContext->currentTex != nullptr){
+            currentContext->currentTex->bind();
         }
-        shader->bind();
-        vao->bind();
-        glDrawElements(GL_TRIANGLES, batchData.size() * 6, GL_UNSIGNED_INT, nullptr);
+        currentContext->shader->bind();
+        currentContext->vao->bind();
+        glDrawElements(GL_TRIANGLES, currentContext->batchData.size() * 6, GL_UNSIGNED_INT, nullptr);
     }
 
 }  // namespace Cube

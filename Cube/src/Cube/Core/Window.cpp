@@ -7,6 +7,7 @@
 #include "Cube/Event/KeyEvent.h"
 #include "Cube/Event/MouseEvent.h"
 #include "Timer.h"
+#include "Cube/Renderer/Renderer.h"
 
 #include <GLFW/glfw3native.h>
 
@@ -22,6 +23,10 @@ namespace Cube {
         if(!windowCnt) {
             glfwTerminate();
         }
+        if(Renderer2D::currentContext == context) {
+            Renderer2D::currentContext = nullptr;
+        }
+        delete context;
     }
 
     void Window::init(GLFWwindow* shareContext) {
@@ -36,6 +41,10 @@ namespace Cube {
         glfwSetWindowUserPointer(window, this);
 
         glfwMakeContextCurrent(window);
+        context = new Context();
+        Renderer2D::currentContext = context;
+        Renderer2D::init();
+        Renderer2D::setViewport(pros.width, pros.height);
 
         glfwSetErrorCallback(windowErrorCallBack);
 
@@ -112,6 +121,7 @@ namespace Cube {
 
     void Window::makeContext() const {
         glfwMakeContextCurrent(window);
+        Renderer2D::currentContext = context;
     }
 
     bool Window::isKeyPressed(KeyCode keyCode) {

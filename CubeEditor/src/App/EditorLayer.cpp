@@ -13,9 +13,11 @@
 #include "../Views/SceneView.h"
 #include "../Views/ToolBar.h"
 #include "Cube/Core/Log.h"
+#include "Cube/Renderer/Renderer.h"
 #include "Cube/Utils/Utils.h"
 #include "imgui/imgui_internal.h"
 
+#include <glm/ext/matrix_clip_space.hpp>
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>

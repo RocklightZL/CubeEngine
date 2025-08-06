@@ -54,7 +54,6 @@ namespace Cube {
     }
 
     void Application::init() {
-        Renderer::init();
         dispatcher.subscribe(std::bind(&Application::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
         dispatcher.subscribe(std::bind(&Application::onWindowResize, this, std::placeholders::_1), EventType::WindowResize);
 

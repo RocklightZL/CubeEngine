@@ -1,6 +1,7 @@
 #include "SceneView.h"
 
 #include "../Project.h"
+#include "../App/EditorApp.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
 
@@ -9,11 +10,12 @@
 #include <glm/ext/matrix_clip_space.hpp>
 
 extern Cube::Project* proj;
+extern Cube::EditorApp* app;
 
 namespace Cube {
 
     SceneView::SceneView() {
-        frameBuffer = new FrameBuffer;
+        frameBuffer = new FrameBuffer();
         frameBuffer->bindAttachment((int)sceneViewSize.x, (int)sceneViewSize.y);
         editorRenderSystem = new EditorRenderSystem();
     }
@@ -43,6 +45,8 @@ namespace Cube {
             editorRenderSystem->onUpdate(proj->selectedScene->scene, deltaTime);
 
             FrameBuffer::bindDefaultFrameBuffer();
+
+            
 
             ImGui::Image(frameBuffer->getTexture(), sceneViewSize, ImVec2(0, 1), ImVec2(1, 0));
 

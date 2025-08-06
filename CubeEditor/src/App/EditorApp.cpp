@@ -23,7 +23,6 @@ namespace Cube {
     }
 
     EditorApp::~EditorApp() {
-        Renderer2D::shutdown();
 
         ImGui_ImplGlfw_Shutdown();
         ImGui_ImplOpenGL3_Shutdown();
@@ -68,15 +67,11 @@ namespace Cube {
     }
 
     void EditorApp::createGameWindow(const WindowPros& pros) {
-        delete gameWindow;
-        gameWindow = new Window(pros, &dispatcher, mainWindow->getNativeWindow());
-        Renderer2D::setViewport(pros.width, pros.height);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        // ÆôÓÃ»ìºÏ
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // TODO: temporary
+        if(gameWindow){
+            gameWindow->makeContext();
+            delete gameWindow;
+        }
+        gameWindow = new Window(pros, &dispatcher);
     }
 
     Window* EditorApp::getWindow() const {
@@ -85,8 +80,6 @@ namespace Cube {
 
     void EditorApp::init() {
         mainWindow->makeContext();
-        Renderer2D::init();
-        Renderer2D::setViewport(800, 600);
 
         dispatcher.subscribe(std::bind(&EditorApp::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
         dispatcher.subscribe(std::bind(&EditorApp::onWindowResize, this, std::placeholders::_1), EventType::WindowResize);
@@ -118,6 +111,7 @@ namespace Cube {
         if(ee.getWindow() == mainWindow){
             running = false;
         }else if(ee.getWindow() == gameWindow) {
+            gameWindow->makeContext();
             delete gameWindow;
             gameWindow = nullptr;
         }

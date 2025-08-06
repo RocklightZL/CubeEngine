@@ -25,7 +25,6 @@ namespace Cube {
 
         Window* mainWindow = nullptr;
         Window* gameWindow = nullptr;
-
         bool running = false;
         EventDispatcher dispatcher;
         Layer* currentLayer = nullptr;

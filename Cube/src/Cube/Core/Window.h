@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 #include <Windows.h>
 #include "Cube/Event/Event.h"
+#include "Cube/Renderer/Context.h"
 
 namespace Cube {
 
@@ -51,5 +52,6 @@ namespace Cube {
         WindowPros pros;
         GLFWwindow* window;
         EventDispatcher* dispatcher;
+        Context* context = nullptr;
     };
 }  // namespace Cube
