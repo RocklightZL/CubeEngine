@@ -67,10 +67,7 @@ namespace Cube {
     }
 
     void EditorApp::createGameWindow(const WindowPros& pros) {
-        if(gameWindow){
-            gameWindow->makeContext();
-            delete gameWindow;
-        }
+        delete gameWindow;
         gameWindow = new Window(pros, &dispatcher);
     }
 
@@ -111,7 +108,6 @@ namespace Cube {
         if(ee.getWindow() == mainWindow){
             running = false;
         }else if(ee.getWindow() == gameWindow) {
-            gameWindow->makeContext();
             delete gameWindow;
             gameWindow = nullptr;
         }

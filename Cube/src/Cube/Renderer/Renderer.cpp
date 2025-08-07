@@ -40,7 +40,7 @@ namespace Cube {
 
     //=========Renderer2D=================================
 
-    Context* Renderer2D::currentContext = nullptr;
+    thread_local Context* Renderer2D::currentContext = nullptr;
 
     void Renderer2D::init() {
         if(!isGladInitialized){

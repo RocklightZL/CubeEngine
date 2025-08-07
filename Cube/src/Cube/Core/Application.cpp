@@ -12,12 +12,22 @@
 
 namespace Cube {
 
+    void Application::init() {
+        Log::init();
+        // register built-in component
+        Component::registerComponentType("TransformComponent", new ComponentFactoryImpl<TransformComponent>());
+        Component::registerComponentType("SpriteComponent", new ComponentFactoryImpl<SpriteComponent>());
+        Component::registerComponentType("CameraComponent", new ComponentFactoryImpl<CameraComponent>());
+        Component::registerComponentType("AnimatorComponent", new ComponentFactoryImpl<AnimatorComponent>());
+    }
+
     Application::Application() : Application({1920, 1080, "Cube Engine"}){}
 
     Application::Application(const WindowPros& windowPros) : mainWindow(nullptr), running(true), mainScene(nullptr) {
-        Log::init();
         mainWindow = new Window(windowPros, &dispatcher);
-        init();
+
+        dispatcher.subscribe(std::bind(&Application::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
+        dispatcher.subscribe(std::bind(&Application::onWindowResize, this, std::placeholders::_1), EventType::WindowResize);
     }
 
     Application::~Application() {
@@ -38,9 +48,6 @@ namespace Cube {
             lastTime = currentTime;
             float deltaTime = frameDuration.count();
 
-            // CB_CORE_INFO("FPS: {}", 1/deltaTime);
-            // std::cout << "FPS: " << 1 / deltaTime << "\n";
-
             Renderer::clearBuffer();
 
             for(Layer* layer : layers.getData()) {
@@ -51,17 +58,6 @@ namespace Cube {
             }
             mainWindow->update();
         }
-    }
-
-    void Application::init() {
-        dispatcher.subscribe(std::bind(&Application::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
-        dispatcher.subscribe(std::bind(&Application::onWindowResize, this, std::placeholders::_1), EventType::WindowResize);
-
-        // register built-in component
-        Component::registerComponentType("TransformComponent", new ComponentFactoryImpl<TransformComponent>());
-        Component::registerComponentType("SpriteComponent", new ComponentFactoryImpl<SpriteComponent>());
-        Component::registerComponentType("CameraComponent", new ComponentFactoryImpl<CameraComponent>());
-        Component::registerComponentType("AnimatorComponent", new ComponentFactoryImpl<AnimatorComponent>());
     }
 
     LayerStack* Application::getLayers() { return &layers; }

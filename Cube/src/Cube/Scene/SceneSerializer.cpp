@@ -14,6 +14,7 @@ namespace Cube {
         nlohmann::json sceneData;
 
         sceneData["name"] = scene->getName();
+        sceneData["viewportSize"] = {scene->getViewportSize().x, scene->getViewportSize().y};
         // sceneData["version"] = "1.0"; // TODO: get version
         // sceneData["date"] = "";
         sceneData["entities"] = nlohmann::json::array();
@@ -43,6 +44,7 @@ namespace Cube {
         file >> sceneData;
         scene->clearAll();
         scene->setName(sceneData["name"]);
+        scene->setViewportSize({sceneData["viewportSize"][0], sceneData["viewportSize"][1]});
         for(auto& entityData : sceneData["entities"]) {
             deserializeEntity(scene, entityData);
         }

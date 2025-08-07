@@ -55,5 +55,9 @@
     "name": "TestScene01",
     "systems": [
         "RenderSystem"
+    ],
+    "viewportSize": [
+        1328.0,
+        628.0
     ]
 }

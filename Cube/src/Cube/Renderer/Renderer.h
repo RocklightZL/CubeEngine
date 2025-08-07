@@ -34,7 +34,7 @@ namespace Cube {
         static void drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4& transform);
 		// TODO: 自定义着色器
 
-        static Context* currentContext;
+        static thread_local Context* currentContext;
     private:
         static void startNewBatch();
         static void flushBatch();

@@ -8,10 +8,12 @@ namespace Cube {
         static void init();
         inline static std::shared_ptr<spdlog::logger>& getCoreLogger() { return coreLogger; }
         inline static std::shared_ptr<spdlog::logger>& getClientLogger() { return clientLogger; }
+        inline static std::shared_ptr<spdlog::logger>& getEditorLogger() { return editorLogger; }
 
     private:
         static std::shared_ptr<spdlog::logger> coreLogger;
         static std::shared_ptr<spdlog::logger> clientLogger;
+        static std::shared_ptr<spdlog::logger> editorLogger;
     };
 }  // namespace Cube
 
@@ -30,6 +32,13 @@ namespace Cube {
     #define CB_WARN(...) ::Cube::Log::getClientLogger()->warn(__VA_ARGS__)
     #define CB_ERROR(...) ::Cube::Log::getClientLogger()->error(__VA_ARGS__)
     #define CB_CRITICAL(...) ::Cube::Log::getClientLogger()->critical(__VA_ARGS__)
+
+    // ±à¼­Æ÷ÈÕÖ¾
+    #define CB_EDITOR_TRACE(...) ::Cube::Log::getClientLogger()->trace(__VA_ARGS__)
+    #define CB_EDITOR_INFO(...) ::Cube::Log::getClientLogger()->info(__VA_ARGS__)
+    #define CB_EDITOR_WARN(...) ::Cube::Log::getClientLogger()->warn(__VA_ARGS__)
+    #define CB_EDITOR_ERROR(...) ::Cube::Log::getClientLogger()->error(__VA_ARGS__)
+    #define CB_EDITOR_CRITICAL(...) ::Cube::Log::getClientLogger()->critical(__VA_ARGS__)
 
     // ¶ÏÑÔ
     #define CB_ASSERT(...) assert(__VA_ARGS__)

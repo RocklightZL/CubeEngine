@@ -18,15 +18,17 @@ namespace Cube {
     Window::Window(const WindowPros& pros, EventDispatcher* dispatcher, GLFWwindow* shareContext) : pros(pros), dispatcher(dispatcher) { init(shareContext); }
 
     Window::~Window() {
+        glfwMakeContextCurrent(window);
+        if(Renderer2D::currentContext == context) {
+            Renderer2D::currentContext = nullptr;
+        }
+        delete context;
+
         glfwDestroyWindow(window);
         --windowCnt;
         if(!windowCnt) {
             glfwTerminate();
         }
-        if(Renderer2D::currentContext == context) {
-            Renderer2D::currentContext = nullptr;
-        }
-        delete context;
     }
 
     void Window::init(GLFWwindow* shareContext) {

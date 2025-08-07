@@ -7,12 +7,13 @@
 namespace Cube {
 	class Application {
 	public:
+		static void init();
+
 		Application();
 		Application(const WindowPros& windowPros);
 		virtual ~Application();
 
 		virtual void run();
-		void init();
 
 		LayerStack* getLayers();
 		Window* getWindow();

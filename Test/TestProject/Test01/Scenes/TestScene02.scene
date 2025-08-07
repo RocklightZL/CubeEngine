@@ -88,5 +88,9 @@
     "name": "TestScene02",
     "systems": [
         "RenderSystem"
+    ],
+    "viewportSize": [
+        1328.0,
+        628.0
     ]
 }
