@@ -1,6 +1,7 @@
 #include "EntityPropertyPanel.h"
 
 #include "../Project.h"
+#include "Cube/Core/Log.h"
 #include "Cube/Resource/ResourceManager.h"
 #include "imgui/imgui.h"
 

@@ -24,6 +24,7 @@ namespace Cube {
 		// 事件处理
 		bool onWindowClose(const Event& e);
 		bool onWindowResize(const Event& e);
+
 	protected:
 		EventDispatcher dispatcher;
 		Window* mainWindow;

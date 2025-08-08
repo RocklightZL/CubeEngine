@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "ResourceManager.h"
 
+#include "Cube/Renderer/Renderer.h"
+
 namespace Cube {
 
     ResourceManager& ResourceManager::getInstance() {
-        static ResourceManager instance;
-        return instance;
+        return Renderer2D::currentContext->getResourceManager();
     }
 
     void ResourceManager::release(const std::string& path) {

@@ -28,9 +28,8 @@ namespace Cube {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui::DestroyContext();
 
-        delete gameWindow;
-        delete mainWindow;
         delete currentLayer;
+        delete mainWindow;
     }
 
     void EditorApp::run() {
@@ -43,21 +42,11 @@ namespace Cube {
             lastTime = currentTime;
             float deltaTime = frameDuration.count();
 
-            mainWindow->makeContext();
             Renderer::clearBuffer();
             if(currentLayer) {
                 currentLayer->onUpdate(deltaTime);
             }
             mainWindow->update();
-
-            if(gameWindow) {
-                gameWindow->makeContext();
-                Renderer::clearBuffer();
-                if(proj->selectedScene) {
-                    proj->selectedScene->scene->onUpdate(deltaTime);
-                }
-                gameWindow->update();
-            }
         }
     }
 
@@ -66,18 +55,11 @@ namespace Cube {
         currentLayer = layer;
     }
 
-    void EditorApp::createGameWindow(const WindowPros& pros) {
-        delete gameWindow;
-        gameWindow = new Window(pros, &dispatcher);
-    }
-
     Window* EditorApp::getWindow() const {
         return mainWindow;
     }
 
     void EditorApp::init() {
-        mainWindow->makeContext();
-
         dispatcher.subscribe(std::bind(&EditorApp::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
         dispatcher.subscribe(std::bind(&EditorApp::onWindowResize, this, std::placeholders::_1), EventType::WindowResize);
 
@@ -107,9 +89,6 @@ namespace Cube {
         const auto ee = static_cast<const WindowCloseEvent&>(e);
         if(ee.getWindow() == mainWindow){
             running = false;
-        }else if(ee.getWindow() == gameWindow) {
-            delete gameWindow;
-            gameWindow = nullptr;
         }
         return true;
     }

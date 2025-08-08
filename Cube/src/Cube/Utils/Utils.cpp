@@ -77,8 +77,16 @@ namespace Cube {
         }
         if(keepSuffix) {
             return path.substr(begin + 1);
-        }else {
+        } else {
             return path.substr(begin + 1, end - begin - 1);
         }
+    }
+
+    std::string Utils::getFileSuffix(const std::string& path) {
+        size_t pos = path.find_last_of('.');
+        if(pos == std::string::npos) {
+            return "";
+        }
+        return path.substr(pos);
     }
 }  // namespace Cube

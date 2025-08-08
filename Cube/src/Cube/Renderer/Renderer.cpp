@@ -57,7 +57,8 @@ namespace Cube {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        currentContext->shader = std::make_shared<Shader>(DEFAULT_2D_VERTEX_SHADER_SRC, DEFAULT_2D_FRAGMENT_SHADER_SRC);
+        currentContext->defaultShader = new Shader(DEFAULT_2D_VERTEX_SHADER_SRC, DEFAULT_2D_FRAGMENT_SHADER_SRC);
+        currentContext->shader = currentContext->defaultShader;
 
         currentContext->vbo = std::make_shared<VertexBuffer>();
 

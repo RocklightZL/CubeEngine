@@ -5,9 +5,13 @@
 #include "Cube/Utils/Utils.h"
 
 namespace Cube {
+    class Context;
 
     class ResourceManager {
     public:
+        friend Context;
+
+        // 并非单例模式
         static ResourceManager& getInstance();
 
         // Delete copy and move constructors and assignment operators
@@ -74,10 +78,10 @@ namespace Cube {
 
         void releaseAll();
 
-    private:
+    protected:
         ResourceManager() = default;
 
-        ~ResourceManager();
+        virtual ~ResourceManager();
 
         std::unordered_map<std::string, ResourceBase*> resourcesCache;
     };

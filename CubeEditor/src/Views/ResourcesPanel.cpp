@@ -3,6 +3,7 @@
 #include "../Project.h"
 #include "../App/EditorApp.h"
 #include "Cube/Core/Log.h"
+#include "Cube/Renderer/Renderer.h"
 #include "Cube/Resource/ResourceManager.h"
 #include "Cube/UI/FileDialog.h"
 #include "imgui/imgui.h"
@@ -34,6 +35,9 @@ namespace Cube {
                 proj->currentNode = currentNode->parent.lock();
             }
         }
+
+        static bool showSplitPopup = false;
+        static Texture2D* splitTexture = nullptr;
         for(auto& n : currentNode->children) {
             ImGui::PushID(&n);
             if(n->isRenaming) {
@@ -79,6 +83,14 @@ namespace Cube {
                     if(ImGui::MenuItem("Delete")) {
                         toDelete = n;
                     }
+                    std::string s = Utils::getFileSuffix(n->name);
+                    if(s == ".png" || s == ".jpg") {
+                        if(ImGui::MenuItem("Split")) {
+                            showSplitPopup = true;
+                            if(splitTexture) ResourceManager::getInstance().release(splitTexture->getFilePath());
+                            splitTexture = ResourceManager::getInstance().load<Texture2D>(proj->getConfig().resourcesDirectory + "/" + n->name)->data;
+                        }
+                    }
                     ImGui::EndPopup();
                 }
             }
@@ -102,10 +114,70 @@ namespace Cube {
             }
             ImGui::EndPopup();
         }
+
+        // SplitPopup
+        if(showSplitPopup) {
+            ImGui::OpenPopup("SplitPopup");
+        }
+        if(ImGui::BeginPopupModal("SplitPopup", &showSplitPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImDrawList* drawList = ImGui::GetWindowDrawList();
+            ImVec2 windowPos = ImGui::GetWindowPos();
+            float titleBarHeight = ImGui::GetCurrentWindow()->TitleBarHeight;
+            ImVec2 padding = ImGui::GetStyle().WindowPadding;
+            ImVec2 contentPos(windowPos.x + padding.x, windowPos.y + titleBarHeight + padding.y);
+
+            if(splitTexture) {
+                ImGui::Image(splitTexture->getId(), {(float)splitTexture->getWidth(), (float)splitTexture->getHeight()}, ImVec2(0, 1), ImVec2(1, 0));
+                drawList->PathClear();
+                drawList->PathLineTo(ImVec2(contentPos.x, contentPos.y));
+                drawList->PathLineTo(ImVec2(contentPos.x, contentPos.y + splitTexture->getHeight()));
+                drawList->PathLineTo(ImVec2(contentPos.x + splitTexture->getWidth(), contentPos.y + splitTexture->getHeight()));
+                drawList->PathLineTo(ImVec2(contentPos.x + splitTexture->getWidth(), contentPos.y));
+                drawList->PathStroke(IM_COL32(255, 255, 255, 255), ImDrawFlags_Closed, 1);
+            }
+
+            ImGui::SameLine();
+
+            ImGui::BeginGroup();
+            static int selected = 0;
+            constexpr const char* items[] = {"Grid equal division", "Custom division"};
+            ImGui::Text("Division mode:");
+            ImGui::Combo("##DivisionMode", &selected, items, IM_ARRAYSIZE(items));
+            if(selected == 0) {
+                static int rowNum = 1;
+                static int columnNum = 1;
+                ImGui::Text("Number of rows:");
+                ImGui::InputInt("##RowNum", &rowNum);
+                rowNum = ImClamp(rowNum, 1, 1000);
+                ImGui::Text("Number of columns:");
+                ImGui::InputInt("##ColumNum", &columnNum);
+                columnNum = ImClamp(columnNum, 1, 1000);
+            }else if(selected == 1) {
+                
+            }
+            ImGui::EndGroup();
+
+            if(ImGui::Button("OK")) {
+                showSplitPopup = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Cancel")) {
+                showSplitPopup = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+        // SplitPopup end
         ImGui::End();
         if(toDelete) {
             currentNode->children.erase(std::find(currentNode->children.begin(), currentNode->children.end(), toDelete));
         }
+
+        ImGui::Begin("ResourcesPreview");
+
+        ImGui::End();
     }
 
     void ResourcesPanel::importResources() {

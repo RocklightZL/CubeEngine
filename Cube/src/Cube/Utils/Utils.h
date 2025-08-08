@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace Cube {
 
 	class Utils {
@@ -12,6 +14,7 @@ namespace Cube {
 		static bool isFileInDirectory(const std::string& file, const std::string& directory);
 		static void normalizePath(std::string& path);
 		static std::string getFileName(const std::string& path, bool keepSuffix = false);
+		static std::string getFileSuffix(const std::string& path);
 	};
 
 }

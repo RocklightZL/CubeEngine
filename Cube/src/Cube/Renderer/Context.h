@@ -4,6 +4,8 @@
 #include "Shader.h"
 #include "VertexArray.h"
 #include "Texture.h"
+#include "Cube/Resource/Resource.h"
+#include "Cube/Resource/ResourceManager.h"
 
 #include <vector>
 
@@ -19,14 +21,18 @@ namespace Cube {
 	public:
 		friend class Renderer2D;
 
-		Context() = default;
+		Context();
 		~Context();
+
+		ResourceManager& getResourceManager();
 	private:
-		std::shared_ptr<Shader> shader; // TODO: 需要注意所有权问题，目前所有权在Context类，后续Shader可能要作为一种资源，由资源管理器管理。
+		ResourceManager resourceManager;
 		std::shared_ptr<VertexArray> vao;
-		std::shared_ptr<VertexBuffer> vbo;
+		std::shared_ptr<VertexBuffer> vbo; // TODO: 改用裸指针
 		std::vector<QuadData> batchData;
-		unsigned int batchCnt;
+		unsigned int batchCnt = 0;
+		Shader* shader = nullptr;
+		Shader* defaultShader = nullptr;
 		Texture2D* currentTex = nullptr;
 		Texture2D* whiteTex = nullptr;
 	};
