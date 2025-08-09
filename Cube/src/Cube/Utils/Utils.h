@@ -15,6 +15,7 @@ namespace Cube {
 		static void normalizePath(std::string& path);
 		static std::string getFileName(const std::string& path, bool keepSuffix = false);
 		static std::string getFileSuffix(const std::string& path);
+		static bool isFileExists(const std::string& path);
 	};
 
 }

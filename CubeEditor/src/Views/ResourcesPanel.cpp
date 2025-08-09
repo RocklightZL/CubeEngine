@@ -2,6 +2,8 @@
 
 #include "../Project.h"
 #include "../App/EditorApp.h"
+#include "../Scene/TextureMetadata.h"
+#include "../Utils/ImGuiExternal.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Resource/ResourceManager.h"
@@ -38,6 +40,7 @@ namespace Cube {
 
         static bool showSplitPopup = false;
         static Texture2D* splitTexture = nullptr;
+        static std::shared_ptr<TextureMetadata> metadata;
         for(auto& n : currentNode->children) {
             ImGui::PushID(&n);
             if(n->isRenaming) {
@@ -86,9 +89,14 @@ namespace Cube {
                     std::string s = Utils::getFileSuffix(n->name);
                     if(s == ".png" || s == ".jpg") {
                         if(ImGui::MenuItem("Split")) {
-                            showSplitPopup = true;
                             if(splitTexture) ResourceManager::getInstance().release(splitTexture->getFilePath());
                             splitTexture = ResourceManager::getInstance().load<Texture2D>(proj->getConfig().resourcesDirectory + "/" + n->name)->data;
+                            if(Utils::isFileExists(splitTexture->getFilePath() + ".meta")) {
+                                metadata = std::make_shared<TextureMetadata>(splitTexture->getFilePath() + ".meta");
+                            }else {
+                                metadata = std::make_shared<TextureMetadata>(glm::vec2(splitTexture->getWidth(), splitTexture->getHeight()));
+                            }
+                            showSplitPopup = true;
                         }
                     }
                     ImGui::EndPopup();
@@ -126,15 +134,13 @@ namespace Cube {
             ImVec2 padding = ImGui::GetStyle().WindowPadding;
             ImVec2 contentPos(windowPos.x + padding.x, windowPos.y + titleBarHeight + padding.y);
 
-            if(splitTexture) {
-                ImGui::Image(splitTexture->getId(), {(float)splitTexture->getWidth(), (float)splitTexture->getHeight()}, ImVec2(0, 1), ImVec2(1, 0));
-                drawList->PathClear();
-                drawList->PathLineTo(ImVec2(contentPos.x, contentPos.y));
-                drawList->PathLineTo(ImVec2(contentPos.x, contentPos.y + splitTexture->getHeight()));
-                drawList->PathLineTo(ImVec2(contentPos.x + splitTexture->getWidth(), contentPos.y + splitTexture->getHeight()));
-                drawList->PathLineTo(ImVec2(contentPos.x + splitTexture->getWidth(), contentPos.y));
-                drawList->PathStroke(IM_COL32(255, 255, 255, 255), ImDrawFlags_Closed, 1);
-            }
+            ImGui::Image(splitTexture->getId(), {(float)splitTexture->getWidth(), (float)splitTexture->getHeight()}, ImVec2(0, 1), ImVec2(1, 0));
+            drawList->PathClear();
+            drawList->PathLineTo(ImVec2(contentPos.x, contentPos.y));
+            drawList->PathLineTo(ImVec2(contentPos.x, contentPos.y + splitTexture->getHeight()));
+            drawList->PathLineTo(ImVec2(contentPos.x + splitTexture->getWidth(), contentPos.y + splitTexture->getHeight()));
+            drawList->PathLineTo(ImVec2(contentPos.x + splitTexture->getWidth(), contentPos.y));
+            drawList->PathStroke(IM_COL32(255, 255, 255, 255), ImDrawFlags_Closed, 2);
 
             ImGui::SameLine();
 
@@ -152,6 +158,15 @@ namespace Cube {
                 ImGui::Text("Number of columns:");
                 ImGui::InputInt("##ColumNum", &columnNum);
                 columnNum = ImClamp(columnNum, 1, 1000);
+
+                float width = (float)splitTexture->getWidth() / columnNum;
+                float height = (float)splitTexture->getHeight() / rowNum;
+                for(int i = 1; i < columnNum; ++i) {
+                    addDashLine(drawList, contentPos + ImVec2(width * i, 0), contentPos + ImVec2(width * i, splitTexture->getHeight()), ImColor(255, 0, 0, 255));
+                }
+                for(int i = 1; i < rowNum; ++i) {
+                    addDashLine(drawList, contentPos + ImVec2(0, height * i), contentPos + ImVec2(splitTexture->getWidth(), height * i), ImColor(255, 0, 0, 255));
+                }
             }else if(selected == 1) {
                 
             }

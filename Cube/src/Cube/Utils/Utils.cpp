@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 
 namespace Cube {
 
@@ -88,5 +89,9 @@ namespace Cube {
             return "";
         }
         return path.substr(pos);
+    }
+
+    bool Utils::isFileExists(const std::string& path) {
+        return std::filesystem::exists(path) && std::filesystem::is_regular_file(path);
     }
 }  // namespace Cube
