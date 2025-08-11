@@ -1,5 +1,6 @@
 #include "EntityPropertyPanel.h"
 
+#include "SceneView.h"
 #include "../Project.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Resource/ResourceManager.h"
@@ -62,7 +63,8 @@ namespace Cube {
                     if(ImGui::ColorEdit4("##Color", color)) proj->selectedScene->isSaved = false;
                     sc->color = {color[0], color[1], color[2], color[3]};
 
-                    std::string texturePath = sc->texture ? Utils::getFileName(sc->texture->getFilePath(), true) : "Texture";
+                    static bool showSelectedSubTexturePopup = false;
+                    static std::string texturePath = "Texture";
                     if(ImGui::Button(texturePath.c_str())){}
                     if(ImGui::BeginDragDropTarget()) {
                         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePath")) {
@@ -71,11 +73,17 @@ namespace Cube {
                                 ResourceManager::getInstance().release(sc->texture->getFilePath());
                             }
                             sc->texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
+                            if(Utils::isFileExists(texturePath + ".meta")) {
+                                showSelectedSubTexturePopup = true;
+                            }
                             proj->selectedScene->isSaved = false;
                         }
                         ImGui::EndDragDropTarget();
                     }
-
+                    if(showSelectedSubTexturePopup) {
+                        SubTexture st;
+                        SceneView::selectSubTexturePopup(TextureData(texturePath + ".meta", texturePath), &st, &showSelectedSubTexturePopup);
+                    }
                     ImGui::TreePop();
                 }
             }

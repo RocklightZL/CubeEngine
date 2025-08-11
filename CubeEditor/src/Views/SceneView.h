@@ -2,7 +2,9 @@
 
 #include "View.h"
 #include "../Scene/EditorRenderSystem.h"
+#include "../Scene/TextureData.h"
 #include "Cube/Renderer/FrameBuffer.h"
+#include "Cube/Renderer/Texture.h"
 #include "imgui/imgui.h"
 
 namespace Cube {
@@ -13,6 +15,8 @@ namespace Cube {
         ~SceneView() override;
 
         void render(float deltaTime) override;
+
+        static void selectSubTexturePopup(const TextureData& data, SubTexture* selected,bool* open);
     private:
         ImVec2 sceneViewSize = {800, 600};
         FrameBuffer* frameBuffer = nullptr;

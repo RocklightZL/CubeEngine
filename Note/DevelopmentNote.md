@@ -337,3 +337,15 @@ ImGui中不同窗口（ImGui窗口）中的ID是可以重复的。
 /progress
 
 继续SplitPopup
+
+# 8.10
+
+# 8.11
+
+/todo
+
+放弃SplitPopup分割纹理图集，改为直接解析TexturePacker生成的Json(array)格式文件。
+
+/todo
+
+拖放图片到场景视图中自动添加实体。子纹理选择对话框。

@@ -14,7 +14,7 @@ namespace Cube {
         if(it != resourcesCache.end()) {
             if((--it->second->refCount) == 0) {
                 delete it->second;
-                resourcesCache.erase(path);
+                resourcesCache.erase(it);
             }
         }
     }

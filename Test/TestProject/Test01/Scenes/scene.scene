@@ -5,13 +5,13 @@
             "components": {
                 "0": {
                     "position": [
-                        400.0,
-                        200.0
+                        300.0,
+                        300.0
                     ],
                     "rotation": 0.0,
                     "scale": [
-                        200.0,
-                        200.0
+                        256.0,
+                        512.0
                     ]
                 },
                 "1": {
@@ -26,7 +26,8 @@
                         0.0,
                         1.0,
                         1.0
-                    ]
+                    ],
+                    "texture": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Resources/test.png"
                 }
             },
             "name": "block"
@@ -57,7 +58,7 @@
         "RenderSystem"
     ],
     "viewportSize": [
-        1328.0,
-        628.0
+        1333.0,
+        632.0
     ]
 }

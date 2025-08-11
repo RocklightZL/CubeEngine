@@ -1,0 +1,60 @@
+{"frames": [
+
+{
+	"filename": "action_building_disabled.png",
+	"frame": {"x":125,"y":126,"w":118,"h":118},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":1,"w":118,"h":118},
+	"sourceSize": {"w":122,"h":122}
+},
+{
+	"filename": "action_cancel.png",
+	"frame": {"x":2,"y":95,"w":121,"h":119},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":2,"w":121,"h":119},
+	"sourceSize": {"w":125,"h":123}
+},
+{
+	"filename": "action_capture.png",
+	"frame": {"x":130,"y":2,"w":122,"h":124},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":1,"y":2,"w":122,"h":124},
+	"sourceSize": {"w":126,"h":128}
+},
+{
+	"filename": "action_carve.png",
+	"frame": {"x":120,"y":246,"w":111,"h":101},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":2,"w":111,"h":101},
+	"sourceSize": {"w":115,"h":105}
+},
+{
+	"filename": "action_clearance.png",
+	"frame": {"x":2,"y":2,"w":91,"h":126},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":0,"w":91,"h":126},
+	"sourceSize": {"w":95,"h":128}
+},
+{
+	"filename": "action_compost.png",
+	"frame": {"x":2,"y":216,"w":94,"h":116},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":2,"w":94,"h":116},
+	"sourceSize": {"w":98,"h":120}
+}],
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "test2.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:e41ab7a207a2db7f614b7930ef5b71b4$"
+}
+}

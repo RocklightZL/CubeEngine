@@ -8,7 +8,7 @@ namespace Cube {
 
     TextureMetadata::TextureMetadata(const glm::vec2& size) : size(size){}
 
-    TextureMetadata::TextureMetadata(const std::string& filePath) {
+     TextureMetadata::TextureMetadata(const std::string& filePath) {
         std::ifstream file(filePath);
         if(!file.is_open()) {
             CB_EDITOR_ERROR("TextureMetadata::TextureMetadata: Fail to open file {}", filePath);

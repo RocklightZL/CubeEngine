@@ -27,7 +27,7 @@ namespace Cube {
 
     void SceneView::render(float deltaTime) {
         ImGui::Begin("Scene View");
-        if(proj->selectedScene){
+        if(proj->selectedScene) {
             ImVec2 currentSize = ImGui::GetContentRegionAvail();
             if(currentSize.x <= 0) currentSize.x = 1;
             if(currentSize.y <= 0) currentSize.y = 1;
@@ -45,8 +45,6 @@ namespace Cube {
             editorRenderSystem->onUpdate(proj->selectedScene->scene, deltaTime);
 
             FrameBuffer::bindDefaultFrameBuffer();
-
-            
 
             ImGui::Image(frameBuffer->getTexture(), sceneViewSize, ImVec2(0, 1), ImVec2(1, 0));
 
@@ -119,5 +117,32 @@ namespace Cube {
         }
         ImGui::End();
     }
-    
-}
+
+    void SceneView::selectSubTexturePopup(const TextureData& data, SubTexture* selected, bool* open) {
+        if(*open){
+            ImGui::OpenPopup("Select SubTexture");
+        }
+        if(ImGui::BeginPopupModal("Select SubTexture", open)) {
+            Texture2D* texture = ResourceManager::getInstance().load<Texture2D>(data.imagePath)->data;
+            for(const SubTexture& st : data.textures) {
+                ImGui::BeginGroup();
+                ImGui::Image(texture->getId(), ImVec2(100, 100), ImVec2(st.uvMin.x, st.uvMin.y + st.size.y / data.size.y), ImVec2(st.uvMax.x, st.uvMax.y - st.size.y / data.size.y));
+                ImGui::Text(st.name.c_str());
+                ImGui::EndGroup();
+            }
+
+            if(ImGui::Button("OK")) {
+                *open = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Cancel")) {
+                *open = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+            ResourceManager::getInstance().release(data.imagePath);
+        }
+    }
+
+}  // namespace Cube

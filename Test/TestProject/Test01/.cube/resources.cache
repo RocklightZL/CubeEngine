@@ -11,6 +11,11 @@
                     "children": [],
                     "isGroup": false,
                     "name": "File.png"
+                },
+                {
+                    "children": [],
+                    "isGroup": false,
+                    "name": "test.png"
                 }
             ],
             "isGroup": true,
