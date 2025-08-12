@@ -111,6 +111,7 @@ private:
 };
 
 int main() {
+    Log::init();
     app = new Application({width, height, "Sandbox"});
     Renderer2D::init();
     Scene* scene = new Scene();

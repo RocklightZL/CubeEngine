@@ -16,7 +16,7 @@ namespace Cube {
 
         void render(float deltaTime) override;
 
-        static void selectSubTexturePopup(const TextureData& data, SubTexture* selected,bool* open);
+        static SubTexture* selectSubTexturePopup(TextureData& data, bool* open);
     private:
         ImVec2 sceneViewSize = {800, 600};
         FrameBuffer* frameBuffer = nullptr;

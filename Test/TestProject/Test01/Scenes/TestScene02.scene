@@ -5,8 +5,8 @@
             "components": {
                 "0": {
                     "position": [
-                        400.0,
-                        400.0
+                        461.0,
+                        232.0
                     ],
                     "rotation": 0.0,
                     "scale": [
@@ -57,8 +57,8 @@
             "components": {
                 "0": {
                     "position": [
-                        200.0,
-                        200.0
+                        393.0,
+                        157.0
                     ],
                     "rotation": 0.0,
                     "scale": [
@@ -83,6 +83,38 @@
                 }
             },
             "name": "1"
+        },
+        {
+            "ID": 7,
+            "components": {
+                "0": {
+                    "position": [
+                        248.0,
+                        308.0
+                    ],
+                    "rotation": 0.0,
+                    "scale": [
+                        119.0,
+                        252.0
+                    ]
+                },
+                "1": {
+                    "color": [
+                        1.0,
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "region": [
+                        0.7890625,
+                        0.5009765625,
+                        0.9052734375,
+                        0.6240234375
+                    ],
+                    "texture": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Resources/test.png"
+                }
+            },
+            "name": "temperature.png"
         }
     ],
     "name": "TestScene02",
@@ -90,7 +122,7 @@
         "RenderSystem"
     ],
     "viewportSize": [
-        1328.0,
-        628.0
+        1333.0,
+        632.0
     ]
 }

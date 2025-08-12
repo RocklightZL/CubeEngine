@@ -7,6 +7,7 @@
 
 namespace Cube {
 
+    // 暂不支持旋转和边缘裁剪，需要在TexturePacker里禁用
     TextureData::TextureData(const std::string& filePath, const std::string& imagePath) : filePath(filePath), imagePath(imagePath){
         std::ifstream file(filePath);
         if(!file.is_open()) {

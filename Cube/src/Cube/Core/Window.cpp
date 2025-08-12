@@ -38,6 +38,7 @@ namespace Cube {
             }
             CB_CORE_INFO("glfw initialize");
         }
+        glfwWindowHint(GLFW_ALPHA_BITS, 8); // 8Î»AlphaÍ¨µÀ
         window = glfwCreateWindow(pros.width, pros.height, pros.title.c_str(), nullptr, shareContext);
 
         glfwSetWindowUserPointer(window, this);

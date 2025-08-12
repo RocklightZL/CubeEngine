@@ -5,8 +5,8 @@
             "components": {
                 "0": {
                     "position": [
-                        400.0,
-                        400.0
+                        314.0,
+                        280.0
                     ],
                     "rotation": 0.0,
                     "scale": [
@@ -21,13 +21,13 @@
                         0.5487684607505798,
                         1.0
                     ],
-                    "name": "",
                     "region": [
                         0.0,
                         0.0,
                         1.0,
                         1.0
-                    ]
+                    ],
+                    "texture": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Resources/Directory.png"
                 }
             },
             "name": "block"
@@ -57,8 +57,8 @@
             "components": {
                 "0": {
                     "position": [
-                        200.0,
-                        200.0
+                        217.0,
+                        222.0
                     ],
                     "rotation": 0.0,
                     "scale": [
@@ -73,13 +73,13 @@
                         0.4730476438999176,
                         1.0
                     ],
-                    "name": "",
                     "region": [
                         0.0,
                         0.0,
                         1.0,
                         1.0
-                    ]
+                    ],
+                    "texture": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Resources/File.png"
                 }
             },
             "name": "1"
@@ -88,5 +88,9 @@
     "name": "TestScene02",
     "systems": [
         "RenderSystem"
+    ],
+    "viewportSize": [
+        1333.0,
+        632.0
     ]
 }

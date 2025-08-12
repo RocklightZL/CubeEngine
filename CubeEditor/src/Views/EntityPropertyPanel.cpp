@@ -65,24 +65,33 @@ namespace Cube {
 
                     static bool showSelectedSubTexturePopup = false;
                     static std::string texturePath = "Texture";
+                    static std::shared_ptr<TextureData> textureData;
                     if(ImGui::Button(texturePath.c_str())){}
                     if(ImGui::BeginDragDropTarget()) {
                         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePath")) {
                             texturePath = (const char*)payload->Data;
+                            if(Utils::isFileExists(texturePath + ".meta")) {
+                                showSelectedSubTexturePopup = true;
+                                textureData = std::make_shared<TextureData>(texturePath + ".meta", texturePath);
+                            }else{
+                                if(sc->texture) {
+                                    ResourceManager::getInstance().release(sc->texture->getFilePath());
+                                }
+                                sc->texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
+                                proj->selectedScene->isSaved = false;
+                            }
+                        }
+                        ImGui::EndDragDropTarget();
+                    }
+                    if(showSelectedSubTexturePopup && textureData) {
+                        if(auto* res = SceneView::selectSubTexturePopup(*textureData, &showSelectedSubTexturePopup)) {
                             if(sc->texture) {
                                 ResourceManager::getInstance().release(sc->texture->getFilePath());
                             }
                             sc->texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
-                            if(Utils::isFileExists(texturePath + ".meta")) {
-                                showSelectedSubTexturePopup = true;
-                            }
+                            sc->region = {res->uvMin, res->uvMax};
                             proj->selectedScene->isSaved = false;
                         }
-                        ImGui::EndDragDropTarget();
-                    }
-                    if(showSelectedSubTexturePopup) {
-                        SubTexture st;
-                        SceneView::selectSubTexturePopup(TextureData(texturePath + ".meta", texturePath), &st, &showSelectedSubTexturePopup);
                     }
                     ImGui::TreePop();
                 }

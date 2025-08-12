@@ -62,7 +62,7 @@ namespace Cube {
         void main(){
             textureCoord = aTexCoord;
             color = aColor;
-            gl_Position = u_ViewProjectMatrix * vec4(aPos.x, aPos.y, aPos.z, aPos.w);
+            gl_Position = u_ViewProjectMatrix * aPos;
         }
 
     )";

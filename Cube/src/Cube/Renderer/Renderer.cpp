@@ -21,9 +21,7 @@ namespace Cube {
                 isGladInitialized = true;
             }
         }
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
     void Renderer::clearBuffer() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
@@ -50,9 +48,7 @@ namespace Cube {
                 isGladInitialized = true;
             }
         }
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         // ∆Ù”√ªÏ∫œ
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -40,13 +40,51 @@ namespace Cube {
             frameBuffer->bind();
             Renderer2D::setViewport((int)sceneViewSize.x, (int)sceneViewSize.y);
             Renderer2D::clearBuffer();
-
             // scene render
             editorRenderSystem->onUpdate(proj->selectedScene->scene, deltaTime);
 
             FrameBuffer::bindDefaultFrameBuffer();
 
+            static bool showSelectSubTexturePopup = false;
+            static std::shared_ptr<TextureData> textureData;
+            static glm::vec2 pos;
+            static std::string texturePath;
             ImGui::Image(frameBuffer->getTexture(), sceneViewSize, ImVec2(0, 1), ImVec2(1, 0));
+            if(ImGui::BeginDragDropTarget()) {
+                if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePath")) {
+                    texturePath = (const char*)payload->Data;
+                    pos = glm::vec2(ImGui::GetMousePos().x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (ImGui::GetMousePos().y - ImGui::GetWindowPos().y));
+                    if(Utils::isFileExists(texturePath + ".meta")) {
+                        showSelectSubTexturePopup = true;
+                        textureData = std::make_shared<TextureData>(texturePath + ".meta", texturePath);
+                    }else{
+                        Texture2D* texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
+                        Scene* scene = proj->selectedScene->scene;
+                        Entity* entity = scene->createEntity(texturePath);
+                        TransformComponent* tc = entity->addComponent<TransformComponent>();
+                        tc->scale = {texture->getWidth(), texture->getHeight()};
+                        tc->position = pos;
+                        SpriteComponent* sc = entity->addComponent<SpriteComponent>();
+                        sc->texture = texture;
+                        proj->selectedScene->isSaved = false;
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
+            if(showSelectSubTexturePopup && textureData) {
+                if(auto* subTexture = selectSubTexturePopup(*textureData, &showSelectSubTexturePopup)) {
+                    Texture2D* texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
+                    Scene* scene = proj->selectedScene->scene;
+                    Entity* entity = scene->createEntity(subTexture->name);
+                    TransformComponent* tc = entity->addComponent<TransformComponent>();
+                    tc->scale = subTexture->size;
+                    tc->position = pos;
+                    SpriteComponent* sc = entity->addComponent<SpriteComponent>();
+                    sc->texture = texture;
+                    sc->region = {subTexture->uvMin, subTexture->uvMax};
+                    proj->selectedScene->isSaved = false;
+                }
+            }
 
             if(ImGui::IsWindowFocused()) {
                 EditorCamera& editorCamera = proj->editorCamera;
@@ -98,6 +136,7 @@ namespace Cube {
                             }
                             proj->selectedEntity = e;
                             choose = true;
+                            break;
                         }
                     }
                     if(!choose) proj->selectedEntity = nullptr;
@@ -118,21 +157,32 @@ namespace Cube {
         ImGui::End();
     }
 
-    void SceneView::selectSubTexturePopup(const TextureData& data, SubTexture* selected, bool* open) {
+    SubTexture* SceneView::selectSubTexturePopup(TextureData& data, bool* open) {
         if(*open){
             ImGui::OpenPopup("Select SubTexture");
         }
-        if(ImGui::BeginPopupModal("Select SubTexture", open)) {
+        SubTexture* res = nullptr;
+        static SubTexture* current = nullptr;
+        if(ImGui::BeginPopupModal("Select SubTexture", open, ImGuiWindowFlags_NoResize)) {
             Texture2D* texture = ResourceManager::getInstance().load<Texture2D>(data.imagePath)->data;
-            for(const SubTexture& st : data.textures) {
-                ImGui::BeginGroup();
-                ImGui::Image(texture->getId(), ImVec2(100, 100), ImVec2(st.uvMin.x, st.uvMin.y + st.size.y / data.size.y), ImVec2(st.uvMax.x, st.uvMax.y - st.size.y / data.size.y));
-                ImGui::Text(st.name.c_str());
-                ImGui::EndGroup();
+            int i = 0;
+            for(SubTexture& st : data.textures) {
+                if(i % 5) ImGui::SameLine();
+                ImGui::BeginChild(st.name.c_str(), {200, 275});
+                ImGui::Image(texture->getId(), ImVec2(st.size.x, st.size.y) * (200 / max(st.size.x, st.size.y)), ImVec2(st.uvMin.x, st.uvMin.y + st.size.y / data.size.y), ImVec2(st.uvMax.x, st.uvMax.y - st.size.y / data.size.y));
+                ImGui::SetCursorPos(ImVec2(0, 200));
+                ImGui::TextWrapped(st.name.c_str());
+                if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                    current = &st;
+                }
+                ImGui::EndChild();
+                ++i;
             }
 
+            ImGui::BeginGroup();
             if(ImGui::Button("OK")) {
                 *open = false;
+                res = current;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine();
@@ -140,9 +190,15 @@ namespace Cube {
                 *open = false;
                 ImGui::CloseCurrentPopup();
             }
+            ImGui::EndGroup();
+
             ImGui::EndPopup();
             ResourceManager::getInstance().release(data.imagePath);
         }
+        if(!*open) {
+            current = nullptr;
+        }
+        return res;
     }
 
 }  // namespace Cube
