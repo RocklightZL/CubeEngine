@@ -4,10 +4,11 @@
 #include "../App/EditorApp.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
+#include "../Game.h"
 
-#include "imgui/imgui.h"
-
+#include <imgui/imgui.h>
 #include <glm/ext/matrix_clip_space.hpp>
+#include <thread>
 
 extern Cube::Project* proj;
 extern Cube::EditorApp* app;
@@ -27,6 +28,15 @@ namespace Cube {
 
     void SceneView::render(float deltaTime) {
         ImGui::Begin("Scene View");
+
+        ImGui::BeginChild("ToolBar", {ImGui::GetWindowWidth(), 45});
+        if(ImGui::Button("Run")) {
+            std::thread gameThread(gameThreadFunction);
+            gameThread.detach();
+        }
+        ImGui::EndChild();
+
+        ImGui::BeginChild("Scene");
         if(proj->selectedScene) {
             ImVec2 currentSize = ImGui::GetContentRegionAvail();
             if(currentSize.x <= 0) currentSize.x = 1;
@@ -154,6 +164,7 @@ namespace Cube {
                 }
             }
         }
+        ImGui::EndChild();
         ImGui::End();
     }
 

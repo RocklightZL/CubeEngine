@@ -375,3 +375,33 @@ ImGui中不同窗口（ImGui窗口）中的ID是可以重复的。
 /todo
 
 通过调整渲染顺序实现前后遮挡关系。修改选中实体的逻辑，实现当两个实体重叠时选中上面那个。
+
+# 8.13
+
+/todo
+
+加入切换主题的功能。
+
+/note
+
+ImGui中窗口停靠后标题栏实际上就是标签页，样式也由标签页样式决定。
+
+/note
+
+去除标签页被选中时上方出现的短线：
+
+去除ImGuiTabBarFlags_DrawSelectedOverline标志，或者将 style.TabBarOverlineSize设为零。
+
+/todo/done
+
+将工具栏改成SceneView的一个子窗口。
+
+/todo
+
+将用户配置文件放在用户配置文件夹（Windows下为AppData）中，跨平台适配。
+
+用用户配置文件保存最近打开的项目。
+
+/todo
+
+修改GLFW窗口标题栏背景色，和主题适配。

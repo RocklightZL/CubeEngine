@@ -11,7 +11,6 @@
 #include "../Views/ScenePanel.h"
 #include "../Views/SceneSelectPanel.h"
 #include "../Views/SceneView.h"
-#include "../Views/ToolBar.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Utils/Utils.h"
@@ -28,13 +27,11 @@ extern Cube::Project* proj;
 namespace Cube {
 
     EditorLayer::EditorLayer() {
-
         views.push_back(new ScenePanel);
         views.push_back(new SceneView);
         views.push_back(new EntityPropertyPanel);
         views.push_back(new SceneSelectPanel);
         views.push_back(new ResourcesPanel);
-        views.push_back(new ToolBar);
     }
 
     EditorLayer::~EditorLayer() {

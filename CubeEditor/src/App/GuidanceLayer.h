@@ -2,13 +2,17 @@
 #include "Cube/Core/Layer.h"
 
 namespace Cube {
+    class Texture2D;
 
-	class GuidanceLayer : public Layer {
+    class GuidanceLayer : public Layer {
 	public:
-		GuidanceLayer() = default;
-		~GuidanceLayer() override = default;
+		GuidanceLayer();
+		~GuidanceLayer() override;
 
 		void onUpdate(float deltaTime) override;
+	private:
+		Texture2D* openProjectIcon;
+		Texture2D* newProjectIcon;
 	};
 
 }

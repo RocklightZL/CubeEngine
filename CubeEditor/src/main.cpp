@@ -1,6 +1,5 @@
 #include "Project.h"
 #include "App/EditorApp.h"
-#include "App/EditorLayer.h"
 #include "App/GuidanceLayer.h"
 #include "Cube/Core/Application.h"
 #include "Cube/Core/Log.h"

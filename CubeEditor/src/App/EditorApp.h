@@ -6,6 +6,8 @@ namespace Cube {
 
     class EditorApp {
     public:
+        static const std::string userConfigDir; 
+
         EditorApp(const WindowPros& windowPros);
         ~EditorApp();
 
@@ -17,6 +19,8 @@ namespace Cube {
     private:
         void init();
         void imGuiInit();
+
+        void setDarkTheme();
 
         bool onWindowClose(const Event& e);
         bool onWindowResize(const Event& e);
