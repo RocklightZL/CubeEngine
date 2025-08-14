@@ -9,7 +9,7 @@ using namespace Cube;
 
 extern Project* proj;
 
-void gameThreadFunction() {
+void gameThreadFunction(bool* isGameStarted) {
 	CB_EDITOR_TRACE("gameThread begin");
 
 	Scene* s = proj->selectedScene->scene;
@@ -21,6 +21,6 @@ void gameThreadFunction() {
 	game->run();
 
 	delete game;
-
+    *isGameStarted = false;
 	CB_EDITOR_TRACE("gameThread exit");
 }

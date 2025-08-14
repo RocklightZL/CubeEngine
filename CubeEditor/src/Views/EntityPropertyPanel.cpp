@@ -25,21 +25,18 @@ namespace Cube {
 
             if(proj->selectedEntity->hasComponent<TransformComponent>()) {
                 TransformComponent* tc = proj->selectedEntity->getComponent<TransformComponent>();
-                if(ImGui::TreeNode("TransformComponent")) {
+                if(ImGui::TreeNodeEx("TransformComponent", treeNodeFlags)) {
                     ImGui::Text("Position: ");
-                    ImGui::SameLine();
                     float pos[2] = {tc->position.x, tc->position.y};
                     if(ImGui::DragFloat2("##Position", pos, 1, 0, 0, "%.1f")) proj->selectedScene->isSaved = false;
                     tc->position = {pos[0], pos[1]};
 
                     ImGui::Text("Scale: ");
-                    ImGui::SameLine();
                     float scale[2] = {tc->scale.x, tc->scale.y};
                     if(ImGui::DragFloat2("##Scale", scale, 1, 0, 0, "%.1f")) proj->selectedScene->isSaved = false;
                     tc->scale = {scale[0], scale[1]};
 
                     ImGui::Text("Rotation: ");
-                    ImGui::SameLine();
                     if(ImGui::DragFloat("##Rotation", &tc->rotation, 1, 0, 0, "%.1f")) proj->selectedScene->isSaved = false;
 
                     ImGui::TreePop();
@@ -49,16 +46,14 @@ namespace Cube {
 
             if(proj->selectedEntity->hasComponent<SpriteComponent>()) {
                 SpriteComponent* sc = proj->selectedEntity->getComponent<SpriteComponent>();
-                if(ImGui::TreeNode("SpriteComponent")) {
+                if(ImGui::TreeNodeEx("SpriteComponent", treeNodeFlags)) {
                     ImGui::Text("TextureRegion: ");
-                    ImGui::SameLine();
                     float in[4] = {sc->region.uvMin.x, sc->region.uvMin.y, sc->region.uvMax.x, sc->region.uvMax.y};
                     if(ImGui::DragFloat4("##TextureRegion", in, 0.001f, 0, 1)) proj->selectedScene->isSaved = false;
                     sc->region.uvMin = {in[0], in[1]};
                     sc->region.uvMax = {in[2], in[3]};
 
                     ImGui::Text("Color: ");
-                    ImGui::SameLine();
                     float color[4] = {sc->color.r, sc->color.g, sc->color.b, sc->color.a};
                     if(ImGui::ColorEdit4("##Color", color)) proj->selectedScene->isSaved = false;
                     sc->color = {color[0], color[1], color[2], color[3]};
@@ -99,7 +94,7 @@ namespace Cube {
 
             if(proj->selectedEntity->hasComponent<CameraComponent>()) {
                 CameraComponent* cc = proj->selectedEntity->getComponent<CameraComponent>();
-                if(ImGui::TreeNode("CameraComponent")) {
+                if(ImGui::TreeNodeEx("CameraComponent", treeNodeFlags)) {
                     ImGui::Text("Available");
                     ImGui::SameLine();
                     if(ImGui::Checkbox("##available", &cc->available)) proj->selectedScene->isSaved = false;

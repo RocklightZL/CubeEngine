@@ -30,8 +30,10 @@ namespace Cube {
         ImGui::Begin("Scene View");
 
         ImGui::BeginChild("ToolBar", {ImGui::GetWindowWidth(), 45});
-        if(ImGui::Button("Run")) {
-            std::thread gameThread(gameThreadFunction);
+        static bool isGameWindowOpened = false;
+        if(ImGui::Button("Run") && !isGameWindowOpened) {
+            isGameWindowOpened = true;
+            std::thread gameThread(gameThreadFunction, &isGameWindowOpened);
             gameThread.detach();
         }
         ImGui::EndChild();

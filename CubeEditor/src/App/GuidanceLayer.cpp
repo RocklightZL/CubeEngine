@@ -3,6 +3,7 @@
 #include "EditorApp.h"
 #include "EditorLayer.h"
 #include "../Project.h"
+#include "../Utils/ImGuiExternal.h"
 #include "Cube/Core/Log.h"
 #include "Cube/UI/FileDialog.h"
 #include "../Utils/misc.h"
@@ -36,15 +37,63 @@ namespace Cube {
 
 
         ImGui::Begin("Guidance");
+
+        static bool isNameValid = true;
+        static bool isPathValid = true;
+        static char name[50] = {};
+        static char path[256] = {};
+        static std::shared_ptr<ModalPopup> newProject = std::make_shared<ModalPopup>("New Project", [] {
+            ImGui::Text("Project Name:");
+            if(!isNameValid) {
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::Text("This name is not valid!");
+                ImGui::PopStyleColor();
+            }
+            ImGui::InputText("##ProjectName", name, IM_ARRAYSIZE(name));
+
+            ImGui::Text("Project Path:");
+            if(!isPathValid) {
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::Text("This path is not valid!");
+                ImGui::PopStyleColor();
+            }
+            ImGui::InputText("##ProjectPath", path, IM_ARRAYSIZE(path));
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(CB_COLOR(70, 77, 88), 0.0f));
+            if(ImGui::Button("...")) {
+                std::string pathStr = FileDialog::selectDir(app->getWindow()->getWin32Window());
+                strcpy_s(path, pathStr.append("/").append(name).c_str());
+            }
+            ImGui::PopStyleColor();
+        }, [] {
+            isNameValid = !std::string(name).empty();
+            isPathValid = std::filesystem::exists(path);
+            if(isNameValid && isPathValid){
+                delete proj;
+                proj = new Project(name, path);
+                newProject->close();
+                ImGui::CloseCurrentPopup();
+
+                app->switchLayer(new EditorLayer());
+            }
+        }, [] {
+
+            isNameValid = true;
+            isPathValid = true;
+            memset(name, '\0', sizeof(name));
+            memset(path, '\0', sizeof(path));
+        });
+
         constexpr ImVec2 buttonSize = {128, 128};
         ImGui::SetCursorPos({ImGui::GetWindowWidth() / 2 - (buttonSize.x * 2 + 100 + ImGui::GetStyle().FramePadding.x * 2 * 2) / 2, 300.0f});
         ImGui::BeginGroup();
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(CB_COLOR(70, 77, 88), 0.5f));
 
-        static bool openNewProjectPopup = false;
         ImGui::BeginGroup();
         if(ImGui::ImageButton("New Project##1", newProjectIcon->getId(), buttonSize, {0, 1}, {1, 0})) {
-            openNewProjectPopup = true;
+            newProject->open();
         }
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (buttonSize.x + ImGui::GetStyle().FramePadding.x * 2) / 2 - ImGui::CalcTextSize("New Project").x / 2);
         ImGui::Text("New Project");
@@ -68,63 +117,7 @@ namespace Cube {
         ImGui::PopStyleColor();
         ImGui::EndGroup();
 
-        static bool isNameValid = true;
-        static bool isPathValid = true;
-        static char name[50] = {};
-        static char path[256] = {};
-        if(openNewProjectPopup) {
-            ImGui::OpenPopup("New Project##2");
-        }else {
-            isNameValid = true;
-            isPathValid = true;
-            memset(name, '\0', sizeof(name));
-            memset(path, '\0', sizeof(path));
-        }
-        if(ImGui::BeginPopupModal("New Project##2", &openNewProjectPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
-
-            ImGui::Text("Project Name:");
-            if(!isNameValid) {
-                ImGui::SameLine();
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
-                ImGui::Text("This name is not valid!");
-                ImGui::PopStyleColor();
-            }
-            ImGui::InputText("##ProjectName", name, IM_ARRAYSIZE(name));
-
-            ImGui::Text("Project Path:");
-            if(!isPathValid) {
-                ImGui::SameLine();
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
-                ImGui::Text("This path is not valid!");
-                ImGui::PopStyleColor();
-            }
-            ImGui::InputText("##ProjectPath", path, IM_ARRAYSIZE(path));
-            ImGui::SameLine();
-            if(ImGui::Button("...##1")) {
-                std::string pathStr = FileDialog::selectDir(app->getWindow()->getWin32Window());
-                strcpy_s(path, pathStr.append("/").append(name).c_str());
-            }
-
-            if(ImGui::Button("OK##2")) {
-                isNameValid = !std::string(name).empty();
-                isPathValid = std::filesystem::exists(path);
-                if(isNameValid && isPathValid){
-                    delete proj;
-                    proj = new Project(name, path);
-                    openNewProjectPopup = false;
-                    ImGui::CloseCurrentPopup();
-
-                    app->switchLayer(new EditorLayer());
-                }
-            }
-            ImGui::SameLine();
-            if(ImGui::Button("Cancel##2")) {
-                openNewProjectPopup = false;
-                ImGui::CloseCurrentPopup();
-            }
-
-            ImGui::EndPopup();
-        }
+        newProject->render();
 
         ImGui::End();
 
