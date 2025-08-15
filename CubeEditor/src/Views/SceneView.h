@@ -7,6 +7,7 @@
 #include "Cube/Renderer/Texture.h"
 #include "imgui/imgui.h"
 
+
 namespace Cube {
 
     class SceneView : public View {
@@ -21,6 +22,8 @@ namespace Cube {
         ImVec2 sceneViewSize = {800, 600};
         FrameBuffer* frameBuffer = nullptr;
         EditorRenderSystem* editorRenderSystem = nullptr;
+
+        Texture2D* playIcon;
     };
 
 }

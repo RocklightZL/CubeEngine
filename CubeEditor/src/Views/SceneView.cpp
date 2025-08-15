@@ -5,6 +5,8 @@
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
 #include "../Game.h"
+#include "../Utils/ImGuiExternal.h"
+#include "../Utils/misc.h"
 
 #include <imgui/imgui.h>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -19,23 +21,30 @@ namespace Cube {
         frameBuffer = new FrameBuffer();
         frameBuffer->bindAttachment((int)sceneViewSize.x, (int)sceneViewSize.y);
         editorRenderSystem = new EditorRenderSystem();
+
+        playIcon = ResourceManager::getInstance().load<Texture2D>("assets/icons/play.png")->data;
     }
 
     SceneView::~SceneView() {
         delete frameBuffer;
         delete editorRenderSystem;
+
+        ResourceManager::getInstance().release(playIcon->getFilePath());
     }
 
     void SceneView::render(float deltaTime) {
         ImGui::Begin("Scene View");
 
         ImGui::BeginChild("ToolBar", {ImGui::GetWindowWidth(), 45});
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
         static bool isGameWindowOpened = false;
-        if(ImGui::Button("Run") && !isGameWindowOpened) {
+        ImVec2 toolButtonSize(37, 37);
+        if(ImGui::ImageButton("play", playIcon->getId(), toolButtonSize, ImVec2(0, 1), ImVec2(1, 0)) && !isGameWindowOpened) {
             isGameWindowOpened = true;
             std::thread gameThread(gameThreadFunction, &isGameWindowOpened);
             gameThread.detach();
         }
+        ImGui::PopStyleColor();
         ImGui::EndChild();
 
         ImGui::BeginChild("Scene");
@@ -171,46 +180,91 @@ namespace Cube {
     }
 
     SubTexture* SceneView::selectSubTexturePopup(TextureData& data, bool* open) {
-        if(*open){
-            ImGui::OpenPopup("Select SubTexture");
-        }
         SubTexture* res = nullptr;
         static SubTexture* current = nullptr;
+        if(*open){
+            ImGui::OpenPopup("Select SubTexture");
+        }else {
+            current = nullptr;
+        }
+        ImVec4 originalBorderColor = ImGui::GetStyle().Colors[ImGuiCol_Border];
+        static ImVec4 borderColor = originalBorderColor;
+        constexpr ImVec4 highLightColor = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+        ImGui::PushStyleColor(ImGuiCol_Border, borderColor);
         if(ImGui::BeginPopupModal("Select SubTexture", open, ImGuiWindowFlags_NoResize)) {
             Texture2D* texture = ResourceManager::getInstance().load<Texture2D>(data.imagePath)->data;
+            const ImVec4 originalBgColor = ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
+            const ImVec4 hoveredBgColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered];
+            const ImVec4 selectedBgColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonActive];
             int i = 0;
+            static int selected = -1;
+            static int hovered = -1;
             for(SubTexture& st : data.textures) {
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, i == hovered ? hoveredBgColor : (i == selected ? selectedBgColor : originalBorderColor));
                 if(i % 5) ImGui::SameLine();
                 ImGui::BeginChild(st.name.c_str(), {200, 275});
                 ImGui::Image(texture->getId(), ImVec2(st.size.x, st.size.y) * (200 / max(st.size.x, st.size.y)), ImVec2(st.uvMin.x, st.uvMin.y + st.size.y / data.size.y), ImVec2(st.uvMax.x, st.uvMax.y - st.size.y / data.size.y));
                 ImGui::SetCursorPos(ImVec2(0, 200));
                 ImGui::TextWrapped(st.name.c_str());
-                if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                    current = &st;
+                if(ImGui::IsWindowHovered()) {
+                    hovered = i;
+                    if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                        current = &st;
+                        selected = i;
+                    }
+                }else if(hovered == i) {
+                    hovered = -1;
                 }
                 ImGui::EndChild();
+                ImGui::PopStyleColor();
                 ++i;
             }
 
-            ImGui::BeginGroup();
-            if(ImGui::Button("OK")) {
-                *open = false;
-                res = current;
-                ImGui::CloseCurrentPopup();
+            static bool showWarning = false;
+            if(showWarning){
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::Text("Please select a subtexture!");
+                ImGui::PopStyleColor();
+                ImGui::SameLine();
             }
-            ImGui::SameLine();
-            if(ImGui::Button("Cancel")) {
+
+            constexpr float buttonWidth = 100.0f;
+            constexpr float spacing = 100.0f;
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - (buttonWidth * 2 + ImGui::GetStyle().FramePadding.x * 2 + spacing));
+            ImGui::BeginGroup();
+            if(ImGui::Button("OK", ImVec2(buttonWidth, 0)) || ImGui::IsKeyPressed(ImGuiKey_Enter)) {
+                if(current != nullptr){
+                    *open = false;
+                    res = current;
+                    showWarning = false;
+                    ImGui::CloseCurrentPopup();
+                }else {
+                    showWarning = true;
+                }
+            }
+            ImGui::SameLine(0.0f, spacing);
+            if(ImGui::Button("Cancel", ImVec2(buttonWidth, 0))) {
                 *open = false;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndGroup();
 
-            ImGui::EndPopup();
+            if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+                ImVec2 mousePos = ImGui::GetMousePos();
+                ImVec2 winPos = ImGui::GetWindowPos();
+                ImVec2 size = ImGui::GetWindowSize();
+                if(!(mousePos.x >= winPos.x && mousePos.y >= winPos.y && mousePos.x <= winPos.x + size.x && mousePos.y <= winPos.y + size.y)) {
+                    borderColor = highLightColor;
+                    MessageBeep(MB_ICONASTERISK); //TODO: ¿çÆ½Ì¨ÊÊÅä
+                }else {
+                    borderColor = originalBorderColor;
+                }
+            }
+
             ResourceManager::getInstance().release(data.imagePath);
+            ImGui::EndPopup();
         }
-        if(!*open) {
-            current = nullptr;
-        }
+        ImGui::PopStyleColor();
         return res;
     }
 

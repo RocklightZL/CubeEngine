@@ -14,6 +14,7 @@ public:
 	void render();
 	void open(){ isOpen = true; }
 	void close(){ isOpen = false; }
+	bool getIsOpen() const { return isOpen; }
 
 private:
 	std::string title;
