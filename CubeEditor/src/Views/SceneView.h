@@ -23,7 +23,6 @@ namespace Cube {
         FrameBuffer* frameBuffer = nullptr;
         EditorRenderSystem* editorRenderSystem = nullptr;
 
-        Texture2D* playIcon;
     };
 
 }

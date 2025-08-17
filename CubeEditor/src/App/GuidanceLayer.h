@@ -10,9 +10,6 @@ namespace Cube {
 		~GuidanceLayer() override;
 
 		void onUpdate(float deltaTime) override;
-	private:
-		Texture2D* openProjectIcon;
-		Texture2D* newProjectIcon;
 	};
 
 }

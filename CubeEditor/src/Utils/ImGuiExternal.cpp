@@ -1,6 +1,7 @@
 #include "ImGuiExternal.h"
 
 #include "Cube/Core/Log.h"
+#include "imgui/imgui_internal.h"
 
 #include <cmath>
 
@@ -68,4 +69,81 @@ void ModalPopup::render() {
         ImGui::EndPopup();
     }
     ImGui::PopStyleColor();
+}
+
+bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_size, const ImVec2& uv_min, const ImVec2& uv_max, ImGuiButtonFlags flags) {
+    float rounding = ImGui::GetStyle().FrameRounding;
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+
+    // 计算文本尺寸
+    ImVec2 text_size = ImGui::CalcTextSize(label);
+    float padding = ImGui::GetStyle().FramePadding.y;
+
+    // 计算整体大小（图标高度 + 文字高度 + 间距）
+    ImVec2 total_size = ImVec2(
+        ImMax(icon_size.x, text_size.x) + padding * 2,
+        icon_size.y + text_size.y + padding * 3
+    );
+
+    // 创建透明按钮作为点击区域
+    ImGui::InvisibleButton(label, total_size, flags);
+
+    // 获取交互状态
+    bool is_hovered = ImGui::IsItemHovered();
+    bool is_active = ImGui::IsItemActive();
+    bool is_clicked = ImGui::IsItemClicked();
+
+    // 绘制按钮背景
+    ImU32 bg_color = ImGui::GetColorU32(
+        is_active ? ImGuiCol_ButtonActive : 
+        is_hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button
+    );
+
+    ImGui::GetWindowDrawList()->AddRectFilled(
+        ImGui::GetItemRectMin(), 
+        ImGui::GetItemRectMax(), 
+        bg_color, 
+        rounding
+    );
+
+    // 添加边框效果
+    if (is_hovered || is_active) {
+        ImGui::GetWindowDrawList()->AddRect(
+            ImGui::GetItemRectMin(), 
+            ImGui::GetItemRectMax(), 
+            ImGui::GetColorU32(ImGuiCol_Border), 
+            rounding, 0, 1.5f
+        );
+    }
+
+    // 计算图标位置（水平居中，顶部留边距）
+    ImVec2 icon_pos = ImVec2(
+        ImGui::GetItemRectMin().x + (total_size.x - icon_size.x) * 0.5f,
+        ImGui::GetItemRectMin().y + padding
+    );
+
+    // 绘制图标（使用纹理）
+    ImGui::GetWindowDrawList()->AddImage(
+        tex_id,
+        icon_pos,
+        ImVec2(icon_pos.x + icon_size.x, icon_pos.y + icon_size.y),
+        uv_min, uv_max
+    );
+
+    // 计算文本位置（水平居中，在图标下方）
+    ImVec2 text_pos = ImVec2(
+        ImGui::GetItemRectMin().x + (total_size.x - text_size.x) * 0.5f,
+        icon_pos.y + icon_size.y + padding
+    );
+
+    // 绘制文本
+    ImGui::GetWindowDrawList()->AddText(
+        text_pos, 
+        ImGui::GetColorU32(ImGuiCol_Text), 
+        label
+    );
+
+    return is_clicked;
 }

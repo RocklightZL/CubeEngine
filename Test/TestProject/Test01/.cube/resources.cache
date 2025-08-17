@@ -25,11 +25,6 @@
             "children": [],
             "isGroup": true,
             "name": "Shaders"
-        },
-        {
-            "children": [],
-            "isGroup": true,
-            "name": "Fonts"
         }
     ],
     "isGroup": true,

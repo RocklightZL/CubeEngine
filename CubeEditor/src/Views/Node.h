@@ -11,7 +11,6 @@ namespace Cube {
         bool isRenaming = false;
         bool justRenaming = false;
         std::vector<std::shared_ptr<Node>> children;
-        std::weak_ptr<Node> parent;
 
         nlohmann::json toJson() const {
             nlohmann::json json;
@@ -31,7 +30,6 @@ namespace Cube {
                 auto n = std::make_shared<Node>();
                 n->fromJson(c, n);
                 children.push_back(n);
-                n->parent = p;
             }
         }
     };

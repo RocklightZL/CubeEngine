@@ -6,7 +6,7 @@ namespace Cube {
 
     class EditorApp {
     public:
-        static const std::string userConfigDir; 
+        static const std::string userConfigDir;
 
         EditorApp(const WindowPros& windowPros);
         ~EditorApp();
@@ -16,9 +16,15 @@ namespace Cube {
 
         Window* getWindow() const;
 
+        // global
+        std::unordered_map<std::string, Texture2D*> icons;
+
     private:
         void init();
         void imGuiInit();
+
+        void loadAssets();
+        void releaseAssets();
 
         void setDarkTheme();
 

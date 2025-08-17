@@ -27,9 +27,11 @@ namespace Cube {
         Log::init();
         mainWindow = new Window(windowPros, &dispatcher);
         init();
+        loadAssets();
     }
 
     EditorApp::~EditorApp() {
+        releaseAssets();
 
         ImGui_ImplGlfw_Shutdown();
         ImGui_ImplOpenGL3_Shutdown();
@@ -92,6 +94,21 @@ namespace Cube {
 
         ImGui_ImplGlfw_InitForOpenGL(mainWindow->getNativeWindow(), true);
         ImGui_ImplOpenGL3_Init("#version 330 core");
+    }
+    void EditorApp::loadAssets() {
+        icons.insert({"directory.png", ResourceManager::getInstance().load<Texture2D>("assets/icons/directory.png")->data});
+        icons.insert({"file.png", ResourceManager::getInstance().load<Texture2D>("assets/icons/file.png")->data});
+        icons.insert({"new_project.png", ResourceManager::getInstance().load<Texture2D>("assets/icons/new_project.png")->data});
+        icons.insert({"open_project.png", ResourceManager::getInstance().load<Texture2D>("assets/icons/open_project.png")->data});
+        icons.insert({"play.png", ResourceManager::getInstance().load<Texture2D>("assets/icons/play.png")->data});
+        icons.insert({"back.png", ResourceManager::getInstance().load<Texture2D>("assets/icons/back.png")->data});
+        icons.insert({"icon_mode.png", ResourceManager::getInstance().load<Texture2D>("assets/icons/icon_mode.png")->data});
+        icons.insert({"list_mode.png", ResourceManager::getInstance().load<Texture2D>("assets/icons/list_mode.png")->data});
+    }
+    void EditorApp::releaseAssets() {
+        for(const auto& icon : icons) {
+            ResourceManager::getInstance().release(icon.second->getFilePath());
+        }
     }
 
     void EditorApp::setDarkTheme() {

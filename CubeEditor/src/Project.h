@@ -9,6 +9,7 @@
 
 #include <string>
 #include <memory>
+#include <stack>
 
 namespace Cube {
 
@@ -46,7 +47,7 @@ namespace Cube {
 		SceneData* selectedScene = nullptr;
 		Entity* selectedEntity = nullptr;
 		std::shared_ptr<Node> resRoot;
-		std::shared_ptr<Node> currentNode;
+		std::deque<std::shared_ptr<Node>> resStack;
 		EditorCamera editorCamera;
 
 	private:

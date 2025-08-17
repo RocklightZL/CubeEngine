@@ -12,95 +12,140 @@
 #include "imgui/imgui_internal.h"
 
 #include <memory>
+#include <stack>
 
 extern Cube::Project* proj;
 extern Cube::EditorApp* app;
 
 namespace Cube {
 
-    ResourcesPanel::ResourcesPanel() {
-        dirIcon = ResourceManager::getInstance().load<Texture2D>("assets/icons/Directory.png");
-        fileIcon = ResourceManager::getInstance().load<Texture2D>("assets/icons/File.png");
-    }
-
-    ResourcesPanel::~ResourcesPanel() {
-        ResourceManager::getInstance().release(dirIcon);
-        ResourceManager::getInstance().release(fileIcon);
-    }
-
     void ResourcesPanel::render(float deltaTime) {
-        std::shared_ptr<Node> currentNode = proj->currentNode;
+        std::deque<std::shared_ptr<Node>>& resStack = proj->resStack;
+        std::shared_ptr<Node> currentNode = resStack.back();
         std::shared_ptr<Node> toDelete = nullptr;
+        static int showMode = 0; // 0: icon mode 1: list mode
         ImGui::Begin("Resources Panel");
-        if(!currentNode->parent.expired()) {
-            if(ImGui::Button("<<<")) {
-                proj->currentNode = currentNode->parent.lock();
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+        std::string path;
+        for(const std::shared_ptr<Node>& n : resStack) path += (n->name + "/");
+        float topHeight = ImGui::CalcTextSize(path.c_str()).y;
+
+        ImGui::BeginChild("TopBar", ImVec2(ImGui::GetContentRegionAvail().x, topHeight));
+        topHeight -= ImGui::GetStyle().FramePadding.x * 2;
+        if(ImGui::ImageButton("back", app->icons["back.png"]->getId(), ImVec2(topHeight, topHeight), {0, 1}, {1, 0})) {
+            if(resStack.size() > 1) resStack.pop_back();
+        }
+        ImGui::SameLine();
+        ImGui::Text(path.c_str());
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - topHeight - ImGui::GetStyle().FramePadding.x * 2);
+        if(showMode == 0) {
+            if(ImGui::ImageButton("iconMode", app->icons["icon_mode.png"]->getId(), ImVec2(topHeight, topHeight))) {
+                showMode = 1;
+            }
+        }else if(showMode == 1) {
+            if(ImGui::ImageButton("listMode", app->icons["list_mode.png"]->getId(), ImVec2(topHeight, topHeight))) {
+                showMode = 0;
             }
         }
+        ImGui::EndChild();
 
-        static bool showSplitPopup = false;
-        static Texture2D* splitTexture = nullptr;
-        static std::shared_ptr<TextureMetadata> metadata;
+        static std::shared_ptr<Node> renamingNode;
+        static char inputBuf[256] = {};
+        static std::shared_ptr<ModalPopup> renamePopup = std::make_shared<ModalPopup>("Rename", [] {
+            ImGui::Text("Name:");
+            ImGui::InputText("##renameInput2", inputBuf, IM_ARRAYSIZE(inputBuf), ImGuiInputTextFlags_AutoSelectAll);
+        }, [] {
+            renamingNode->name = inputBuf;
+            renamePopup->close();
+        }, [] {
+            if(renamingNode) renamingNode->isRenaming = false;
+            renamingNode = nullptr;
+        });
+
+        ImGui::BeginChild("Content", ImGui::GetContentRegionAvail());
+        float imageSize = 128.0f;
         for(auto& n : currentNode->children) {
             ImGui::PushID(&n);
-            if(n->isRenaming) {
-                if(n->justRenaming) {
-                    ImGui::SetKeyboardFocusHere(0);
-                    ImGui::SetActiveID(ImGui::GetID("##renameInput"), ImGui::GetCurrentWindow());
-                    n->justRenaming = false;
-                }
-                char renameBuf[256] = {};
-                strcpy_s(renameBuf, n->name.c_str());
-                if(ImGui::InputText("##renameInput", renameBuf, IM_ARRAYSIZE(renameBuf), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll)) {
-                    n->name = renameBuf;
-                    n->isRenaming = false; // TODO: 名称合法性检测
-                }
+            if(showMode == 0) {
+                // static char inputBuf[256] = {};
+                // static std::shared_ptr<ModalPopup> renamePopup = std::make_shared<ModalPopup>("Rename", [] {
+                //     ImGui::Text("Name:");
+                //     ImGui::InputText("##renameInput2", inputBuf, IM_ARRAYSIZE(inputBuf));
+                // }, [&n] {
+                //     n->isRenaming = false;
+                //     n->name = inputBuf;
+                // }, [&n] {
+                //     memset(inputBuf, '\0', sizeof(inputBuf));
+                //     n->isRenaming = false;
+                // });
 
-                if(!ImGui::IsItemActive() && ImGui::IsMouseClicked(0)) {
-                    n->name = renameBuf;
-                    n->isRenaming = false;
+                ImGui::SameLine();
+                if(ImGui::GetContentRegionAvail().x < imageSize) {
+                    ImGui::NewLine();
                 }
-            } else {
-                if(n->isGroup) {
-                    ImGui::Selectable(n->name.c_str());
-                    if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                        proj->currentNode = n;
-                    }
-                } else {
-                    ImGui::Selectable(n->name.c_str());
-                    if(ImGui::BeginDragDropSource()) {
-                        std::string texturePath = proj->getConfig().resourcesDirectory + "/" + n->name;
-                        ImGui::Text(texturePath.c_str());
-                        ImGui::SetDragDropPayload("TexturePath", texturePath.c_str(), texturePath.size() + 1);
-                        ImGui::EndDragDropSource();
-                    }
-                }
-                if(ImGui::IsItemHovered() && ImGui::IsMouseClicked(1)) {
+                IconTextButton(app->icons["directory.png"]->getId(), n->name.c_str(), ImVec2(imageSize, imageSize), {0, 1}, {1, 0});
+                if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
                     ImGui::OpenPopup("NodeRightButtonMenu");
                 }
-                if(ImGui::BeginPopup("NodeRightButtonMenu")) {
-                    if(ImGui::MenuItem("Rename")) {
-                        n->isRenaming = true;
-                        n->justRenaming = true;
+                if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                    if(n->isGroup) {
+                        resStack.push_back(n);
                     }
-                    if(ImGui::MenuItem("Delete")) {
-                        toDelete = n;
+                }
+            }else if(showMode == 1){
+                if(n->isRenaming) {
+                    if(n->justRenaming) {
+                        ImGui::SetKeyboardFocusHere(0);
+                        ImGui::SetActiveID(ImGui::GetID("##renameInput"), ImGui::GetCurrentWindow());
+                        n->justRenaming = false;
                     }
-                    std::string s = Utils::getFileSuffix(n->name);
-                    if(s == ".png" || s == ".jpg") {
-                        if(ImGui::MenuItem("Split")) {
-                            if(splitTexture) ResourceManager::getInstance().release(splitTexture->getFilePath());
-                            splitTexture = ResourceManager::getInstance().load<Texture2D>(proj->getConfig().resourcesDirectory + "/" + n->name)->data;
-                            if(Utils::isFileExists(splitTexture->getFilePath() + ".meta")) {
-                                metadata = std::make_shared<TextureMetadata>(splitTexture->getFilePath() + ".meta");
-                            }else {
-                                metadata = std::make_shared<TextureMetadata>(glm::vec2(splitTexture->getWidth(), splitTexture->getHeight()));
-                            }
-                            showSplitPopup = true;
+                    char renameBuf[256] = {};
+                    strcpy_s(renameBuf, n->name.c_str());
+                    if(ImGui::InputText("##renameInput", renameBuf, IM_ARRAYSIZE(renameBuf), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll)) {
+                        n->name = renameBuf;
+                        n->isRenaming = false; // TODO: 名称合法性检测
+                    }
+
+                    if(!ImGui::IsItemActive() && ImGui::IsMouseClicked(0)) {
+                        n->name = renameBuf;
+                        n->isRenaming = false;
+                    }
+                } else {
+                    if(n->isGroup) {
+                        ImGui::Selectable(n->name.c_str());
+                        if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+                            resStack.push_back(n);
+                        }
+                    } else {
+                        ImGui::Selectable(n->name.c_str());
+                        if(ImGui::BeginDragDropSource()) {
+                            std::string texturePath = proj->getConfig().resourcesDirectory + "/" + n->name;
+                            ImGui::Text(texturePath.c_str());
+                            ImGui::SetDragDropPayload("TexturePath", texturePath.c_str(), texturePath.size() + 1);
+                            ImGui::EndDragDropSource();
                         }
                     }
-                    ImGui::EndPopup();
+                    if(ImGui::IsItemHovered() && ImGui::IsMouseClicked(1)) {
+                        ImGui::OpenPopup("NodeRightButtonMenu");
+                    }
                 }
+            }
+            if(ImGui::BeginPopup("NodeRightButtonMenu")) {
+                if(ImGui::MenuItem("Rename")) {
+                    n->isRenaming = true;
+                    n->justRenaming = true;
+                    if(showMode == 0) {
+                        renamingNode = n;
+                        strcpy_s(inputBuf, n->name.c_str());
+                        renamePopup->open();
+                    }
+                }
+                if(ImGui::MenuItem("Delete")) {
+                    toDelete = n;
+                }
+                ImGui::EndPopup();
             }
             ImGui::PopID();
         }
@@ -114,7 +159,6 @@ namespace Cube {
                 n->isGroup = true;
                 n->isRenaming = true;
                 n->justRenaming = true;
-                n->parent = currentNode;
                 currentNode->children.push_back(n);
             }
             if(ImGui::MenuItem("Import Resources##2")) {
@@ -122,69 +166,11 @@ namespace Cube {
             }
             ImGui::EndPopup();
         }
+        ImGui::EndChild();
 
-        // SplitPopup
-        if(showSplitPopup) {
-            ImGui::OpenPopup("SplitPopup");
-        }
-        if(ImGui::BeginPopupModal("SplitPopup", &showSplitPopup, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImDrawList* drawList = ImGui::GetWindowDrawList();
-            ImVec2 windowPos = ImGui::GetWindowPos();
-            float titleBarHeight = ImGui::GetCurrentWindow()->TitleBarHeight;
-            ImVec2 padding = ImGui::GetStyle().WindowPadding;
-            ImVec2 contentPos(windowPos.x + padding.x, windowPos.y + titleBarHeight + padding.y);
+        renamePopup->render();
 
-            ImGui::Image(splitTexture->getId(), {(float)splitTexture->getWidth(), (float)splitTexture->getHeight()}, ImVec2(0, 1), ImVec2(1, 0));
-            drawList->PathClear();
-            drawList->PathLineTo(ImVec2(contentPos.x, contentPos.y));
-            drawList->PathLineTo(ImVec2(contentPos.x, contentPos.y + splitTexture->getHeight()));
-            drawList->PathLineTo(ImVec2(contentPos.x + splitTexture->getWidth(), contentPos.y + splitTexture->getHeight()));
-            drawList->PathLineTo(ImVec2(contentPos.x + splitTexture->getWidth(), contentPos.y));
-            drawList->PathStroke(IM_COL32(255, 255, 255, 255), ImDrawFlags_Closed, 2);
-
-            ImGui::SameLine();
-
-            ImGui::BeginGroup();
-            static int selected = 0;
-            constexpr const char* items[] = {"Grid equal division", "Custom division"};
-            ImGui::Text("Division mode:");
-            ImGui::Combo("##DivisionMode", &selected, items, IM_ARRAYSIZE(items));
-            if(selected == 0) {
-                static int rowNum = 1;
-                static int columnNum = 1;
-                ImGui::Text("Number of rows:");
-                ImGui::InputInt("##RowNum", &rowNum);
-                rowNum = ImClamp(rowNum, 1, 1000);
-                ImGui::Text("Number of columns:");
-                ImGui::InputInt("##ColumNum", &columnNum);
-                columnNum = ImClamp(columnNum, 1, 1000);
-
-                float width = (float)splitTexture->getWidth() / columnNum;
-                float height = (float)splitTexture->getHeight() / rowNum;
-                for(int i = 1; i < columnNum; ++i) {
-                    addDashLine(drawList, contentPos + ImVec2(width * i, 0), contentPos + ImVec2(width * i, splitTexture->getHeight()), ImColor(255, 0, 0, 255));
-                }
-                for(int i = 1; i < rowNum; ++i) {
-                    addDashLine(drawList, contentPos + ImVec2(0, height * i), contentPos + ImVec2(splitTexture->getWidth(), height * i), ImColor(255, 0, 0, 255));
-                }
-            }else if(selected == 1) {
-                
-            }
-            ImGui::EndGroup();
-
-            if(ImGui::Button("OK")) {
-                showSplitPopup = false;
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::SameLine();
-            if(ImGui::Button("Cancel")) {
-                showSplitPopup = false;
-                ImGui::CloseCurrentPopup();
-            }
-
-            ImGui::EndPopup();
-        }
-        // SplitPopup end
+        ImGui::PopStyleColor();
         ImGui::End();
         if(toDelete) {
             currentNode->children.erase(std::find(currentNode->children.begin(), currentNode->children.end(), toDelete));
@@ -196,17 +182,19 @@ namespace Cube {
     }
 
     void ResourcesPanel::importResources() {
+        std::shared_ptr<Node> currentNode = proj->resStack.back();
         for(auto& path : FileDialog::openMultiFiles("Resources(.png.jpg)\0*.png;*.jpg\0", app->getWindow()->getWin32Window())) {
             std::string fileName = Utils::getFileName(path, true);
             if(!Utils::isFileInDirectory(path, proj->getConfig().resourcesDirectory)) {
                 Utils::copyFile(path, proj->getConfig().resourcesDirectory + "/" + fileName);
             }
-            if(std::find_if(proj->currentNode->children.begin(), proj->currentNode->children.end(), [fileName](std::shared_ptr<Node> x){ return x->name == fileName; }) == proj->currentNode->children.end()){
+            if(std::find_if(currentNode->children.begin(), currentNode->children.end(), [fileName](std::shared_ptr<Node> x){ return x->name == fileName; }) == currentNode->children.end()){
                 std::shared_ptr<Node> n = std::make_shared<Node>();
                 n->isGroup = false;
                 n->name = fileName;
-                proj->currentNode->children.push_back(n);
+                currentNode->children.push_back(n);
             } // TODO: 提醒用户不能添加重复资源
         }
     }
+
 }  // namespace Cube

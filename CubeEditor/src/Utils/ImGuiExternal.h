@@ -26,3 +26,5 @@ private:
 	ImVec4 originalBorderColor;
 	ImVec4 highLightColor = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
 };
+
+bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_size, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {0, 0}, ImGuiButtonFlags flags = ImGuiButtonFlags_None);

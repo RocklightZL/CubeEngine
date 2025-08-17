@@ -21,15 +21,11 @@ namespace Cube {
         frameBuffer = new FrameBuffer();
         frameBuffer->bindAttachment((int)sceneViewSize.x, (int)sceneViewSize.y);
         editorRenderSystem = new EditorRenderSystem();
-
-        playIcon = ResourceManager::getInstance().load<Texture2D>("assets/icons/play.png")->data;
     }
 
     SceneView::~SceneView() {
         delete frameBuffer;
         delete editorRenderSystem;
-
-        ResourceManager::getInstance().release(playIcon->getFilePath());
     }
 
     void SceneView::render(float deltaTime) {
@@ -39,7 +35,7 @@ namespace Cube {
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
         static bool isGameWindowOpened = false;
         ImVec2 toolButtonSize(37, 37);
-        if(ImGui::ImageButton("play", playIcon->getId(), toolButtonSize, ImVec2(0, 1), ImVec2(1, 0)) && !isGameWindowOpened) {
+        if(ImGui::ImageButton("play", app->icons["play.png"]->getId(), toolButtonSize, ImVec2(0, 1), ImVec2(1, 0)) && !isGameWindowOpened) {
             isGameWindowOpened = true;
             std::thread gameThread(gameThreadFunction, &isGameWindowOpened);
             gameThread.detach();

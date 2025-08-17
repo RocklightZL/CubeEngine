@@ -2,6 +2,7 @@
 
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/RenderSystem.h"
+#include "Cube/Resource/ResourceManager.h"
 #include "Cube/Scene/SceneSerializer.h"
 #include "Scene/EditorRenderSystem.h"
 
@@ -27,7 +28,7 @@ namespace Cube {
         resRoot = std::make_shared<Node>();
         resRoot->name = "root";
         resRoot->isGroup = true;
-        currentNode = resRoot;
+        resStack.push_back(resRoot);
     }
 
     Project::Project(const std::string& configFilePath) {
@@ -50,7 +51,6 @@ namespace Cube {
     }
 
     Project::~Project() {
-
         save();
 
         for(auto s : scenes) {
@@ -152,7 +152,7 @@ namespace Cube {
         resFile >> resData;
         resRoot = std::make_shared<Node>();
         resRoot->fromJson(resData, resRoot);
-        currentNode = resRoot;
+        resStack.push_back(resRoot);
         resFile.close();
     }
 
