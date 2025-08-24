@@ -8,23 +8,25 @@ void addDashLine(ImDrawList* drawList, const ImVec2& start, const ImVec2& end, c
 
 class ModalPopup {
 public:
-	ModalPopup(const std::string& title, const std::function<void()>& content, const std::function<void()>& confirm, const std::function<void()>& clear);
-	~ModalPopup() = default;
+    ModalPopup(const std::string& title, const std::function<void()>& content, const std::function<void()>& confirm, const std::function<void()>& clear);
+    ~ModalPopup() = default;
 
-	void render();
-	void open(){ isOpen = true; }
-	void close(){ isOpen = false; }
-	bool getIsOpen() const { return isOpen; }
+    void render();
+    void open() { isOpen = true; }
+    void close() { isOpen = false; }
+    bool getIsOpen() const { return isOpen; }
 
 private:
-	std::string title;
-	bool isOpen = false;
-	std::function<void()> content;
-	std::function<void()> confirm;
-	std::function<void()> clear;
-	ImVec4 borderColor;
-	ImVec4 originalBorderColor;
-	ImVec4 highLightColor = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+    std::string title;
+    bool isOpen = false;
+    std::function<void()> content;
+    std::function<void()> confirm;
+    std::function<void()> clear;
+    ImVec4 borderColor;
+    ImVec4 originalBorderColor;
+    ImVec4 highLightColor = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
 };
 
-bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_size, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {0, 0}, ImGuiButtonFlags flags = ImGuiButtonFlags_None);
+bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_size, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {1, 1}, ImGuiButtonFlags flags = ImGuiButtonFlags_None);
+
+bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {1, 1}, const ImVec2& button_size = {0, 0}, const ImVec2& icon_size = ImVec2(ImGui::CalcTextSize("Text").y, ImGui::CalcTextSize("Text").y));

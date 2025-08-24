@@ -1,4 +1,4 @@
-#include "EditorRenderSystem.h"
+﻿#include "EditorRenderSystem.h"
 
 #include "../Project.h"
 #include "Cube/Renderer/Renderer.h"
@@ -16,17 +16,30 @@ namespace Cube {
             auto b1 = b->getComponent<SpriteComponent>()->texture ? b->getComponent<SpriteComponent>()->texture->getId() : -1;
             return a1 < b1;
         });
+        auto cameras = scene->getEntitiesWith<TransformComponent, CameraComponent>();
 
         const EditorCamera& editorCamera = proj->editorCamera;
         glm::mat4 pvMatrix = glm::ortho(0.0f, scene->getViewportSize().x, 0.0f, scene->getViewportSize().y, 0.0f, 1.0f) * glm::inverse(editorCamera.getTransformMatrix());
         Renderer2D::beginFrame(pvMatrix);
-        // ����ϵ����
-        Renderer2D::drawQuad({0, 0}, glm::vec2(1, 3000) * editorCamera.scale, nullptr, {1.0f, 0.0f, 0.0f, 1.0f});
-        Renderer2D::drawQuad({0, 0}, glm::vec2(3000, 1) * editorCamera.scale, nullptr, {0.0f, 0.0f, 1.0f, 1.0f});
-        for(auto e : sprites) {
+        // 坐标系标线
+        Renderer2D::drawQuad({0, 0}, glm::vec2(1, 30000) * editorCamera.scale, nullptr, {1.0f, 0.0f, 0.0f, 1.0f});
+        Renderer2D::drawQuad({0, 0}, glm::vec2(30000, 1) * editorCamera.scale, nullptr, {0.0f, 0.0f, 1.0f, 1.0f});
+        for(auto& e : sprites) {
             auto* sc = e->getComponent<SpriteComponent>();
             auto* tc = e->getComponent<TransformComponent>();
             Renderer2D::drawQuad(tc->getTransformMatrix(), sc->color, sc->texture, glm::vec4(sc->region.uvMin, sc->region.uvMax));
+        }
+        for(auto& camera : cameras) {
+            auto* tc = camera->getComponent<TransformComponent>();
+            // TODO: 待完善
+        }
+        // 选中实体边框线
+        if(proj->selectedEntity){
+            auto* selectEntityTC = proj->selectedEntity->getComponent<TransformComponent>();
+            Renderer2D::drawQuad(selectEntityTC->position - glm::vec2(0, selectEntityTC->scale.y / 2), glm::vec2(selectEntityTC->scale.x, 1) * glm::vec2(1, editorCamera.scale.y), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
+            Renderer2D::drawQuad(selectEntityTC->position + glm::vec2(0, selectEntityTC->scale.y / 2), glm::vec2(selectEntityTC->scale.x, 1) * glm::vec2(1, editorCamera.scale.y), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
+            Renderer2D::drawQuad(selectEntityTC->position - glm::vec2(selectEntityTC->scale.x / 2, 0), glm::vec2(1, selectEntityTC->scale.y) * glm::vec2(editorCamera.scale.x, 1), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
+            Renderer2D::drawQuad(selectEntityTC->position + glm::vec2(selectEntityTC->scale.x / 2, 0), glm::vec2(1, selectEntityTC->scale.y) * glm::vec2(editorCamera.scale.x, 1), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
         }
         Renderer2D::endFrame();
     }

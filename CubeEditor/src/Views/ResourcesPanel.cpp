@@ -65,34 +65,30 @@ namespace Cube {
         });
 
         ImGui::BeginChild("Content", ImGui::GetContentRegionAvail());
-        float imageSize = 128.0f;
+        constexpr float imageSize = 128.0f;
         for(auto& n : currentNode->children) {
             ImGui::PushID(&n);
             if(showMode == 0) {
-                // static char inputBuf[256] = {};
-                // static std::shared_ptr<ModalPopup> renamePopup = std::make_shared<ModalPopup>("Rename", [] {
-                //     ImGui::Text("Name:");
-                //     ImGui::InputText("##renameInput2", inputBuf, IM_ARRAYSIZE(inputBuf));
-                // }, [&n] {
-                //     n->isRenaming = false;
-                //     n->name = inputBuf;
-                // }, [&n] {
-                //     memset(inputBuf, '\0', sizeof(inputBuf));
-                //     n->isRenaming = false;
-                // });
-
                 ImGui::SameLine();
                 if(ImGui::GetContentRegionAvail().x < imageSize) {
                     ImGui::NewLine();
                 }
-                IconTextButton(app->icons["directory.png"]->getId(), n->name.c_str(), ImVec2(imageSize, imageSize), {0, 1}, {1, 0});
-                if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
-                    ImGui::OpenPopup("NodeRightButtonMenu");
-                }
-                if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                    if(n->isGroup) {
+                if(n->isGroup){
+                    IconTextButton(app->icons["directory.png"]->getId(), n->name.c_str(), ImVec2(imageSize, imageSize), {0, 1}, {1, 0});
+                    if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                         resStack.push_back(n);
                     }
+                }else {
+                    IconTextButton(app->icons["file.png"]->getId(), n->name.c_str(), ImVec2(imageSize, imageSize), {0, 1}, {1, 0});
+                    if(ImGui::BeginDragDropSource()) {
+                        std::string texturePath = proj->getConfig().resourcesDirectory + "/" + n->name;
+                        ImGui::Text(texturePath.c_str());
+                        ImGui::SetDragDropPayload("TexturePath", texturePath.c_str(), texturePath.size() + 1);
+                        ImGui::EndDragDropSource();
+                    }
+                }
+                if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+                    ImGui::OpenPopup("NodeRightButtonMenu");
                 }
             }else if(showMode == 1){
                 if(n->isRenaming) {
@@ -114,12 +110,14 @@ namespace Cube {
                     }
                 } else {
                     if(n->isGroup) {
-                        ImGui::Selectable(n->name.c_str());
+                        // ImGui::Selectable(n->name.c_str());
+                        IconTextButtonLeft(n->name.c_str(), app->icons["directory.png"]->getId(), {0, 1}, {1, 0}, {ImGui::GetContentRegionAvail().x, 0});
                         if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                             resStack.push_back(n);
                         }
                     } else {
-                        ImGui::Selectable(n->name.c_str());
+                        // ImGui::Selectable(n->name.c_str());
+                        IconTextButtonLeft(n->name.c_str(), app->icons["file.png"]->getId(), {0, 1}, {1, 0}, {ImGui::GetContentRegionAvail().x, 0});
                         if(ImGui::BeginDragDropSource()) {
                             std::string texturePath = proj->getConfig().resourcesDirectory + "/" + n->name;
                             ImGui::Text(texturePath.c_str());
