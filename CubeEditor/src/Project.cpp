@@ -36,7 +36,7 @@ namespace Cube {
         std::ifstream file(configFilePath);
         if(!file.is_open()) {
             CB_ERROR("Project::Project: Failed to open file: {}", configFilePath);
-            CB_ASSERT(true);
+            CB_ASSERT(false);
             return;
         }
         file >> data;
@@ -85,7 +85,7 @@ namespace Cube {
         std::ofstream file(config.projectDataDirectory + "/scenes.cache");
         if(!file.is_open()) {
             CB_ERROR("Project::save: failed to open file: {}", config.projectDataDirectory + "/scenes.cache");
-            CB_ASSERT(true);
+            CB_ASSERT(false);
             return;
         }
         file << data.dump(4);
@@ -94,7 +94,7 @@ namespace Cube {
         std::ofstream resFile(config.projectDataDirectory + "/resources.cache");
         if(!resFile.is_open()) {
             CB_ERROR("Project::save: failed to open file: {}", config.projectDataDirectory + "/resources.cache");
-            CB_ASSERT(true);
+            CB_ASSERT(false);
             return;
         }
         resFile << resRoot->toJson().dump(4);
@@ -112,7 +112,7 @@ namespace Cube {
         std::ofstream file(configFilePath);
         if(!file.is_open()) {
             CB_ERROR("Project::Project: Failed to open file: {}", configFilePath);
-            CB_ASSERT(true);
+            CB_ASSERT(false);
             return;
         }
         file << data.dump(4);
@@ -123,7 +123,7 @@ namespace Cube {
         std::ifstream file(config.projectDataDirectory + "/scenes.cache");
         if(!file.is_open()) {
             CB_ERROR("Project::load: failed to open file: {}", config.projectDataDirectory + "/scenes.cache");
-            CB_ASSERT(true);
+            CB_ASSERT(false);
             return;
         }
         nlohmann::json data;
@@ -145,7 +145,7 @@ namespace Cube {
         std::ifstream resFile(config.projectDataDirectory + "/resources.cache");
         if(!resFile.is_open()) {
             CB_ERROR("Project::load: failed to open file: {}", config.projectDataDirectory + "/resources.cache");
-            CB_ASSERT(true);
+            CB_ASSERT(false);
             return;
         }
         nlohmann::json resData;
