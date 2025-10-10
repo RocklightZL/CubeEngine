@@ -4,7 +4,6 @@
 #include "Cube/Renderer/RenderSystem.h"
 #include "Cube/Resource/ResourceManager.h"
 #include "Cube/Scene/SceneSerializer.h"
-#include "Scene/EditorRenderSystem.h"
 
 #include <json.hpp>
 #include <fstream>

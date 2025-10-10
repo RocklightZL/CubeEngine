@@ -20,13 +20,9 @@ namespace Cube {
     SceneView::SceneView() {
         frameBuffer = new FrameBuffer();
         frameBuffer->bindAttachment((int)sceneViewSize.x, (int)sceneViewSize.y);
-        editorRenderSystem = new EditorRenderSystem();
     }
 
-    SceneView::~SceneView() {
-        delete frameBuffer;
-        delete editorRenderSystem;
-    }
+    SceneView::~SceneView() { delete frameBuffer; }
 
     void SceneView::render(float deltaTime) {
         ImGui::Begin("Scene View");
@@ -52,13 +48,12 @@ namespace Cube {
                 sceneViewSize = currentSize;
                 frameBuffer->resize((int)sceneViewSize.x, (int)sceneViewSize.y);
             }
-            proj->selectedScene->scene->setViewportSize({sceneViewSize.x, sceneViewSize.y});
 
             frameBuffer->bind();
             Renderer2D::setViewport((int)sceneViewSize.x, (int)sceneViewSize.y);
             Renderer2D::clearBuffer();
             // scene render
-            editorRenderSystem->onUpdate(proj->selectedScene->scene, deltaTime);
+            sceneRender(deltaTime);
 
             FrameBuffer::bindDefaultFrameBuffer();
 
@@ -74,7 +69,7 @@ namespace Cube {
                     if(Utils::isFileExists(texturePath + ".meta")) {
                         showSelectSubTexturePopup = true;
                         textureData = std::make_shared<TextureData>(texturePath + ".meta", texturePath);
-                    }else{
+                    } else {
                         Texture2D* texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
                         Scene* scene = proj->selectedScene->scene;
                         Entity* entity = scene->createEntity(texturePath);
@@ -178,9 +173,9 @@ namespace Cube {
     SubTexture* SceneView::selectSubTexturePopup(TextureData& data, bool* open) {
         SubTexture* res = nullptr;
         static SubTexture* current = nullptr;
-        if(*open){
+        if(*open) {
             ImGui::OpenPopup("Select SubTexture");
-        }else {
+        } else {
             current = nullptr;
         }
         ImVec4 originalBorderColor = ImGui::GetStyle().Colors[ImGuiCol_Border];
@@ -208,7 +203,7 @@ namespace Cube {
                         current = &st;
                         selected = i;
                     }
-                }else if(hovered == i) {
+                } else if(hovered == i) {
                     hovered = -1;
                 }
                 ImGui::EndChild();
@@ -217,7 +212,7 @@ namespace Cube {
             }
 
             static bool showWarning = false;
-            if(showWarning){
+            if(showWarning) {
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
                 ImGui::Text("Please select a subtexture!");
                 ImGui::PopStyleColor();
@@ -229,12 +224,12 @@ namespace Cube {
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() - (buttonWidth * 2 + ImGui::GetStyle().FramePadding.x * 2 + spacing));
             ImGui::BeginGroup();
             if(ImGui::Button("OK", ImVec2(buttonWidth, 0)) || ImGui::IsKeyPressed(ImGuiKey_Enter)) {
-                if(current != nullptr){
+                if(current != nullptr) {
                     *open = false;
                     res = current;
                     showWarning = false;
                     ImGui::CloseCurrentPopup();
-                }else {
+                } else {
                     showWarning = true;
                 }
             }
@@ -251,8 +246,8 @@ namespace Cube {
                 ImVec2 size = ImGui::GetWindowSize();
                 if(!(mousePos.x >= winPos.x && mousePos.y >= winPos.y && mousePos.x <= winPos.x + size.x && mousePos.y <= winPos.y + size.y)) {
                     borderColor = highLightColor;
-                    MessageBeep(MB_ICONASTERISK); //TODO: 跨平台适配
-                }else {
+                    MessageBeep(MB_ICONASTERISK);  // TODO: 跨平台适配
+                } else {
                     borderColor = originalBorderColor;
                 }
             }
@@ -262,6 +257,51 @@ namespace Cube {
         }
         ImGui::PopStyleColor();
         return res;
+    }
+
+    void SceneView::sceneRender(float deltaTime) {
+        Scene* scene = proj->selectedScene->scene;
+        auto sprites = scene->getEntitiesWith<TransformComponent, SpriteComponent>();
+        std::sort(sprites.begin(), sprites.end(), [](Entity* a, Entity* b) {
+            auto a1 = a->getComponent<SpriteComponent>()->texture ? a->getComponent<SpriteComponent>()->texture->getId() : -1;
+            auto b1 = b->getComponent<SpriteComponent>()->texture ? b->getComponent<SpriteComponent>()->texture->getId() : -1;
+            return a1 < b1;
+        });
+        auto cameras = scene->getEntitiesWith<TransformComponent, CameraComponent>();
+
+        const EditorCamera& editorCamera = proj->editorCamera;
+        glm::mat4 pvMatrix = glm::ortho(0.0f, sceneViewSize.x, 0.0f, sceneViewSize.y, 0.0f, 1.0f) * glm::inverse(editorCamera.getTransformMatrix());
+        Renderer2D::beginFrame(pvMatrix);
+        // 坐标系标线
+        Renderer2D::drawQuad({0, 0}, glm::vec2(1, 30000) * editorCamera.scale, nullptr, {1.0f, 0.0f, 0.0f, 1.0f});
+        Renderer2D::drawQuad({0, 0}, glm::vec2(30000, 1) * editorCamera.scale, nullptr, {0.0f, 0.0f, 1.0f, 1.0f});
+        for(auto& e : sprites) {
+            auto* sc = e->getComponent<SpriteComponent>();
+            auto* tc = e->getComponent<TransformComponent>();
+            Renderer2D::drawQuad(tc->getTransformMatrix(), sc->color, sc->texture, glm::vec4(sc->region.uvMin, sc->region.uvMax));
+        }
+        for(auto& camera : cameras) {
+            auto* tc = camera->getComponent<TransformComponent>();
+            auto* cc = camera->getComponent<CameraComponent>();
+            if(cc->available) {
+                glm::vec2 size = tc->scale * scene->getViewportSize();
+                glm::vec2 pos = tc->position + scene->getViewportSize() / glm::vec2(2, 2);
+                glm::vec4 color = glm::vec4(CB_COLOR(113, 96, 232), 1.0f);
+                Renderer2D::drawQuad(pos - glm::vec2(0, size.y / 2), glm::vec2(size.x, 1) * glm::vec2(1, editorCamera.scale.y), nullptr, color);
+                Renderer2D::drawQuad(pos + glm::vec2(0, size.y / 2), glm::vec2(size.x, 1) * glm::vec2(1, editorCamera.scale.y), nullptr, color);
+                Renderer2D::drawQuad(pos - glm::vec2(size.x / 2, 0), glm::vec2(1, size.y) * glm::vec2(editorCamera.scale.x, 1), nullptr, color);
+                Renderer2D::drawQuad(pos + glm::vec2(size.x / 2, 0), glm::vec2(1, size.y) * glm::vec2(editorCamera.scale.x, 1), nullptr, color);
+            }
+        }
+        // 选中实体边框线
+        if(proj->selectedEntity && proj->selectedEntity->hasComponent<TransformComponent>() && proj->selectedEntity->hasComponent<SpriteComponent>()) {
+            auto* selectEntityTC = proj->selectedEntity->getComponent<TransformComponent>();
+            Renderer2D::drawQuad(selectEntityTC->position - glm::vec2(0, selectEntityTC->scale.y / 2), glm::vec2(selectEntityTC->scale.x, 1) * glm::vec2(1, editorCamera.scale.y), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
+            Renderer2D::drawQuad(selectEntityTC->position + glm::vec2(0, selectEntityTC->scale.y / 2), glm::vec2(selectEntityTC->scale.x, 1) * glm::vec2(1, editorCamera.scale.y), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
+            Renderer2D::drawQuad(selectEntityTC->position - glm::vec2(selectEntityTC->scale.x / 2, 0), glm::vec2(1, selectEntityTC->scale.y) * glm::vec2(editorCamera.scale.x, 1), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
+            Renderer2D::drawQuad(selectEntityTC->position + glm::vec2(selectEntityTC->scale.x / 2, 0), glm::vec2(1, selectEntityTC->scale.y) * glm::vec2(editorCamera.scale.x, 1), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
+        }
+        Renderer2D::endFrame();
     }
 
 }  // namespace Cube

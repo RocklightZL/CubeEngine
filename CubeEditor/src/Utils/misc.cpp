@@ -5,12 +5,12 @@
 
 std::string getUserConfigDir() {
 #ifdef _WIN32
-	std::string dir = std::string(std::getenv("APPDATA"));
+	std::string dir = std::string(std::getenv("APPDATA")); // C:\Users\UserName\AppData\Roaming
 	if(dir.empty()) {
 	    CB_EDITOR_ERROR("getUserConfigDir: Failed to get environment variable \"APPDATA\"");
 	}
 	return dir;
-#elif __APPLE__ // TODO: øÁ∆ΩÃ®  ≈‰
+#elif __APPLE__
 	std::string dir = std::string(std::getenv("HOME"));
 	if(dir.empty()) {
 		CB_EDITOR_ERROR("getUserConfigDir: Failed to get environment variable \"HOME\"");
