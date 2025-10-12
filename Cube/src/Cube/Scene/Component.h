@@ -18,7 +18,7 @@ namespace Cube {
 	public:
 	    virtual ~Component() = default;
 
-		// 利用模板函数内静态变量的特性关联类型与ID
+		// 静态模板函数，用于静态生成各组件类型ID
 		template <typename T>
 		static uint32_t getTypeID(){
 			static_assert(std::is_base_of<Component, T>::value);
