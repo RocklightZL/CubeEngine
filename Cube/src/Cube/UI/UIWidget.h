@@ -1,139 +1,94 @@
 #pragma once
 
+#include "Cube/Renderer/Texture.h"
+
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
 #include <functional>
 
 namespace Cube {
+    struct UIStyle {
+        glm::vec4 bgColor;
+        glm::vec4 border;
+        glm::vec4 borderColor;
+    };
 
-    // 前向声明
-    class UICanvas;
-    class Event;
-
-    /**
-     * UI基础组件类 - 所有UI元素的基类
-     */
+    // base class for all UI elements
     class UIWidget {
     public:
-        UIWidget() = default;
-        UIWidget(const glm::vec2& pos, const glm::vec2& size) : position(pos), size(size){};
-
+        UIWidget(){ style = globalStyle; }
+        UIWidget(const glm::vec2& pos, const glm::vec2& size) : pos(pos), size(size) { style = globalStyle; }
         virtual ~UIWidget() = default;
 
-        // 基本属性
-        void setPosition(const glm::vec2& pos) { position = pos; markDirty(); }
-        void setSize(const glm::vec2& size) { this->size = size; markDirty(); }
-        void setVisible(bool visible) { this->visible = visible; }
-        void setEnabled(bool enabled) { this->enabled = enabled; }
-
-        glm::vec2 getPosition() const { return position; }
-        glm::vec2 getSize() const { return size; }
-        glm::vec2 getWorldPosition() const;
-        bool isVisible() const { return visible; }
-        bool isEnabled() const { return enabled; }
-
-        // 渲染和更新
-        virtual void update(float deltaTime);
         virtual void render();
-        
-        // 事件处理
-        virtual bool onMouseEnter() { return false; }
-        virtual bool onMouseLeave() { return false; }
-        virtual bool onMousePressed(const glm::vec2& mousePos) { return false; }
-        virtual bool onMouseReleased(const glm::vec2& mousePos) { return false; }
-        virtual bool onMouseMoved(const glm::vec2& mousePos) { return false; }
-        virtual bool onKeyPressed(int keyCode) { return false; }
-        virtual bool onKeyReleased(int keyCode) { return false; }
 
-        // 碰撞检测
-        bool containsPoint(const glm::vec2& point) const;
-        
-        // 样式
-        struct Style {
-            glm::vec4 backgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-            glm::vec4 borderColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-            float borderWidth = 0.0f;
-            glm::vec4 padding = glm::vec4(0.0f); // left, top, right, bottom
-            glm::vec4 margin = glm::vec4(0.0f);  // left, top, right, bottom
-        };
+        glm::vec2 getWorldPosition() const {
+            if (parent) {
+                return parent->getWorldPosition() + pos;
+            }
+            return pos;
+        }
 
-        Style& getStyle() { return style; }
-        const Style& getStyle() const { return style; }
+        void setParent(UIWidget* p) { parent = p; }
+        UIWidget* getParent() const { return parent; }
+
+        void setPosition(const glm::vec2& p) { pos = p; }
+        glm::vec2 getPosition() const { return pos; }
+
+        void setSize(const glm::vec2& s) { size = s; }
+        glm::vec2 getSize() const { return size; }
+
+        UIStyle& getStyle() { return style; }
+
+        void setVisible(bool v) { visible = v; }
+        bool isVisible() const { return visible; }
+
+        static UIStyle globalStyle;
 
     protected:
-        // 基本属性
-        glm::vec2 position = glm::vec2(0.0f);
-        glm::vec2 size = glm::vec2(100.0f);
+        glm::vec2 pos = {0.0f, 0.0f};     // relative position to parent
+        glm::vec2 size = {100.0f, 30.0f};
+        UIStyle style;
         bool visible = true;
-        bool enabled = true;
-        bool dirty = true;  // 是否需要重新计算
 
-        // 层次结构
-        UIWidget* parent = nullptr;
-
-        // 样式
-        Style style;
-
-        // 内部方法
-        void markDirty() { dirty = true; }
+        UIWidget* parent = nullptr; // upper container
     };
 
-    /**
-     * UI按钮组件
-     */
-    class UIButton : public UIWidget {
-    public:
-        UIButton(const std::string& text = "Button");
-        
-        void setText(const std::string& text) { this->text = text; markDirty(); }
-        const std::string& getText() const { return text; }
-        
-        void setOnClick(std::function<void()> callback) { onClick = callback; }
-        
-        void render() override;
-        bool onMousePressed(const glm::vec2& mousePos) override;
-        bool onMouseEnter() override;
-        bool onMouseLeave() override;
-
-    private:
-        std::string text;
-        std::function<void()> onClick;
-        bool isPressed = false;
-        bool isHovered = false;
-    };
-
-    /**
-     * UI文本标签组件
-     */
-    class UILabel : public UIWidget {
-    public:
-        UILabel(const std::string& text = "Label");
-        
-        void setText(const std::string& text) { this->text = text; markDirty(); }
-        const std::string& getText() const { return text; }
-        
-        void setTextColor(const glm::vec4& color) { textColor = color; }
-        const glm::vec4& getTextColor() const { return textColor; }
-        
-        void render() override;
-
-    private:
-        std::string text;
-        glm::vec4 textColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    };
-
-    /**
-     * UI面板组件 - 容器类型
-     */
     class UIPanel : public UIWidget {
     public:
-        UIPanel();
-        
+        UIPanel() = default;
+        UIPanel(std::initializer_list<std::shared_ptr<UIWidget>> children) : children(children) {}
+        ~UIPanel() override = default;
+
         void render() override;
-        
+
+        void addChild(const std::shared_ptr<UIWidget>& child);
+        void removeChild(const std::shared_ptr<UIWidget>& child);
+
     protected:
-        void updateLayout();
+        std::vector<std::shared_ptr<UIWidget>> children;
     };
 
+    class UIImage : public UIWidget {
+    public:
+        UIImage() = default;
+        UIImage(const std::shared_ptr<Texture2D>& texture, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}) : UIWidget(pos, size), texture(texture) {}
+        ~UIImage() override = default;
+
+        void render() override;
+    protected:
+        std::shared_ptr<Texture2D> texture;
+    };
+
+    class UILabel : public UIWidget {
+    public:
+        UILabel() = default;
+        UILabel(const std::string& text, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}) : UIWidget(pos, size), text(text) {}
+        ~UILabel() override = default;
+
+        void render() override;
+    protected:
+        std::string text;
+    };
 }

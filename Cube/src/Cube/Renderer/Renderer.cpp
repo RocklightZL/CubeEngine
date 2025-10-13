@@ -130,6 +130,10 @@ namespace Cube {
         drawQuad(modelMatrix, color, texture, texCoord);
     }
 
+    void Renderer2D::drawLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, float width) {
+        
+    }
+
     void Renderer2D::startNewBatch() {
         currentContext->batchData.clear();
         currentContext->batchCnt = 0;
