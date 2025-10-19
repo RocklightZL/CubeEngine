@@ -3,24 +3,37 @@
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Core/Log.h"
 
-#include <algorithm>
-
 namespace Cube {
 
     // UIWidget
     UIStyle UIWidget::globalStyle = {
         {0.0f, 0.0f, 0.0f, 1.0f},  // bgColor
-        {0.0f, 0.0f, 0.0f, 0.0f},  // border
+        {0.0f, 0.0f, 0.0f, 0.0f},  // border: top right bottom left
         {0.0f, 0.0f, 0.0f, 1.0f}   // borderColor
     };
 
     void UIWidget::render() {
-        
+        if(!visible) return;
+        glm::vec2 renderPos = getOpenGLPos();
+        Renderer2D::drawQuad(renderPos, size, nullptr, style.bgColor);
+
+        Renderer2D::drawLine(renderPos + glm::vec2(0, size.y), renderPos + size, style.borderColor, style.border.x);
+        Renderer2D::drawLine(renderPos + size, renderPos + glm::vec2(size.x, 0), style.borderColor, style.border.y);
+        Renderer2D::drawLine(renderPos + glm::vec2(size.x, 0), renderPos, style.borderColor, style.border.z);
+        Renderer2D::drawLine(renderPos, renderPos + glm::vec2(0, size.y), style.borderColor, style.border.w);
+    }
+
+    glm::vec2 UIWidget::getWorldPosition() const {
+        if (parent) {
+            return parent->getWorldPosition() + pos;
+        }
+        return pos;
     }
 
     // UIPanel
     void UIPanel::render() {
         if(!isVisible()) return;
+        UIWidget::render();
         for(auto& child : children) {
             child->render();
         }

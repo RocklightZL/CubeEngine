@@ -17,5 +17,4 @@ namespace Cube {
 		static std::string getFileSuffix(const std::string& path);
 		static bool isFileExists(const std::string& path);
 	};
-
 }

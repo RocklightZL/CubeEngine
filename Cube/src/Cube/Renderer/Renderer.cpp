@@ -32,6 +32,12 @@ namespace Cube {
 
     void Renderer::setViewport(int width, int height) { glViewport(0, 0, width, height); }
 
+    glm::vec2 Renderer::getViewport() {
+        int viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        return {viewport[2], viewport[3]};
+    }
+
     void Renderer::setClearColor(float r, float g, float b, float a) { glClearColor(r, g, b, a); }
 
     void Renderer::setVSync(bool val) { glfwSwapInterval(val); }
@@ -131,7 +137,27 @@ namespace Cube {
     }
 
     void Renderer2D::drawLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, float width) {
+        if(width < 0.01f) return;
+        // 计算线段的方向向量和长度
+        glm::vec2 direction = p2 - p1;
+        float length = glm::length(direction);
         
+        if (length < 0.01f) {
+            return;
+        }
+        
+        // 计算线段的角度（弧度）
+        float angle = std::atan2(direction.y, direction.x);
+        
+        // 计算线段的中心点
+        glm::vec2 center = (p1 + p2) * 0.5f;
+        
+        // 创建变换矩阵：平移到中心点，旋转，缩放为线段长度和宽度
+        glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(center, 0.0f));
+        modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(0.0f, 0.0f, 1.0f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(length, width, 1.0f));
+        
+        drawQuad(modelMatrix, color, currentContext->whiteTex, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
     }
 
     void Renderer2D::startNewBatch() {

@@ -10,30 +10,31 @@
 
 namespace Cube {
 
-	class Renderer {
-	public:
-		static void init();
+    class Renderer {
+    public:
+        static void init();
         static void clearBuffer();
-		static void beginFrame();
-		static void endFrame();
-		static void setViewport(int width, int height);
-		static void setClearColor(float r, float g, float b, float a);
-		static void setVSync(bool val);
-	protected:
+        static void beginFrame();
+        static void endFrame();
+        static void setViewport(int width, int height);
+        static glm::vec2 getViewport();
+        static void setClearColor(float r, float g, float b, float a);
+        static void setVSync(bool val);
+    protected:
         static bool isGladInitialized;
-	};
+    };
 
     class Renderer2D : public Renderer {
     public:
-		static void init();
-		static void beginFrame(const glm::mat4& pvMatrix);
-		static void endFrame();
-		static void shutdown();
+        static void init();
+        static void beginFrame(const glm::mat4& pvMatrix);
+        static void endFrame();
+        static void shutdown();
         static void drawQuad(const glm::mat4& modelMatrix, const glm::vec4& color, Texture2D* texture, const glm::vec4& texCoord);
         static void drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& tintColor = glm::vec4(1.0f), float degree = 0.0f, const glm::vec4& texCoord = {0.0f, 0.0f, 1.0f, 1.0f});
         static void drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4& transform);
         static void drawLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, float width = 1.0f);
-		// TODO: 自定义着色器
+        // TODO: 自定义着色器
 
         static thread_local Context* currentContext;
     private:
@@ -46,9 +47,9 @@ namespace Cube {
     };
 
 
-	// 默认着色器
-	// clang-format off
-	const std::string DEFAULT_2D_VERTEX_SHADER_SRC = R"(
+    // 默认着色器
+    // clang-format off
+    const std::string DEFAULT_2D_VERTEX_SHADER_SRC = R"(
         #version 330 core
 
         layout (location = 0) in vec4 aPos;
@@ -67,7 +68,7 @@ namespace Cube {
         }
 
     )";
-	const std::string DEFAULT_2D_FRAGMENT_SHADER_SRC = R"(
+    const std::string DEFAULT_2D_FRAGMENT_SHADER_SRC = R"(
         #version 330 core
 
         in vec2 textureCoord;
@@ -81,5 +82,5 @@ namespace Cube {
             o_color = texture(u_Texture, textureCoord) * color;
         }
     )";
-	// clang-format on
+    // clang-format on
 }
