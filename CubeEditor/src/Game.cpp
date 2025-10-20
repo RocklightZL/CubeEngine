@@ -3,21 +3,30 @@
 #include "Project.h"
 #include "Cube/Core/Application.h"
 #include "Cube/Core/Log.h"
+#include "Cube/Scene/SceneLayer.h"
 #include "Cube/Scene/SceneSerializer.h"
 
 using namespace Cube;
 
 extern Project* proj;
 
+class PreGame : public Application {
+public:
+    PreGame(const WindowPros& windowPros, const std::shared_ptr<Scene>& scene) : Application(windowPros) {
+        layers.pushLayer(std::make_shared<SceneLayer>(scene));
+    }
+};
+
 void gameThreadFunction(bool* isGameStarted) {
 	CB_EDITOR_TRACE("gameThread begin");
 
 	Scene* s = proj->selectedScene->scene;
-	Application* game = new Application({(int)s->getViewportSize().x, (int)s->getViewportSize().y, s->getName()});
 
-	Scene* mainScene = new Scene();
-	SceneSerializer::deserialize(mainScene, proj->getConfig().sceneDirectory + "/" + s->getName() + ".scene");
-	game->setMainScene(mainScene);
+	std::shared_ptr<Scene> mainScene = std::make_shared<Scene>();
+	SceneSerializer::deserialize(mainScene.get(), proj->getConfig().sceneDirectory + "/" + s->getName() + ".scene");
+
+	PreGame* game = new PreGame({(int)s->getViewportSize().x, (int)s->getViewportSize().y, s->getName()}, mainScene);
+
 	game->run();
 
 	delete game;

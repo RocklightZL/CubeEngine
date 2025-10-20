@@ -70,7 +70,7 @@ namespace Cube {
                 newProject->close();
                 ImGui::CloseCurrentPopup();
 
-                app->switchLayer(new EditorLayer());
+                app->switchLayer(std::make_shared<EditorLayer>());
             }
         }, [] {
 
@@ -101,7 +101,7 @@ namespace Cube {
             std::string path = FileDialog::openFile("Cube Project File(.cbproj)\0*.cbproj\0", app->getWindow()->getWin32Window());
             if(!path.empty()) {
                 proj = new Project(path);
-                app->switchLayer(new EditorLayer());
+                app->switchLayer(std::make_shared<EditorLayer>());
             }
         }
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (buttonSize.x + ImGui::GetStyle().FramePadding.x * 2) / 2 - ImGui::CalcTextSize("Open Project").x / 2);

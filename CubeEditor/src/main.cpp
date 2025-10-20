@@ -11,7 +11,7 @@ Cube::Project* proj = nullptr;
 
 int main() {
     app = new Cube::EditorApp({1920, 1080, "Cube Editor"});
-    app->switchLayer(new Cube::GuidanceLayer());
+    app->switchLayer(std::make_shared<Cube::GuidanceLayer>());
     app->run();
 
     delete proj;

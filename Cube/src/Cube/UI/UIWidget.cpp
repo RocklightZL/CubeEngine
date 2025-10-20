@@ -14,8 +14,8 @@ namespace Cube {
 
     void UIWidget::render() {
         if(!visible) return;
-        glm::vec2 renderPos = getOpenGLPos();
-        Renderer2D::drawQuad(renderPos, size, nullptr, style.bgColor);
+        glm::vec2 renderPos = getWorldPosition();
+        Renderer2D::drawQuad(renderPos + size / 2.0f, size, nullptr, style.bgColor);
 
         Renderer2D::drawLine(renderPos + glm::vec2(0, size.y), renderPos + size, style.borderColor, style.border.x);
         Renderer2D::drawLine(renderPos + size, renderPos + glm::vec2(size.x, 0), style.borderColor, style.border.y);

@@ -12,9 +12,11 @@
 
 namespace Cube {
 
+    bool Application::isInitialized = false;
+
     void Application::init() {
         Log::init();
-        // register built-in component
+        // register built-in component //TODO: 可以放到场景类那里
         Component::registerComponentType("TransformComponent", new ComponentFactoryImpl<TransformComponent>());
         Component::registerComponentType("SpriteComponent", new ComponentFactoryImpl<SpriteComponent>());
         Component::registerComponentType("CameraComponent", new ComponentFactoryImpl<CameraComponent>());
@@ -23,7 +25,11 @@ namespace Cube {
 
     Application::Application() : Application({1920, 1080, "Cube Engine"}){}
 
-    Application::Application(const WindowPros& windowPros) : mainWindow(nullptr), running(true), mainScene(nullptr) {
+    Application::Application(const WindowPros& windowPros) : mainWindow(nullptr), running(true){
+        if(!isInitialized) {
+            init();
+            isInitialized = true;
+        }
         mainWindow = new Window(windowPros, &dispatcher);
 
         dispatcher.subscribe(std::bind(&Application::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
@@ -32,7 +38,6 @@ namespace Cube {
 
     Application::~Application() {
         delete mainWindow;
-        delete mainScene;
     }
 
     void Application::run(){
@@ -50,27 +55,14 @@ namespace Cube {
 
             Renderer::clearBuffer();
 
-            for(Layer* layer : layers.getData()) {
+            for(const auto& layer : layers.getLayers()) {
                 layer->onUpdate(deltaTime);
-            }
-            if(mainScene) {
-                mainScene->onUpdate(deltaTime);
             }
             mainWindow->update();
         }
     }
 
-    LayerStack* Application::getLayers() { return &layers; }
-
     Window* Application::getWindow() { return mainWindow; }
-
-    void Application::pushLayer(Layer* layer) {
-        layers.pushLayer(layer);
-    }
-
-    void Application::setMainScene(Scene* scene) {
-        mainScene = scene;
-    }
 
     bool Application::onWindowClose(const Event& e) {
         running = false;

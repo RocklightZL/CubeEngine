@@ -24,9 +24,7 @@ namespace Cube {
     }();
 
     EditorApp::EditorApp(const WindowPros& windowPros) {
-        Log::init();
-        mainWindow = new Window(windowPros, &dispatcher);
-        init();
+        imGuiInit();
         loadAssets();
     }
 
@@ -36,49 +34,17 @@ namespace Cube {
         ImGui_ImplGlfw_Shutdown();
         ImGui_ImplOpenGL3_Shutdown();
         ImGui::DestroyContext();
-
-        delete currentLayer;
-        delete mainWindow;
     }
 
-    void EditorApp::run() {
-        running = true;
-
-        std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
-        while(running) {
-            std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-            std::chrono::duration<float> frameDuration = currentTime - lastTime;
-            lastTime = currentTime;
-            float deltaTime = frameDuration.count();
-
-            Renderer::clearBuffer();
-            if(currentLayer) {
-                currentLayer->onUpdate(deltaTime);
-            }
-            mainWindow->update();
+    void EditorApp::switchLayer(const std::shared_ptr<Layer>& layer) {
+        if(!layers.getLayers().empty()) {
+            layers.popOverLayer();
         }
-    }
-
-    void EditorApp::switchLayer(Layer* layer) {
-        delete currentLayer;
-        currentLayer = layer;
+        layers.pushOverLayer(layer);
     }
 
     Window* EditorApp::getWindow() const {
         return mainWindow;
-    }
-
-    void EditorApp::init() {
-        dispatcher.subscribe(std::bind(&EditorApp::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
-        dispatcher.subscribe(std::bind(&EditorApp::onWindowResize, this, std::placeholders::_1), EventType::WindowResize);
-
-        // register built-in component
-        Component::registerComponentType("TransformComponent", new ComponentFactoryImpl<TransformComponent>());
-        Component::registerComponentType("SpriteComponent", new ComponentFactoryImpl<SpriteComponent>());
-        Component::registerComponentType("CameraComponent", new ComponentFactoryImpl<CameraComponent>());
-        Component::registerComponentType("AnimatorComponent", new ComponentFactoryImpl<AnimatorComponent>());
-
-        imGuiInit();
     }
 
     void EditorApp::imGuiInit() {
@@ -784,20 +750,5 @@ namespace Cube {
             style.WindowTitleAlign = ImVec2(0.0f, 0.5f); // 窗口标题对齐
             style.ButtonTextAlign = ImVec2(0.5f, 0.5f);  // 按钮文本居中
         }
-    }
-
-    bool EditorApp::onWindowClose(const Event& e) {
-        const auto ee = static_cast<const WindowCloseEvent&>(e);
-        if(ee.getWindow() == mainWindow){
-            running = false;
-        }
-        return true;
-    }
-
-    bool EditorApp::onWindowResize(const Event& e) {
-        // const auto ee = static_cast<const WindowResizeEvent&>(e);
-        // if(ee.getWindow() == gameWindow) {
-        // }
-        return true;
     }
 }  // namespace Cube

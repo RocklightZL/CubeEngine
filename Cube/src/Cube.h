@@ -24,10 +24,7 @@
 
 #include "Cube/Animator/AnimatorSystem.h"
 
-#include "Cube/UI/UIManager.h"
-#include "Cube/UI/UICanvas.h"
+#include "Cube/UI/UILayer.h"
 #include "Cube/UI/UIWidget.h"
-#include "Cube/UI/UIExample.h"
-#include "Cube/UI/FileDialog.h"
 
 #include "Cube/Utils/Utils.h"

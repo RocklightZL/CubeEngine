@@ -1,5 +1,5 @@
 // test data from CubeEditor
-#define TEST05
+// #define TEST05
 #ifdef TEST05
 
 #include "Cube/Renderer/FrameBuffer.h"

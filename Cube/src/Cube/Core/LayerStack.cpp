@@ -3,32 +3,27 @@
 
 namespace Cube {
 
-    LayerStack::~LayerStack() {
-        for(Layer* layer : layers) {
-            delete layer;
-        }
-    }
-
-    void LayerStack::pushLayer(Layer* layer) {
-        layers.push_back(layer);
-        layer->onAttach();
-    }
-
-    void LayerStack::pushOverLayer(Layer* layer) {
+    void LayerStack::pushLayer(const std::shared_ptr<Layer>& layer) {
         layers.push_front(layer);
         layer->onAttach();
     }
 
-    void LayerStack::popLayer(Layer* layer) {
-        auto it = std::find(layers.begin(), layers.end(), layer);
-        if(it != layers.end()) {
-            layers.erase(it);
-            layer->onDetach();
-            delete layer;
-        }
-    }
-    const std::deque<Layer*>& LayerStack::getData() const {
-        return layers;
+    void LayerStack::pushOverLayer(const std::shared_ptr<Layer>& layer) {
+        layers.push_back(layer);
+        layer->onAttach();
     }
 
+    std::shared_ptr<Layer> LayerStack::popLayer() {
+        std::shared_ptr<Layer> layer = layers.front();
+        layers.pop_front();
+        layer->onDetach();
+        return layer;
+    }
+
+    std::shared_ptr<Layer> LayerStack::popOverLayer() {
+        std::shared_ptr<Layer> layer = layers.back();
+        layers.pop_back();
+        layer->onDetach();
+        return layer;
+    }
 }  // namespace Cube

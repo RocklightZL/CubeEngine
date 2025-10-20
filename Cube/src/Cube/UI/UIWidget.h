@@ -1,13 +1,11 @@
 #pragma once
 
-#include "../../../../CubeEditor/external/imgui/imgui/imgui.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Renderer/Texture.h"
 
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
-#include <functional>
 
 namespace Cube {
     struct UIStyle {
@@ -26,11 +24,6 @@ namespace Cube {
         virtual void render();
 
         glm::vec2 getWorldPosition() const;
-
-        glm::vec2 getOpenGLPos() const {
-            glm::vec2 worldPos = getWorldPosition();
-            return {worldPos.x, Renderer::getViewport().y - worldPos.y};
-        }
 
         void setParent(UIWidget* p) { parent = p; }
         UIWidget* getParent() const { return parent; }
