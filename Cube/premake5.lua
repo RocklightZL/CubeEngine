@@ -24,11 +24,13 @@ project "Cube"
         "external/glad/include",
         "external/glm",
         "external/stb_image",
-        "external/nlohmann-json"
+        "external/nlohmann-json",
+        "external/freetype/include"
     }
 
     links{
-        "external/glfw-3.4/lib-vc2022/glfw3.lib"
+        "external/glfw-3.4/lib-vc2022/glfw3.lib",
+        "external/freetype/freetype.lib"
     }
 
     filter "configurations:Debug"

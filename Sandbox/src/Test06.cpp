@@ -13,7 +13,10 @@ public:
         UIWidget::globalStyle.bgColor = {0.0f, 1.0f, 1.0f, 1.0f};
         UIWidget::globalStyle.borderColor = {1.0f, 1.0f, 0.0f, 1.0f};
         UIWidget::globalStyle.border = glm::vec4(2.0f);
-        std::shared_ptr<UIWidget> panel = std::make_shared<UIPanel>();
+        std::shared_ptr<UIPanel> panel = std::make_shared<UIPanel>();
+        std::shared_ptr<Texture2D> tex = std::make_shared<Texture2D>("assets/texture/test02.jpg");
+        std::shared_ptr<UIImage> image = std::make_shared<UIImage>(tex);
+        panel->addChild(image);
         panel->setPosition({300.0f, 300.0f});
         panel->setSize({400.0f, 300.0f});
         uiLayer->addWidget(panel);

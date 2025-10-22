@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "UIWidget.h"
+
+#include "Cube/Core/Input.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Core/Log.h"
 
@@ -24,10 +26,19 @@ namespace Cube {
     }
 
     glm::vec2 UIWidget::getWorldPosition() const {
-        if (parent) {
+        if(parent) {
             return parent->getWorldPosition() + pos;
         }
         return pos;
+    }
+
+    bool UIWidget::isHovered() const {
+        return contain(Input::getMousePos());
+    }
+
+    bool UIWidget::contain(const glm::vec2& point) const {
+        glm::vec2 pos = getWorldPosition();
+        return point.x >= pos.x && point.x <= pos.x + size.x && point.y >= pos.y && point.y <= pos.y + size.y;
     }
 
     // UIPanel
@@ -48,7 +59,8 @@ namespace Cube {
 
     // UIImage
     void UIImage::render() {
-        
+        UIWidget::render();
+        Renderer2D::drawQuad(getWorldPosition() + size / 2.0f, size, texture.get(), glm::vec4(1), 0, texRegion.getUVCoord());
     }
 
 }  // namespace Cube

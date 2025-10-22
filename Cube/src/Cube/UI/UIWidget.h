@@ -2,6 +2,7 @@
 
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Renderer/Texture.h"
+#include "Cube/Renderer/TextureRegion.h"
 
 #include <glm/glm.hpp>
 #include <memory>
@@ -22,8 +23,8 @@ namespace Cube {
         virtual ~UIWidget() = default;
 
         virtual void render();
-
         glm::vec2 getWorldPosition() const;
+        bool isHovered() const;
 
         void setParent(UIWidget* p) { parent = p; }
         UIWidget* getParent() const { return parent; }
@@ -48,6 +49,8 @@ namespace Cube {
         bool visible = true;
 
         UIWidget* parent = nullptr; // upper container
+
+        bool contain(const glm::vec2& point) const;
     };
 
     class UIPanel : public UIWidget {
@@ -68,12 +71,13 @@ namespace Cube {
     class UIImage : public UIWidget {
     public:
         UIImage() = default;
-        UIImage(const std::shared_ptr<Texture2D>& texture, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}) : UIWidget(pos, size), texture(texture) {}
+        UIImage(const std::shared_ptr<Texture2D>& texture, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}, const TextureRegion& texRegion = {{0.0f, 1.0f}, {1.0f, 0.0f}}) : UIWidget(pos, size), texture(texture), texRegion(texRegion) {}
         ~UIImage() override = default;
 
         void render() override;
     protected:
         std::shared_ptr<Texture2D> texture;
+        TextureRegion texRegion;
     };
 
     class UILabel : public UIWidget {
