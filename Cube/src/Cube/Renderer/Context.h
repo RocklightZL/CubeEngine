@@ -17,6 +17,7 @@ namespace Cube {
 		glm::vec4 textureCoord;
 	};
 
+	// each Window owns a Context object, and each Context object owns a ResourceManager instance.
 	class Context {
 	public:
 		friend class Renderer2D;

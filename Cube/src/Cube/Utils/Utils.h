@@ -16,5 +16,6 @@ namespace Cube {
 		static std::string getFileName(const std::string& path, bool keepSuffix = false);
 		static std::string getFileSuffix(const std::string& path);
 		static bool isFileExists(const std::string& path);
+		static std::vector<uint32_t> utf8To32(const std::string& utf8_str);
 	};
 }

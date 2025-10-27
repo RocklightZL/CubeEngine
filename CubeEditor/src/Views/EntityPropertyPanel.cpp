@@ -101,9 +101,9 @@ namespace Cube {
                                 textureData = std::make_shared<TextureData>(texturePath + ".meta", texturePath);
                             }else{
                                 if(sc->texture) {
-                                    ResourceManager::getInstance().release(sc->texture->getFilePath());
+                                    ResourceManager::get().release(sc->texture->getFilePath());
                                 }
-                                sc->texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
+                                sc->texture = ResourceManager::get().load<Texture2D>(texturePath)->data;
                                 proj->selectedScene->isSaved = false;
                             }
                         }
@@ -112,9 +112,9 @@ namespace Cube {
                     if(showSelectedSubTexturePopup && textureData) {
                         if(auto* res = SceneView::selectSubTexturePopup(*textureData, &showSelectedSubTexturePopup)) {
                             if(sc->texture) {
-                                ResourceManager::getInstance().release(sc->texture->getFilePath());
+                                ResourceManager::get().release(sc->texture->getFilePath());
                             }
-                            sc->texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
+                            sc->texture = ResourceManager::get().load<Texture2D>(texturePath)->data;
                             sc->region = {res->uvMin, res->uvMax};
                             proj->selectedScene->isSaved = false;
                         }

@@ -1,4 +1,6 @@
 #pragma once
+#include "Cube/Resource/Resource.h"
+
 #include <string>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -6,13 +8,14 @@
 
 namespace Cube {
 
-    class Texture2D {
+    class Texture2D : public ResourceBase{
     public:
         Texture2D(const std::string& filePath);
         Texture2D(int width, int height, void* data);
         virtual ~Texture2D();
         void bind(unsigned int slot = 0) const;
         void unbind();
+        void updateData(int x, int y, int w, int h, const unsigned char* data);
 
         int getWidth() const;
         int getHeight() const;

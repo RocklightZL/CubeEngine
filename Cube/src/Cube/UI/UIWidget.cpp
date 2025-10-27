@@ -60,7 +60,18 @@ namespace Cube {
     // UIImage
     void UIImage::render() {
         UIWidget::render();
-        Renderer2D::drawQuad(getWorldPosition() + size / 2.0f, size, texture.get(), glm::vec4(1), 0, texRegion.getUVCoord());
+        Renderer2D::drawQuad(getWorldPosition() + size / 2.0f, size, texture, glm::vec4(1), 0, texRegion.getUVCoord());
+    }
+
+    // UILabel
+    void UILabel::render() {
+        UIWidget::render();
+        glm::vec2 renderPos = getPosition();
+        for(uint32_t c : Utils::utf8To32(text)) {
+            Glyph* g = font->getGlyph(c);
+            Renderer2D::drawQuad(glm::vec2(renderPos.x + g->bearing.x, renderPos.y - g->bearing.y) + g->size / 2.0f, g->size, g->texture, color, 0, g->texRegion.getUVCoord());
+            renderPos.x += g->advance;
+        }
     }
 
 }  // namespace Cube

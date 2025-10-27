@@ -70,7 +70,7 @@ namespace Cube {
                         showSelectSubTexturePopup = true;
                         textureData = std::make_shared<TextureData>(texturePath + ".meta", texturePath);
                     } else {
-                        Texture2D* texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
+                        Texture2D* texture = ResourceManager::get().load<Texture2D>(texturePath)->data;
                         Scene* scene = proj->selectedScene->scene;
                         Entity* entity = scene->createEntity(texturePath);
                         TransformComponent* tc = entity->addComponent<TransformComponent>();
@@ -85,7 +85,7 @@ namespace Cube {
             }
             if(showSelectSubTexturePopup && textureData) {
                 if(auto* subTexture = selectSubTexturePopup(*textureData, &showSelectSubTexturePopup)) {
-                    Texture2D* texture = ResourceManager::getInstance().load<Texture2D>(texturePath)->data;
+                    Texture2D* texture = ResourceManager::get().load<Texture2D>(texturePath)->data;
                     Scene* scene = proj->selectedScene->scene;
                     Entity* entity = scene->createEntity(subTexture->name);
                     TransformComponent* tc = entity->addComponent<TransformComponent>();
@@ -183,7 +183,7 @@ namespace Cube {
         constexpr ImVec4 highLightColor = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
         ImGui::PushStyleColor(ImGuiCol_Border, borderColor);
         if(ImGui::BeginPopupModal("Select SubTexture", open, ImGuiWindowFlags_NoResize)) {
-            Texture2D* texture = ResourceManager::getInstance().load<Texture2D>(data.imagePath)->data;
+            Texture2D* texture = ResourceManager::get().load<Texture2D>(data.imagePath)->data;
             const ImVec4 originalBgColor = ImGui::GetStyle().Colors[ImGuiCol_ChildBg];
             const ImVec4 hoveredBgColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered];
             const ImVec4 selectedBgColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonActive];
@@ -252,7 +252,7 @@ namespace Cube {
                 }
             }
 
-            ResourceManager::getInstance().release(data.imagePath);
+            ResourceManager::get().release(data.imagePath);
             ImGui::EndPopup();
         }
         ImGui::PopStyleColor();

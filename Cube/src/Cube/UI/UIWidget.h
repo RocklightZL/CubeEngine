@@ -70,24 +70,38 @@ namespace Cube {
 
     class UIImage : public UIWidget {
     public:
-        UIImage() = default;
-        UIImage(const std::shared_ptr<Texture2D>& texture, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}, const TextureRegion& texRegion = {{0.0f, 1.0f}, {1.0f, 0.0f}}) : UIWidget(pos, size), texture(texture), texRegion(texRegion) {}
-        ~UIImage() override = default;
+        UIImage(const std::string& path, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}, const TextureRegion& texRegion = {{0.0f, 1.0f}, {1.0f, 0.0f}}) : UIWidget(pos, size), texRegion(texRegion) {
+            texture = ResourceManager::get().loadTexture(path);
+        }
+        ~UIImage() override {
+            ResourceManager::get().release(texture);
+        }
 
         void render() override;
     protected:
-        std::shared_ptr<Texture2D> texture;
+        Texture2D* texture;
         TextureRegion texRegion;
     };
 
     class UILabel : public UIWidget {
     public:
-        UILabel() = default;
-        UILabel(const std::string& text, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}) : UIWidget(pos, size), text(text) {}
-        ~UILabel() override = default;
+        UILabel(const std::string& text, const std::string& fontPath, int fontSize, const glm::vec4& color, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}) : UIWidget(pos, size), text(text), color(color) {
+            font = ResourceManager::get().loadFont(fontPath, fontSize);
+        }
+        UILabel(const std::string& text, const glm::vec4& color, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}) : UILabel(text, globalFont.filepath, globalFont.fontSize, color, pos, size){}
+        ~UILabel() override {
+            ResourceManager::get().release(font);
+        }
 
         void render() override;
+
+        static struct{
+            std::string filepath;
+            int fontSize;
+        } globalFont;
     protected:
         std::string text;
+        glm::vec4 color;
+        Font* font;
     };
 }

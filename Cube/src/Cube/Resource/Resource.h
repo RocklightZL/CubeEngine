@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 namespace Cube {
 
     class ResourceBase {
@@ -9,16 +7,7 @@ namespace Cube {
         ResourceBase() = default;
         virtual ~ResourceBase() = default;
 
-        std::string path;
         int refCount = 0;
-    };
-
-    template<typename T>
-    class Resource : public ResourceBase{
-    public:
-        T* data = nullptr;
-        virtual ~Resource() {
-            delete data;
-        }
+        std::string identifier; // format: filepath?param1&param2... eg. "C:/data/abc.ttf&24"
     };
 }

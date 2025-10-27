@@ -83,6 +83,12 @@ namespace Cube {
 
     void Texture2D::unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
 
+    // only for RGBA
+    void Texture2D::updateData(int x, int y, int w, int h, const unsigned char* data) {
+        bind();
+        glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    }
+
     int Texture2D::getWidth() const {
         return width;
     }

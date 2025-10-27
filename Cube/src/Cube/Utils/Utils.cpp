@@ -94,4 +94,53 @@ namespace Cube {
     bool Utils::isFileExists(const std::string& path) {
         return std::filesystem::exists(path) && std::filesystem::is_regular_file(path);
     }
+
+    std::vector<uint32_t> Utils::utf8To32(const std::string& utf8_str) {
+        std::vector<uint32_t> code_points;
+        size_t i = 0;
+        const size_t len = utf8_str.size();
+
+        while (i < len) {
+            uint8_t c = static_cast<uint8_t>(utf8_str[i]);
+
+            if (c <= 0x7F) { // 1byte U+0000~U+007F
+                code_points.push_back(static_cast<uint32_t>(c));
+                i += 1;
+            } 
+            else if (c >= 0xC0 && c <= 0xDF) { // 2bytes U+0080~U+07FF
+                if (i + 1 >= len) break; // invalid
+                uint8_t c2 = static_cast<uint8_t>(utf8_str[i + 1]);
+                uint32_t cp = static_cast<uint32_t>(((c & 0x1F) << 6) | (c2 & 0x3F));
+                code_points.push_back(cp);
+                i += 2;
+            } 
+            else if (c >= 0xE0 && c <= 0xEF) { // 3bytes U+0800~U+FFFF
+                if (i + 2 >= len) break;
+                uint8_t c2 = static_cast<uint8_t>(utf8_str[i + 1]);
+                uint8_t c3 = static_cast<uint8_t>(utf8_str[i + 2]);
+                uint32_t cp = static_cast<uint32_t>(
+                    ((c & 0x0F) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F)
+                    );
+                code_points.push_back(cp);
+                i += 3;
+            } 
+            else if (c >= 0xF0 && c <= 0xF7) { // 4bytes U+10000~U+10FFFF
+                if (i + 3 >= len) break;
+                uint8_t c2 = static_cast<uint8_t>(utf8_str[i + 1]);
+                uint8_t c3 = static_cast<uint8_t>(utf8_str[i + 2]);
+                uint8_t c4 = static_cast<uint8_t>(utf8_str[i + 3]);
+                uint32_t cp = static_cast<uint32_t>(
+                    ((c & 0x07) << 18) | ((c2 & 0x3F) << 12) | ((c3 & 0x3F) << 6) | (c4 & 0x3F)
+                    );
+                code_points.push_back(cp);
+                i += 4;
+            } 
+            else {
+                // invalid
+                i += 1;
+            }
+        }
+
+        return code_points;
+    }
 }  // namespace Cube
