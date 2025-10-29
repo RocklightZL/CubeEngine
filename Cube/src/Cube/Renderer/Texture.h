@@ -11,7 +11,7 @@ namespace Cube {
     class Texture2D : public ResourceBase{
     public:
         Texture2D(const std::string& filePath);
-        Texture2D(int width, int height, void* data);
+        Texture2D(int width, int height, uint8_t* data);
         virtual ~Texture2D();
         void bind(unsigned int slot = 0) const;
         void unbind();

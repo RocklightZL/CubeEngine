@@ -66,11 +66,12 @@ namespace Cube {
     // UILabel
     void UILabel::render() {
         UIWidget::render();
-        glm::vec2 renderPos = getPosition();
+        glm::vec2 renderPos = getWorldPosition();
+        renderPos.y = renderPos.y + size.y + font->getDescender();
         for(uint32_t c : Utils::utf8To32(text)) {
             Glyph* g = font->getGlyph(c);
             Renderer2D::drawQuad(glm::vec2(renderPos.x + g->bearing.x, renderPos.y - g->bearing.y) + g->size / 2.0f, g->size, g->texture, color, 0, g->texRegion.getUVCoord());
-            renderPos.x += g->advance;
+            renderPos.x += (float)g->advance;
         }
     }
 

@@ -88,8 +88,8 @@ namespace Cube {
         currentContext->vao->setIndexBuffer(ibo);
         currentContext->vao->addVertexBuffer(currentContext->vbo);
 
-        uint32_t data = 0xFFFFFFFF;
-        currentContext->whiteTex = new Texture2D(1, 1, &data);
+        uint8_t data[4]{0xFF, 0xFF, 0xFF, 0xFF};
+        currentContext->whiteTex = new Texture2D(1, 1, data);
     }
 
     void Renderer2D::beginFrame(const glm::mat4& pvMatrix) {

@@ -10,7 +10,7 @@ namespace Cube {
     Texture2D::Texture2D(const std::string& filePath) : filePath(filePath){
         stbi_set_flip_vertically_on_load(1);
         int channels;
-        unsigned char* originalData = stbi_load(filePath.c_str(), &width, &height, &channels, 0);
+        uint8_t* originalData = stbi_load(filePath.c_str(), &width, &height, &channels, 0);
         if(!originalData) {
             CB_CORE_ERROR("Failed to load image: {}", filePath);
             CB_ASSERT(0);
@@ -36,9 +36,9 @@ namespace Cube {
         // alignment
         int rowSize = width * pixelSize;
         int alignedSize = (rowSize + 3) / 4 * 4;
-        unsigned char* data = originalData;
+        uint8_t* data = originalData;
         if(rowSize != alignedSize) {
-            data = new unsigned char[(size_t)(alignedSize * height)];
+            data = new uint8_t[(size_t)(alignedSize * height)];
             for(int i = 0; i < height; i++) {
                 memcpy(data + i * alignedSize, originalData + i * rowSize, rowSize);
                 memset(data + i * alignedSize + rowSize, 0, alignedSize - rowSize);
@@ -63,13 +63,29 @@ namespace Cube {
         }
     }
     
-    Texture2D::Texture2D(int width, int height, void* data) : width(width), height(height){
-        // white texture
+    Texture2D::Texture2D(int width, int height, uint8_t* originalData) : width(width), height(height){
+        // alignment
+        int rowSize = width * 4;
+        int alignedSize = (rowSize + 3) / 4 * 4;
+        uint8_t* data = originalData;
+        if(rowSize != alignedSize) {
+            data = new uint8_t[(size_t)(alignedSize * height)];
+            for(int i = 0; i < height; i++) {
+                memcpy(data + i * alignedSize, originalData + i * rowSize, rowSize);
+                memset(data + i * alignedSize + rowSize, 0, alignedSize - rowSize);
+            }
+        }
+
         glGenTextures(1, &id);
         bind();
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        if(rowSize != alignedSize) {
+            delete[] data;
+        }
     }
 
     Texture2D::~Texture2D() {

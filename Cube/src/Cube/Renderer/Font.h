@@ -21,6 +21,10 @@ namespace Cube {
 		Font(const std::string& filePath, int fontSize);
 
 		Glyph* getGlyph(uint32_t c);
+
+		int getDescender() const;
+		int getAscender() const;
+		glm::vec2 calcTextSize(const std::string& text);
 	private:
 		std::string filePath;
         int fontSize;
@@ -32,11 +36,9 @@ namespace Cube {
 
 		Glyph* loadGlyph(uint32_t c);
 		// for function loadGlyph
-		int curSize = 512;
+		int texSize = 512;
 		int x = 0;
 		int y = 0;
 		int maxH = 0;
 	};
-
-	constexpr int MAX_TEX_SIZE = 4096;
 }

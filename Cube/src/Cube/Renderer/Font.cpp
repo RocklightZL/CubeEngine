@@ -6,6 +6,9 @@
 
 #include <algorithm>
 #include "Texture.h"
+#include "Cube/Utils/Utils.h"
+
+#include <iostream>
 
 namespace Cube {
 
@@ -19,6 +22,15 @@ namespace Cube {
     };
 
     Font::Font(const std::string& filePath, int fontSize) : filePath(filePath), fontSize(fontSize) {
+        if(fontSize < 16) {
+            texSize = 512;
+        }else if(fontSize < 32) {
+            texSize = 1024;
+        }else if(fontSize < 64) {
+            texSize = 2048;
+        }else {
+            texSize = 4096;
+        }
         atlasPages.push_back(nullptr);
         ftData = std::make_unique<FreeTypeData>();
         if(FT_Error err = FT_Init_FreeType(&ftData->lib)) {
@@ -45,6 +57,19 @@ namespace Cube {
         return loadGlyph(c);
     }
 
+    int Font::getDescender() const { return ftData->face->descender * fontSize / ftData->face->units_per_EM; }
+    int Font::getAscender() const { return ftData->face->ascender * fontSize / ftData->face->units_per_EM; }
+
+    glm::vec2 Font::calcTextSize(const std::string& text){
+        glm::vec2 res;
+        res.y = (ftData->face->ascender - ftData->face->descender) * fontSize / ftData->face->units_per_EM;
+        res.x = 0;
+        for(auto c : Utils::utf8To32(text)) {
+            res.x += getGlyph(c)->advance;
+        }
+        return res;
+    }
+
     Glyph* Font::loadGlyph(uint32_t c) {
         if(FT_Error err = FT_Load_Char(ftData->face, c, FT_LOAD_RENDER)) {
             CB_CORE_ERROR("FreeType: Failed to load character '{}'. Error Code = {}", c, err);
@@ -56,33 +81,24 @@ namespace Cube {
             ftData->face->glyph->bitmap_left,
             ftData->face->glyph->bitmap_top,
         };
-        glyph.advance = (ftData->face->glyph->advance.x * fontSize) / ftData->face->units_per_EM;
+        glyph.advance = ftData->face->glyph->advance.x >> 6;
 
         // add glyph to atlas
         uint8_t* rawData = ftData->face->glyph->bitmap.buffer;
         int width = ftData->face->glyph->bitmap.width;
         int height = ftData->face->glyph->bitmap.rows;
-        if(y + height > curSize) {
-            curSize <<= 2;
+        if(y + height > texSize) {
             x = 0;
             y = 0;
             maxH = 0;
-            if(curSize > MAX_TEX_SIZE) {
-                curSize = MAX_TEX_SIZE;
-                atlasPages.push_back(nullptr);
-            }else{
-                atlasPages.back().reset(nullptr);
-                for(auto& g : glyphs) {
-                    loadGlyph(g.first);
-                }
-            }
+            atlasPages.push_back(nullptr);
         }
         if(!atlasPages.back()) {
-            uint8_t* d = new uint8_t[curSize * curSize * 4];
-            atlasPages.back().reset(new Texture2D(curSize, curSize, d));
+            uint8_t* d = new uint8_t[texSize * texSize * 4];
+            atlasPages.back().reset(new Texture2D(texSize, texSize, d));
             delete[] d;
         }
-        uint8_t* data = new uint8_t[curSize * curSize * 4];
+        uint8_t* data = new uint8_t[width * height * 4];
         for(int i = 0; i < height; i++) {
             for(int j = 0; j < width; j++) {
                 data[i * width * 4 + j * 4] = 255;
@@ -93,20 +109,20 @@ namespace Cube {
         }
         atlasPages.back()->updateData(x, y, width, height, data);
         delete[] data;
-
+        
         glyph.texture = atlasPages.back().get();
-        glyph.texRegion.uvMin = glm::vec2(x, y + height) / (float)curSize;
-        glyph.texRegion.uvMax = glm::vec2(x + width, y) / (float)curSize;
+        glyph.texRegion.uvMin = glm::vec2(x, y + height) / (float)texSize;
+        glyph.texRegion.uvMax = glm::vec2(x + width, y) / (float)texSize;
         glyphs[c] = glyph;
-
+        
         x += width;
-        maxH = std::max(y, maxH);
-        if(x + width > curSize) {
+        maxH = std::max(height, maxH);
+        if(x + width > texSize) {
             y += maxH;
             x = 0;
         }
-
-        return &glyph;
+        
+        return &glyphs[c];
     }
 
 }  // namespace Cube

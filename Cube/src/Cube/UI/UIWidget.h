@@ -85,10 +85,12 @@ namespace Cube {
 
     class UILabel : public UIWidget {
     public:
-        UILabel(const std::string& text, const std::string& fontPath, int fontSize, const glm::vec4& color, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}) : UIWidget(pos, size), text(text), color(color) {
+        UILabel(const std::string& text, const std::string& fontPath, int fontSize, const glm::vec4& color, const glm::vec2& pos) : text(text), color(color) {
+            this->pos = pos;
             font = ResourceManager::get().loadFont(fontPath, fontSize);
+            size = font->calcTextSize(text);
         }
-        UILabel(const std::string& text, const glm::vec4& color, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}) : UILabel(text, globalFont.filepath, globalFont.fontSize, color, pos, size){}
+        UILabel(const std::string& text, const glm::vec4& color, const glm::vec2& pos = {0.0f, 0.0f}) : UILabel(text, globalFont.filepath, globalFont.fontSize, color, pos){}
         ~UILabel() override {
             ResourceManager::get().release(font);
         }
