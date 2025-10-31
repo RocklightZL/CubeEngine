@@ -5,16 +5,9 @@
 namespace Cube {
 	class MouseEvent : public Event {
 	public:
-		double getX() const {
-			return x;
-		}
-		double getY() const {
-			return y;
-		}
-	protected:
 		MouseEvent(double x, double y) : x(x), y(y){}
 		virtual ~MouseEvent() = default;
-	private:
+
 		double x;
 		double y;
 	};
@@ -26,8 +19,8 @@ namespace Cube {
 		MouseCode getMouseCode() {
 			return mouseCode;
 		}
-		EVENT_TYPE(MousePressed)
-	private:
+		EVENT_TYPE(MousePressedEvent)
+
 		MouseCode mouseCode;
 	};
 
@@ -38,8 +31,8 @@ namespace Cube {
 		MouseCode getMouseCode() {
 			return mouseCode;
 		}
-		EVENT_TYPE(MouseReleased)
-	private:
+		EVENT_TYPE(MouseReleasedEvent)
+
 		MouseCode mouseCode;
 	};
 
@@ -47,8 +40,8 @@ namespace Cube {
 	public:
 		MouseScrolledEvent(double x, double y, double xOffset, double yOffset) : MouseEvent(x, y), xOffset(xOffset), yOffset(yOffset){}
 		virtual ~MouseScrolledEvent() = default;
-		EVENT_TYPE(MouseScrolled)
-	private:
+		EVENT_TYPE(MouseScrolledEvent)
+
 		double xOffset;
 		double yOffset;
 	};
@@ -57,6 +50,6 @@ namespace Cube {
 	public:
 		MouseMovedEvent(double x, double y) : MouseEvent(x, y){}
 		virtual ~MouseMovedEvent() = default;
-		EVENT_TYPE(MouseMoved)
+		EVENT_TYPE(MouseMovedEvent)
 	};
 }

@@ -27,10 +27,9 @@ namespace Cube {
 
     class Window {
     public:
-        Window(const WindowPros& pros, EventDispatcher* dispatcher, GLFWwindow* shareContext = nullptr);
+        Window(const WindowPros& pros, GLFWwindow* shareContext = nullptr);
         virtual ~Window();
         void init(GLFWwindow* shareContext);
-        EventDispatcher* getDispatcher() const;
         const WindowPros& getPros() const;
         GLFWwindow* getNativeWindow() const;
 
@@ -51,7 +50,6 @@ namespace Cube {
         static int windowCnt;
         WindowPros pros;
         GLFWwindow* window;
-        EventDispatcher* dispatcher;
         Context* context = nullptr;
     };
 }  // namespace Cube

@@ -2,37 +2,38 @@
 
 #include <unordered_map>
 #include <functional>
+#include <typeindex>
 
 namespace Cube {
 
-    enum EventType {
-        None = 0,
-        WindowClose, WindowResize,
-        KeyPressed, KeyReleased,
-        MousePressed, MouseReleased, MouseMoved, MouseScrolled
-    };
-
-#define EVENT_TYPE(type) static EventType getStaticType(){return EventType::##type;}\
-                         virtual EventType getType() const override{return getStaticType();}\
-                         virtual const char* toString() const override{return #type;}
+#define EVENT_TYPE(type) virtual std::type_index getType() const override { return typeid(type); }\
+                         virtual std::string toString() const override { return #type; }
 
     class Event {
     public:
         Event() = default;
         virtual ~Event() = default;
-        virtual EventType getType() const = 0;
-        virtual const char* toString() const = 0;
+        virtual std::type_index getType() const = 0;
+        virtual std::string toString() const = 0;
     };
 
     class EventDispatcher {
-        using Handler = std::function<bool(const Event& e)>; // ´¦Àíº¯Êý
+        using Handler = std::function<bool(const Event& e)>;
     public:
+
+        static EventDispatcher& get();
+
+        void dispatch(const Event& e);
+
+        template<typename Type>
+        void subscribe(const Handler& handler) {
+            listener[typeid(Type)].push_back(handler);
+        }
+
+    private:
         EventDispatcher() = default;
         ~EventDispatcher() = default;
-        void subscribe(const Handler& handler, EventType type);
-        void dispatch(const Event& e);
-    private:
-        // ¼àÌýÆ÷
-        std::unordered_map<EventType, std::vector<Handler>> listener;
+
+        std::unordered_map<std::type_index, std::vector<Handler>> listener;
     };
 }  // namespace Cube

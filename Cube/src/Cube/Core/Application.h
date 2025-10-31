@@ -20,7 +20,6 @@ namespace Cube {
 		bool onWindowResize(const Event& e);
 
 	protected:
-		EventDispatcher dispatcher;
 		Window* mainWindow;
 		bool running;
 		LayerStack layers;

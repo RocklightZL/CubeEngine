@@ -30,10 +30,10 @@ namespace Cube {
             init();
             isInitialized = true;
         }
-        mainWindow = new Window(windowPros, &dispatcher);
+        mainWindow = new Window(windowPros);
 
-        dispatcher.subscribe(std::bind(&Application::onWindowClose, this, std::placeholders::_1), EventType::WindowClose);
-        dispatcher.subscribe(std::bind(&Application::onWindowResize, this, std::placeholders::_1), EventType::WindowResize);
+        EventDispatcher::get().subscribe<WindowCloseEvent>(std::bind(&Application::onWindowClose, this, std::placeholders::_1));
+        EventDispatcher::get().subscribe<WindowResizeEvent>(std::bind(&Application::onWindowResize, this, std::placeholders::_1));
     }
 
     Application::~Application() {
@@ -47,7 +47,6 @@ namespace Cube {
         std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
 
         while(running) {
-            // º∆À„÷° ±º‰
             std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
             std::chrono::duration<float> frameDuration = currentTime - lastTime;
             lastTime = currentTime;
@@ -71,8 +70,8 @@ namespace Cube {
     }
 
     bool Application::onWindowResize(const Event& e) {
-        const auto ee = dynamic_cast<const WindowResizeEvent&>(e);
-        Renderer::setViewport(ee.getWidth(), ee.getHeight());
+        const auto ee = static_cast<const WindowResizeEvent&>(e);
+        Renderer::setViewport(ee.width, ee.width);
         return true;
     }
 

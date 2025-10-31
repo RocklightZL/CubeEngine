@@ -15,7 +15,7 @@ namespace Cube {
 
     int Window::windowCnt = 0;
 
-    Window::Window(const WindowPros& pros, EventDispatcher* dispatcher, GLFWwindow* shareContext) : pros(pros), dispatcher(dispatcher) { init(shareContext); }
+    Window::Window(const WindowPros& pros, GLFWwindow* shareContext) : pros(pros) { init(shareContext); }
 
     Window::~Window() {
         glfwMakeContextCurrent(window);
@@ -53,7 +53,7 @@ namespace Cube {
 
         glfwSetWindowCloseCallback(window, [](GLFWwindow* w) {
             Window* window = static_cast<Window*>(glfwGetWindowUserPointer(w));
-            window->dispatcher->dispatch(WindowCloseEvent(window));
+            EventDispatcher::get().dispatch(WindowCloseEvent(window));
         });
 
         glfwSetWindowSizeCallback(window, [](GLFWwindow* w, int width, int height) {
@@ -62,20 +62,20 @@ namespace Cube {
             window->pros.width = width;
             window->pros.height = height;
 
-            window->dispatcher->dispatch(WindowResizeEvent(window, width, height));
+            EventDispatcher::get().dispatch(WindowResizeEvent(window, width, height));
         });
 
         glfwSetKeyCallback(window, [](GLFWwindow* w, int key, int scancode, int action, int mods) {
             Window* window = static_cast<Window*>(glfwGetWindowUserPointer(w));
             switch(action) {
             case GLFW_PRESS:
-                window->getDispatcher()->dispatch(KeyPressedEvent(key, false));
+                EventDispatcher::get().dispatch(KeyPressedEvent(key, false));
                 break;
             case GLFW_REPEAT:
-                window->getDispatcher()->dispatch(KeyPressedEvent(key, true));
+                EventDispatcher::get().dispatch(KeyPressedEvent(key, true));
                 break;
             case GLFW_RELEASE:
-                window->getDispatcher()->dispatch(KeyReleasedEvent(key));
+                EventDispatcher::get().dispatch(KeyReleasedEvent(key));
                 break;
             }
         });
@@ -86,10 +86,10 @@ namespace Cube {
             glfwGetCursorPos(w, &xPos, &yPos);
             switch(action) {
             case GLFW_PRESS:
-                window->getDispatcher()->dispatch(MousePressedEvent(xPos, yPos, button));
+                EventDispatcher::get().dispatch(MousePressedEvent(xPos, yPos, button));
                 break;
             case GLFW_RELEASE:
-                window->getDispatcher()->dispatch(MouseReleasedEvent(xPos, yPos, button));
+                EventDispatcher::get().dispatch(MouseReleasedEvent(xPos, yPos, button));
                 break;
             }
         });
@@ -98,16 +98,14 @@ namespace Cube {
             Window* window = static_cast<Window*>(glfwGetWindowUserPointer(w));
             double xPos, yPos;
             glfwGetCursorPos(w, &xPos, &yPos);
-            window->getDispatcher()->dispatch(MouseScrolledEvent(xPos, yPos, xoffset, yoffset));
+            EventDispatcher::get().dispatch(MouseScrolledEvent(xPos, yPos, xoffset, yoffset));
         });
 
         glfwSetCursorPosCallback(window, [](GLFWwindow* w, double xpos, double ypos) {
             Window* window = static_cast<Window*>(glfwGetWindowUserPointer(w));
-            window->getDispatcher()->dispatch(MouseMovedEvent(xpos, ypos));
+            EventDispatcher::get().dispatch(MouseMovedEvent(xpos, ypos));
         });
     }
-
-    EventDispatcher* Window::getDispatcher() const { return dispatcher; }
 
     const WindowPros& Window::getPros() const { return pros; }
 

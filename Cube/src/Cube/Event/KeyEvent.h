@@ -3,32 +3,26 @@
 #include "Cube/Core/KeyCodes.h"
 
 namespace Cube {
-	class KeyEvent : public Event {
-	public:
-		virtual KeyCode getKeyCode() const {
-			return keyCode;
-		}
-	protected:
-		KeyEvent(KeyCode keyCode) :keyCode(keyCode) {}
-		virtual ~KeyEvent() = default;
-	private:
-		KeyCode keyCode;
-	};
 
-	class KeyPressedEvent : public KeyEvent {
+	class KeyPressedEvent : public Event {
 	public:
-		KeyPressedEvent(KeyCode keyCode) : KeyEvent(keyCode){}
-		KeyPressedEvent(KeyCode keyCode, bool isRepeat) : KeyEvent(keyCode), isRepeat(isRepeat){}
-		virtual ~KeyPressedEvent() = default;
-		EVENT_TYPE(KeyPressed)
-	private:
+		EVENT_TYPE(KeyPressedEvent)
+
+		KeyPressedEvent(KeyCode keyCode) : keyCode(keyCode), isRepeat(false){}
+		KeyPressedEvent(KeyCode keyCode, bool isRepeat) : keyCode(keyCode), isRepeat(isRepeat) {}
+        virtual  ~KeyPressedEvent() override = default;
+
+		KeyCode keyCode;
 		bool isRepeat;
 	};
 
-	class KeyReleasedEvent : public KeyEvent {
+	class KeyReleasedEvent : public Event {
 	public:
-		KeyReleasedEvent(KeyCode keyCode) : KeyEvent(keyCode){}
-		virtual ~KeyReleasedEvent() = default;
-		EVENT_TYPE(KeyReleased)
+		EVENT_TYPE(KeyReleasedEvent)
+
+		KeyReleasedEvent(KeyCode keyCode) : keyCode(keyCode){}
+		virtual ~KeyReleasedEvent() override = default;
+
+	    KeyCode keyCode;
 	};
 }
