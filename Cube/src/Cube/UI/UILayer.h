@@ -12,9 +12,9 @@ namespace Cube {
 
         void onUpdate(float deltaTime) override;
 
-        void addWidget(const std::shared_ptr<UIWidget>& widget) { widgets.push_back(widget); }
+        void addWidget(UIWidget* widget) { widgets.emplace_back(widget); }
     private:
-        std::vector<std::shared_ptr<UIWidget>> widgets;
+        std::vector<std::unique_ptr<UIWidget>> widgets;
     };
 
 }

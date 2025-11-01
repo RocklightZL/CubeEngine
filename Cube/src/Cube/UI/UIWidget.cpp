@@ -75,4 +75,12 @@ namespace Cube {
         }
     }
 
+    bool UIButton::onMousePressed(const Event& e) {
+        if(isHovered() && static_cast<const MousePressedEvent&>(e).mouseCode == Mouse::ButtonLeft) {
+            onClicked();
+            return true;
+        }
+        return false;
+    }
+
 }  // namespace Cube

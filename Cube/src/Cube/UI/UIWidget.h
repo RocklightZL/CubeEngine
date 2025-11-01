@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Cube/Event/Event.h"
+#include "Cube/Event/MouseEvent.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Renderer/Texture.h"
 #include "Cube/Renderer/TextureRegion.h"
@@ -53,6 +55,7 @@ namespace Cube {
         bool contain(const glm::vec2& point) const;
     };
 
+    // UIPanel
     class UIPanel : public UIWidget {
     public:
         UIPanel() = default;
@@ -68,6 +71,7 @@ namespace Cube {
         std::vector<std::shared_ptr<UIWidget>> children;
     };
 
+    // UIImage
     class UIImage : public UIWidget {
     public:
         UIImage(const std::string& path, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}, const TextureRegion& texRegion = {{0.0f, 1.0f}, {1.0f, 0.0f}}) : UIWidget(pos, size), texRegion(texRegion) {
@@ -83,6 +87,7 @@ namespace Cube {
         TextureRegion texRegion;
     };
 
+    // UILabel
     class UILabel : public UIWidget {
     public:
         UILabel(const std::string& text, const std::string& fontPath, int fontSize, const glm::vec4& color, const glm::vec2& pos) : text(text), color(color) {
@@ -105,5 +110,18 @@ namespace Cube {
         std::string text;
         glm::vec4 color;
         Font* font;
+    };
+
+    // UIButton
+    class UIButton : public UIWidget{
+    public:
+        UIButton(const std::function<void()>& onClicked, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}) : UIWidget(pos, size), onClicked(onClicked) {
+            EventDispatcher::get().subscribe<MousePressedEvent>(std::bind(&UIButton::onMousePressed, this, std::placeholders::_1));
+        }
+        ~UIButton() = default;
+    private:
+        bool onMousePressed(const Event& e);
+
+        std::function<void()> onClicked;
     };
 }
