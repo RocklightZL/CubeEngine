@@ -89,7 +89,7 @@ namespace Cube {
         nlohmann::json componentData;
         SpriteComponent* sc = entity->getComponent<SpriteComponent>();
         if(sc->texture){
-            componentData["texture"] = sc->texture->getFilePath();
+            componentData["texture"] = sc->texture->getPath();
         }
         componentData["region"] = nlohmann::json::array({sc->region.uvMin.x, sc->region.uvMin.y, sc->region.uvMax.x, sc->region.uvMax.y});
         componentData["color"] = nlohmann::json::array({sc->color.r, sc->color.g, sc->color.b, sc->color.a});
@@ -119,7 +119,7 @@ namespace Cube {
     void SceneSerializer::spriteComponentDeserializer(Entity* entity, const nlohmann::json& componentData) {
         SpriteComponent* sc = entity->addComponent<SpriteComponent>();
         if(componentData.find("texture") != componentData.end()) {
-            sc->texture = ResourceManager::get().loadTexture(componentData["texture"]);
+            sc->texture = ResourceManager::get().load<Texture2D>(componentData["texture"]);
         }
         sc->region = {{componentData["region"][0], componentData["region"][1]}, {componentData["region"][2], componentData["region"][3]}};
         sc->color = {componentData["color"][0], componentData["color"][1], componentData["color"][2], componentData["color"][3]};

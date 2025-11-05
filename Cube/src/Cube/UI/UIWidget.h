@@ -75,7 +75,7 @@ namespace Cube {
     class UIImage : public UIWidget {
     public:
         UIImage(const std::string& path, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}, const TextureRegion& texRegion = {{0.0f, 1.0f}, {1.0f, 0.0f}}) : UIWidget(pos, size), texRegion(texRegion) {
-            texture = ResourceManager::get().loadTexture(path);
+            texture = ResourceManager::get().load<Texture2D>(path);
         }
         ~UIImage() override {
             ResourceManager::get().release(texture);
@@ -90,22 +90,19 @@ namespace Cube {
     // UILabel
     class UILabel : public UIWidget {
     public:
-        UILabel(const std::string& text, const std::string& fontPath, int fontSize, const glm::vec4& color, const glm::vec2& pos) : text(text), color(color) {
+        UILabel(const std::string& text, const std::string& fontMetaFile, const glm::vec4& color, const glm::vec2& pos) : text(text), color(color) {
             this->pos = pos;
-            font = ResourceManager::get().loadFont(fontPath, fontSize);
+            font = ResourceManager::get().load<Font>(fontMetaFile);
             size = font->calcTextSize(text);
         }
-        UILabel(const std::string& text, const glm::vec4& color, const glm::vec2& pos = {0.0f, 0.0f}) : UILabel(text, globalFont.filepath, globalFont.fontSize, color, pos){}
+        UILabel(const std::string& text, const glm::vec4& color, const glm::vec2& pos = {0.0f, 0.0f}) : UILabel(text, globalFont, color, pos){}
         ~UILabel() override {
             ResourceManager::get().release(font);
         }
 
         void render() override;
 
-        static struct{
-            std::string filepath;
-            int fontSize;
-        } globalFont;
+        static std::string globalFont;
     protected:
         std::string text;
         glm::vec4 color;

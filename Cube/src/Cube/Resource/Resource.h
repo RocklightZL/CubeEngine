@@ -4,10 +4,17 @@ namespace Cube {
 
     class ResourceBase {
     public:
+        friend class ResourceManager;
+
+        // Derived classes must implement a constructor with a std::string type parameter.
+        ResourceBase(const std::string& path) : path(path){}
         ResourceBase() = default;
         virtual ~ResourceBase() = default;
 
+        std::string getPath() const { return path; }
+
+    protected:
+        std::string path; // resource file path
         int refCount = 0;
-        std::string identifier; // format: filepath?param1&param2... eg. "C:/data/abc.ttf&24"
     };
 }

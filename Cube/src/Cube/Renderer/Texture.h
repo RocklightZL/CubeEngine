@@ -20,12 +20,10 @@ namespace Cube {
         int getWidth() const;
         int getHeight() const;
         GLuint getId() const;
-        const std::string& getFilePath() const;
     private:
         int width;
         int height;
         GLuint id;
-        std::string filePath;
     };
 
     struct SubTexture {

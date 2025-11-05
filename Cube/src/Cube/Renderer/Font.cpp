@@ -8,7 +8,9 @@
 #include "Texture.h"
 #include "Cube/Utils/Utils.h"
 
+#include <fstream>
 #include <iostream>
+#include <json.hpp>
 
 namespace Cube {
 
@@ -21,32 +23,30 @@ namespace Cube {
         }
     };
 
-    Font::Font(const std::string& filePath, int fontSize) : filePath(filePath), fontSize(fontSize) {
-        if(fontSize < 16) {
-            texSize = 512;
-        }else if(fontSize < 32) {
-            texSize = 1024;
-        }else if(fontSize < 64) {
-            texSize = 2048;
-        }else {
-            texSize = 4096;
-        }
-        atlasPages.push_back(nullptr);
-        ftData = std::make_unique<FreeTypeData>();
-        if(FT_Error err = FT_Init_FreeType(&ftData->lib)) {
-            CB_CORE_ERROR("FreeType: Failed to initialize library. Error Code = {}", err);
+    /*
+     * {
+     *      "fontFilePath": "C:/Font/font.ttf",
+     *      "FontSize": 24
+     * }
+     *
+     */
+    Font::Font(const std::string& path) : ResourceBase(path) {
+        std::ifstream file(path);
+        if(!file.is_open()) {
+            CB_CORE_ERROR("Failed to open font resource file: {}", path);
             return;
         }
+        nlohmann::json fontData;
+        file >> fontData;
+        file.close();
+        fontFilePath = fontData["fontFilePath"];
+        fontSize = fontData["fontSize"];
 
-        if(FT_Error err = FT_New_Face(ftData->lib, filePath.c_str(), 0, &ftData->face)) {
-            CB_CORE_ERROR("FreeType: Failed to load font file \"{}\". Error Code = {}", filePath, err);
-            return;
-        }
+        loadFontFile();
+    }
 
-        FT_Set_Pixel_Sizes(ftData->face, 0, fontSize);
-        for(unsigned char c = 32; c < 128; c++) {
-            loadGlyph(c);
-        }
+    Font::Font(const std::string& fontFilePath, int fontSize) : fontFilePath(fontFilePath), fontSize(fontSize){
+        loadFontFile();
     }
 
     Glyph* Font::getGlyph(uint32_t c) {
@@ -109,20 +109,48 @@ namespace Cube {
         }
         atlasPages.back()->updateData(x, y, width, height, data);
         delete[] data;
-        
+
         glyph.texture = atlasPages.back().get();
         glyph.texRegion.uvMin = glm::vec2(x, y + height) / (float)texSize;
         glyph.texRegion.uvMax = glm::vec2(x + width, y) / (float)texSize;
         glyphs[c] = glyph;
-        
+
         x += width;
         maxH = std::max(height, maxH);
         if(x + width > texSize) {
             y += maxH;
             x = 0;
         }
-        
+
         return &glyphs[c];
+    }
+
+    void Font::loadFontFile() {
+        if(fontSize < 16) {
+            texSize = 512;
+        }else if(fontSize < 32) {
+            texSize = 1024;
+        }else if(fontSize < 64) {
+            texSize = 2048;
+        }else {
+            texSize = 4096;
+        }
+        atlasPages.push_back(nullptr);
+        ftData = std::make_unique<FreeTypeData>();
+        if(FT_Error err = FT_Init_FreeType(&ftData->lib)) {
+            CB_CORE_ERROR("FreeType: Failed to initialize library. Error Code = {}", err);
+            return;
+        }
+
+        if(FT_Error err = FT_New_Face(ftData->lib, fontFilePath.c_str(), 0, &ftData->face)) {
+            CB_CORE_ERROR("FreeType: Failed to load font file \"{}\". Error Code = {}", fontFilePath, err);
+            return;
+        }
+
+        FT_Set_Pixel_Sizes(ftData->face, 0, fontSize);
+        for(unsigned char c = 32; c < 128; c++) {
+            loadGlyph(c);
+        }
     }
 
 }  // namespace Cube

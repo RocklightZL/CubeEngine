@@ -18,7 +18,8 @@ namespace Cube {
 	// Font class. based on FreeType
 	class Font : public ResourceBase{
 	public:
-		Font(const std::string& filePath, int fontSize);
+		Font(const std::string& path);
+		Font(const std::string& fontFilePath, int fontSize);
 
 		Glyph* getGlyph(uint32_t c);
 
@@ -26,7 +27,7 @@ namespace Cube {
 		int getAscender() const;
 		glm::vec2 calcTextSize(const std::string& text);
 	private:
-		std::string filePath;
+		std::string fontFilePath;
         int fontSize;
 		std::unordered_map<uint32_t, Glyph> glyphs;
 		std::vector<std::unique_ptr<Texture2D>> atlasPages;
@@ -40,5 +41,7 @@ namespace Cube {
 		int x = 0;
 		int y = 0;
 		int maxH = 0;
+
+		void loadFontFile();
 	};
 }

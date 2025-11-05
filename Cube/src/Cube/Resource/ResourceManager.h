@@ -22,8 +22,22 @@ namespace Cube {
         ResourceManager& operator=(const ResourceManager&) = delete;
 
         // load
-        Texture2D* loadTexture(const std::string& path);
-        Font* loadFont(const std::string& path, int fontSize);
+        template<typename T>
+        T* load(const std::string& path) {
+            static_assert(std::is_base_of_v<ResourceBase, T>);
+            auto it = resourcesCache.find(path);
+            if(it != resourcesCache.end()) {
+                ResourceBase* resource = it->second.get();
+                resource->refCount++;
+                return static_cast<T*>(resource);
+            }
+            std::unique_ptr<T> res = std::make_unique<T>(path);
+            T* ptr = res.get();
+            ++res->refCount;
+            res->path = path;
+            resourcesCache[path] = std::move(res);
+            return ptr;
+        }
 
         void release(ResourceBase* resource);
         void release(const std::string& identifier);
