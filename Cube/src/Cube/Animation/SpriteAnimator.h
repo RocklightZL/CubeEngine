@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Animator.h"
+#include "Animation.h"
+#include "Cube/Scene/Component.h"
 
 #include <unordered_map>
 #include <string>
@@ -15,7 +16,7 @@ namespace Cube {
         void update(float deltaTime);
         TextureRegion getCurrentFrame();
 
-        void addClip(AnimatorClip* clip);
+        void addClip(AnimationClip* clip);
 
         void play(const std::string& clipName);
         void stop();
@@ -23,8 +24,13 @@ namespace Cube {
     private:
         bool playing = false;
         float currentTime = 0.0f;
-        AnimatorClip* currentClip = nullptr;
-        std::unordered_map<std::string, AnimatorClip*> clips;
+        AnimationClip* currentClip = nullptr;
+        std::unordered_map<std::string, AnimationClip*> clips;
+    };
+
+    class AnimatedSpriteComponent : public Component{
+    public:
+        
     };
 
 }  // namespace Cube

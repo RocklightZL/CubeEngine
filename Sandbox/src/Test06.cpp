@@ -15,7 +15,7 @@ public:
         // UIWidget::globalStyle.border = glm::vec4(2.0f);
         // std::shared_ptr<UIPanel> panel = std::make_shared<UIPanel>();
         // std::shared_ptr<UIImage> image = std::make_shared<UIImage>("assets/texture/test02.jpg");
-        UILabel* label = new UILabel("你好世界Hello, World!", "../CubeEditor/assets/fonts/TestFont.font.json", glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), glm::vec2(100, 100));
+        UILabel* label = new UILabel("你好世界Hello, World!", "../CubeEditor/assets/fonts/TestFont.font.res", glm::vec4(0.0f, 1.0f, 1.0f, 1.0f), glm::vec2(100, 100));
         // panel->addChild(image);
         // panel->setPosition({300.0f, 300.0f});
         // panel->setSize({400.0f, 300.0f});

@@ -28,7 +28,7 @@ namespace Cube {
         return {};
     }
 
-    void SpriteAnimator::addClip(AnimatorClip* clip) {
+    void SpriteAnimator::addClip(AnimationClip* clip) {
         clips.insert({clip->getName(), clip});
         if(currentClip == nullptr) {
             currentClip = clip;

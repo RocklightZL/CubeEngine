@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Cube/Renderer/Texture.h"
-#include "Cube/Animator/SpriteAnimator.h"
+#include "Cube/Animation/SpriteAnimator.h"
 #include "Cube/Renderer/TextureRegion.h"
 
 #include <cstdint>

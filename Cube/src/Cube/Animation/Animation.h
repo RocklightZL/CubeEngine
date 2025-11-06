@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Cube/Renderer/Texture.h"
 #include "Cube/Renderer/TextureRegion.h"
 
 #include <string>
@@ -7,18 +8,15 @@
 
 namespace Cube {
 
-    struct AnimatorFrame {
+    struct AnimationFrame {
         TextureRegion textureRegion;
-        float duration; // 持续时间，单位为秒
+        float duration; // unit: second
     };
 
-    class AnimatorClip {
+    class AnimationClip : public ResourceBase{
     public:
-        AnimatorClip(const std::string& name, bool looping = true, float speed = 1.0f);
-        AnimatorClip(std::initializer_list<AnimatorFrame> frameList, const std::string& name, bool looping = true, float speed = 1.0f);
-        ~AnimatorClip() = default;
-
-        void addFrame(const TextureRegion& textureRegion, float duration);
+        AnimationClip(const std::string& animationFilePath);
+        ~AnimationClip();
 
         TextureRegion getFrameAtTime(float time) const;
 
@@ -27,7 +25,8 @@ namespace Cube {
         float getSpeed() const;
         float getDuration() const;
     private:
-        std::vector<AnimatorFrame> frames;
+        Texture2D* texture;
+        std::vector<AnimationFrame> frames;
         std::string name;
         bool looping;
         float speed;
