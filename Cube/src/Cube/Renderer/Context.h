@@ -13,7 +13,7 @@ namespace Cube {
 
     struct QuadData {
 		glm::mat4 modelMatrix;
-		glm::vec4 color;
+		Color color;
 		glm::vec4 textureCoord;
 	};
 
