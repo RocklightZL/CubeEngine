@@ -20,6 +20,7 @@ namespace Cube {
 	public:
 		Font(const std::string& path);
 		Font(const std::string& fontFilePath, int fontSize);
+		~Font() = default;
 
 		Glyph* getGlyph(uint32_t c);
 

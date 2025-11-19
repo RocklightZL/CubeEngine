@@ -15,7 +15,6 @@ namespace Cube {
 
 		Window* getWindow();
 
-		// 事件处理
 		bool onWindowClose(const Event& e);
 		bool onWindowResize(const Event& e);
 
@@ -23,6 +22,7 @@ namespace Cube {
 		Window* mainWindow;
 		bool running;
 		LayerStack layers;
+
 	private:
 		static bool isInitialized;
 		void init();

@@ -1,12 +1,18 @@
 #include "pch.h"
 #include "Node.h"
 
+#include "Camera2D.h"
 #include "Node2D.h"
+#include "SceneNode.h"
+#include "Sprite.h"
 
 namespace Cube {
 
     std::unordered_map<std::string, Node::CreateFunc> Node::constructorMap = {
-        {"Node2D", []{ return new Node2D(); }}
+        {"Node2D",      []{ return new Node2D(); }},
+        {"Sprite",      []{ return new Sprite(); }},
+        {"Camera2D",    []{ return new Camera2D(); }},
+        {"SceneNode",   []{ return new SceneNode(); }}
     };
 
     nlohmann::json Node::serialize() const {

@@ -5,7 +5,6 @@
 #include "Window.h"
 #include "Cube/Renderer/Buffer.h"
 #include "Cube/Renderer/Renderer.h"
-#include "Cube/Scene/Component.h"
 
 #include <chrono>
 #include <iostream>
@@ -16,11 +15,6 @@ namespace Cube {
 
     void Application::init() {
         Log::init();
-        // register built-in component //TODO: 可以放到场景类那里
-        Component::registerComponentType("TransformComponent", new ComponentFactoryImpl<TransformComponent>());
-        Component::registerComponentType("SpriteComponent", new ComponentFactoryImpl<SpriteComponent>());
-        Component::registerComponentType("CameraComponent", new ComponentFactoryImpl<CameraComponent>());
-        Component::registerComponentType("AnimatorComponent", new ComponentFactoryImpl<AnimatorComponent>());
     }
 
     Application::Application() : Application({1920, 1080, "Cube Engine"}){}
