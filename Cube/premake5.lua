@@ -48,3 +48,9 @@ project "Cube"
 
     filter "files:external/**"
         buildoptions { "/Y-"}
+    
+    -- forbidden RTTI
+    filter "action:gmake"
+        buildoptions { "-fno-rtti" }
+    filter "action:vs*"
+        buildoptions { "/GR-" }
