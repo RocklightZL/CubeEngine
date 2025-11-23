@@ -1,9 +1,6 @@
 #pragma once
 
-#define INIT_EXECUTE(func)  \
-namespace {                 \
-bool ret = [] {             \
-    (func)                    \
-    return true;            \
-}                           \
+#define INIT_EXECUTE(func)					\
+namespace {									\
+[[maybe_unused]] bool ret = (func, true);	\
 }
