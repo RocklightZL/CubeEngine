@@ -7,7 +7,6 @@
 #include "Cube/Reflection/Type.h"
 
 namespace Cube {
-	// ×ª»ØECS
 	struct Transform {
 	    glm::vec2 pos = {0.0f, 0.0f};
 		float rotation = 0.0f;
