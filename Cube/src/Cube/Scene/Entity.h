@@ -40,6 +40,7 @@ namespace Cube {
 				return nullptr;
 			}
 			components[typeID] = std::make_unique<T>(std::forward<Args>(args)...);
+            components[typeID]->entity = this;
 			return components[typeID].get();
         }
 
