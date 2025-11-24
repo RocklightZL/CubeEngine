@@ -1,20 +1,41 @@
 #pragma once
-#include "Cube/Resource/Resource.h"
+#include "Entity.h"
 
 namespace Cube {
-    class Node;
 
-    class Scene : public ResourceBase {
+    class Scene {
     public:
-        Scene(const std::string& path);
-        ~Scene() = default;
+        Scene(const std::string& name) : name(name){}
+        virtual ~Scene() = default;
 
         void update(float delta);
 
-        static void createSceneFile(const Node* node, const std::string& filePath);
+        Entity* createEntity(const std::string& name);
+        void destroyEntity(const std::string& name);
+
+        const std::vector<std::unique_ptr<Entity>>& getAllEntities() const;
+        Entity* getEntity(const std::string& name) const;
+
+        template<typename... Types>
+        std::vector<Entity*> getEntitiesWith() const {
+            static_assert((std::is_base_of_v<Component, Types> && ...));
+            std::vector<Entity*> result;
+            for(const auto& entity : entities) {
+                bool hasAll = true;
+                ((hasAll = hasAll && entity->hasComponent<Types>()), ...);
+                if(hasAll) {
+                    result.push_back(entity.get());
+                }
+            }
+            return result;
+        }
 
     private:
-        std::unique_ptr<Node> rootNode = nullptr;
+        std::string name;
+        std::vector<std::unique_ptr<Entity>> entities;
+        std::vector<Entity*> pendingDestroy;
+
+        void processDestroy();
     };
 
 }

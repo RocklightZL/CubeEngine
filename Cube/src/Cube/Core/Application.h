@@ -22,6 +22,7 @@ namespace Cube {
 		Window* mainWindow;
 		bool running;
 		LayerStack layers;
+		std::unique_ptr<RenderServer> renderServer;
 
 	private:
 		static bool isInitialized;

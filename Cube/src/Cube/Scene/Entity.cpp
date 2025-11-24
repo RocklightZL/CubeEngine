@@ -14,22 +14,17 @@ namespace Cube {
         for(auto c : components) {
             c.second->start();
         }
-        for(auto child : children) {
-            child.second->start();
-        }
     }
 
     void Entity::update(float delta) {
         for(auto c : components) {
             c.second->update(delta);
         }
-        for(auto child : children) {
-            child.second->update(delta);
-        }
     }
 
-    void Entity::addChild(const std::string& name) {
-        children[name] = std::make_unique<Entity>(name);
+    void Entity::addChild(Entity* entity) {
+        children[entity->name] = entity;
+        entity->parent = this;
     }
 
     void Entity::removeChild(const std::string& name) {
@@ -47,7 +42,7 @@ namespace Cube {
             CB_CORE_ERROR("Entity::getChild(const std::string& name): child '{}' not found", name);
             return nullptr;
         }
-        return it->second.get();
+        return it->second;
     }
 
     const std::string& Entity::getName() const {

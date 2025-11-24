@@ -28,7 +28,7 @@ namespace Cube {
 		virtual void start();
 		virtual void update(float delta);
 
-		void addChild(const std::string& name);
+		void addChild(Entity* entity);
         void removeChild(const std::string& name);
         Entity* getChild(const std::string& name) const;
 
@@ -85,10 +85,10 @@ namespace Cube {
 		void setScale(const glm::vec2& scale);
 
 	private:
-		std::string name;
+        std::string name;  // Temporarily used as the unique identifier
 		Transform transform;
 		Entity* parent = nullptr;
-		std::unordered_map<std::string, std::unique_ptr<Entity>> children;
+		std::unordered_map<std::string, Entity*> children;
 		std::unordered_map<TypeID, std::unique_ptr<Component>> components;
 	};
 
