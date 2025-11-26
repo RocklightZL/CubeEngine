@@ -10,18 +10,6 @@ namespace Cube {
         return matrix;
     }
 
-    void Entity::start() {
-        for(auto c : components) {
-            c.second->start();
-        }
-    }
-
-    void Entity::update(float delta) {
-        for(auto c : components) {
-            c.second->update(delta);
-        }
-    }
-
     void Entity::addChild(Entity* entity) {
         children[entity->name] = entity;
         entity->parent = this;

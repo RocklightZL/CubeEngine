@@ -25,9 +25,6 @@ namespace Cube {
 		Entity(const std::string& name) : name(name){}
 		virtual ~Entity() = default;
 
-		virtual void start();
-		virtual void update(float delta);
-
 		void addChild(Entity* entity);
         void removeChild(const std::string& name);
         Entity* getChild(const std::string& name) const;
@@ -66,11 +63,16 @@ namespace Cube {
 			return it->second.get();
         }
 
+		const std::unordered_map<TypeID, std::unique_ptr<Component>>& getComponents() const { return components; }
+
 		template<typename T>
 		bool hasComponent() const {
 			TypeID typeID = getTypeID<T>();
 			return components.find(typeID) != components.end();
         }
+
+		bool isAlive() const { return alive; }
+        void destroy() { alive = false; }
 
 		const std::string& getName() const;
 		const Transform& getTransform() const;
@@ -86,6 +88,7 @@ namespace Cube {
 
 	private:
         std::string name;  // Temporarily used as the unique identifier
+		bool alive = true;
 		Transform transform;
 		Entity* parent = nullptr;
 		std::unordered_map<std::string, Entity*> children;

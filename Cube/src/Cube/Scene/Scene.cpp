@@ -4,9 +4,6 @@
 namespace Cube {
 
     void Scene::update(float delta) {
-        for(auto& entity : entities) {
-            entity->update(delta);
-        }
         processDestroy();
     }
 
@@ -21,7 +18,7 @@ namespace Cube {
         auto it = std::find_if(entities.begin(), entities.end(), [&name](const std::unique_ptr<Entity>& entity) {
             return entity->getName() == name; 
         });
-        pendingDestroy.push_back(it->get());
+        it->get()->destroy();
     }
 
     const std::vector<std::unique_ptr<Entity>>& Scene::getAllEntities() const {
@@ -37,9 +34,8 @@ namespace Cube {
 
     void Scene::processDestroy() {
         auto end = std::remove_if(entities.begin(), entities.end(), [this](const std::unique_ptr<Entity>& entity) {
-            return std::find(pendingDestroy.begin(), pendingDestroy.end(), entity.get()) != pendingDestroy.end();
+            return !entity->isAlive();
         });
         entities.erase(end, entities.end());
-        pendingDestroy.clear();
     }
 }  // namespace Cube
