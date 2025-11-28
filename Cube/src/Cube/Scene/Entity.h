@@ -1,33 +1,18 @@
 #pragma once
-#include <glm/ext/matrix_transform.hpp>
 #include <glm/glm.hpp>
 
 #include "Component.h"
+#include "Transform.h"
 #include "Cube/Reflection/ClassRegistry.h"
 #include "Cube/Reflection/Type.h"
 
 namespace Cube {
-	struct Transform {
-	    glm::vec2 pos = {0.0f, 0.0f};
-		float rotation = 0.0f;
-		glm::vec2 scale = {1.0f, 1.0f};
-
-		Transform(const glm::vec2& pos, float rotation, const glm::vec2& scale)
-	        : pos(pos), rotation(rotation), scale(scale){}
-		Transform() = default;
-
-		glm::mat4 getMatrix() const;
-	};
 
 	class Entity {
 	public:
 		Entity() = default;
 		Entity(const std::string& name) : name(name){}
 		virtual ~Entity() = default;
-
-		void addChild(Entity* entity);
-        void removeChild(const std::string& name);
-        Entity* getChild(const std::string& name) const;
 
 		template<typename T, typename... Args>
 		Component* addComponent(Args&&... args) {
@@ -75,24 +60,13 @@ namespace Cube {
         void destroy() { alive = false; }
 
 		const std::string& getName() const;
-		const Transform& getTransform() const;
-		glm::vec2 getWorldPos() const;
-		glm::mat4 getWorldMatrix() const;
-		Entity* getParent() const;
-
 		void setName(const std::string& name);
-		void setTransform(const Transform& transform);
-		void setPos(const glm::vec2& pos);
-		void setRotation(float rotation);
-		void setScale(const glm::vec2& scale);
 
 	private:
         std::string name;  // Temporarily used as the unique identifier
 		bool alive = true;
-		Transform transform;
-		Entity* parent = nullptr;
-		std::unordered_map<std::string, Entity*> children;
 		std::unordered_map<TypeID, std::unique_ptr<Component>> components;
+		Transform transform = Transform(this);
 	};
 
 }

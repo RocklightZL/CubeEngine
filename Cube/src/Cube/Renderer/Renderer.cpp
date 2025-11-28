@@ -107,6 +107,7 @@ namespace Cube {
     }
 
     void Renderer2D::drawQuad(const glm::mat4& modelMatrix, const Color& tintColor, Texture2D* texture, const glm::vec4& texCoord) {
+        // TODO: 模型矩阵还要加上纹理长宽信息
         if(texture == nullptr) {
             texture = currentContext->whiteTex;
         }
