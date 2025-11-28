@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 
 #include "Component.h"
-#include "Entity.h"
 
 namespace Cube {
 
@@ -22,6 +21,10 @@ namespace Cube {
         float getRotation() const;
         void setScale(const glm::vec2& scale);
         const glm::vec2& getScale() const;
+
+		glm::vec2 getWorldPos() const;
+		glm::vec2 getWorldRotation() const;
+		glm::vec2 getWorldScale() const;
 
 		void addChild(Transform* child);
 		void removeChild(const Transform* child);

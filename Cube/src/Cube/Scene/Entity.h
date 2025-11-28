@@ -11,11 +11,11 @@ namespace Cube {
 	class Entity {
 	public:
 		Entity() = default;
-		Entity(const std::string& name) : name(name){}
+		Entity(const std::string& name) : name(name) {}
 		virtual ~Entity() = default;
 
 		template<typename T, typename... Args>
-		Component* addComponent(Args&&... args) {
+		T* addComponent(Args&&... args) {
 			TypeID typeID = getTypeID<T>();
 			if(components.find(typeID) != components.end()) {
 				CB_CORE_ERROR("Entity::addComponent<T>(): component of type '{}' already exists", ClassRegistry::get().getClass<T>()->getName());
@@ -38,11 +38,10 @@ namespace Cube {
 		}
 
 		template<typename T>
-		Component* getComponent() const {
+		T* getComponent() const {
 			TypeID typeID = getTypeID<T>();
 			auto it = components.find(typeID);
 			if(it == components.end()) {
-				CB_CORE_ERROR("Entity::getComponent<T>(): component of type '{}' not found", ClassRegistry::get().getClass<T>()->getName());
 				return nullptr;
 			}
 			return it->second.get();
@@ -61,6 +60,7 @@ namespace Cube {
 
 		const std::string& getName() const;
 		void setName(const std::string& name);
+        Transform& getTransform();
 
 	private:
         std::string name;  // Temporarily used as the unique identifier

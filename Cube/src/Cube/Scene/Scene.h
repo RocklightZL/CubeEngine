@@ -17,7 +17,6 @@ namespace Cube {
         const std::vector<std::unique_ptr<Entity>>& getAllEntities() const;
         Entity* getEntity(const std::string& name) const;
 
-        // 之后优化成将组件按类型连续存储以提升缓存命中率
         template<typename... Types>
         std::vector<Entity*> getEntitiesWith() const {
             static_assert((std::is_base_of_v<Component, Types> && ...));

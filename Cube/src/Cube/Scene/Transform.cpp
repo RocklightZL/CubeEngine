@@ -56,6 +56,16 @@ namespace Cube {
         return scale;
     }
 
+    glm::vec2 Transform::getWorldPos() const {
+        return parent ? parent->getWorldPos() + pos : pos;
+    }
+    glm::vec2 Transform::getWorldRotation() const {
+        return parent ? parent->getWorldRotation() + glm::vec2(rotation) : glm::vec2(rotation);
+    }
+    glm::vec2 Transform::getWorldScale() const {
+        return parent ? parent->getWorldScale() * scale : scale;
+    }
+
     void Transform::addChild(Transform* child) {
         children.push_back(child);
     }

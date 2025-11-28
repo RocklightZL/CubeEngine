@@ -4,11 +4,11 @@ UseTab: Never
 IndentWidth: 4
 TabWidth: 4
 BreakBeforeBraces: Attach
-# AllowShortIfStatementsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: false
 ColumnLimit: 200
 AccessModifierOffset: -4
-# AllowShortFunctionsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: false
 SpaceBeforeParens: Never
 NamespaceIndentation: All
 SortIncludes: false

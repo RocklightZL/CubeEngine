@@ -26,9 +26,7 @@ namespace Cube {
     }
 
     Entity* Scene::getEntity(const std::string& name) const {
-        auto it = std::find_if(entities.begin(), entities.end(), [&name](const std::unique_ptr<Entity>& entity) {
-            return entity->getName() == name; 
-        });
+        auto it = std::find_if(entities.begin(), entities.end(), [&name](const std::unique_ptr<Entity>& entity) { return entity->getName() == name; });
         return it->get();
     }
 

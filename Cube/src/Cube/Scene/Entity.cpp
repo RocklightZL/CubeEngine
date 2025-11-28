@@ -9,5 +9,8 @@ namespace Cube {
     void Entity::setName(const std::string& name) {
         this->name = name;
     }
+    Transform& Entity::getTransform() {
+        return transform;
+    }
 
 }  // namespace Cube
