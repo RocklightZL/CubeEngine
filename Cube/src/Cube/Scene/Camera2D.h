@@ -16,7 +16,7 @@ namespace Cube {
         Camera2D() = default;
         glm::mat4 getPVMatrix() const {
             glm::mat4 pvMatrix = glm::ortho(0.0f, viewport.x, 0.0f, viewport.y, -0.1f, 1.0f);
-            glm::vec2 position = entity->getComponent<Transform>()->getWorldPos();
+            glm::vec2 position = entity->getTransform().getWorldPos();
             pvMatrix = pvMatrix * glm::inverse(glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f)), glm::vec3(zoom, zoom, 1.0f)));
             return pvMatrix;
         }

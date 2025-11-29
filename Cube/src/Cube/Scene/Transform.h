@@ -35,7 +35,7 @@ namespace Cube {
 		glm::vec2 scale = {1.0f, 1.0f};
 		glm::mat4 localMatrix = glm::mat4(0);
 		glm::mat4 worldMatrix = glm::mat4(0);
-        uint8_t dirty = 0;  // bit 0: localMatrix dirty, bit 1: worldMatrix dirty
+        uint8_t dirty = 0b11;  // bit 0: localMatrix dirty, bit 1: worldMatrix dirty
 
 		Transform* parent = nullptr;
 		std::vector<Transform*> children;

@@ -7,7 +7,9 @@
 namespace Cube {
 
     Transform::~Transform() {
-        parent->removeChild(this);
+        if(parent) {
+            parent->removeChild(this);
+        }
         for(auto& c : children) {
             c->parent = nullptr;
         }

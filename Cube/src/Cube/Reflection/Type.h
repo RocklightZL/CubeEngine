@@ -3,16 +3,18 @@
 namespace Cube {
 
     using TypeID = uint32_t;
-    static TypeID nextArithmeticID = 1;
-    static TypeID nextClassID = 0x100;
+    namespace Detail {
+        inline TypeID nextArithmeticID; // ensure a unique copy
+        inline TypeID nextClassID;
+    }
 
     template<typename T>
     TypeID getTypeID() {
         if constexpr (std::is_arithmetic_v<T>) {
-            static TypeID id = nextArithmeticID++;
+            static TypeID id = Detail::nextArithmeticID++;
             return id;
         } else {
-            static TypeID id = nextClassID++;
+            static TypeID id = Detail::nextClassID++;
             return id;
         }
     }
