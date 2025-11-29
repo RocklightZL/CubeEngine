@@ -14,7 +14,8 @@ namespace Cube {
 		Entity(const std::string& name) : name(name) {}
 		~Entity() = default;
 
-		
+		void start();
+		void update(float delta);
 
 		template<typename T, typename... Args>
 		T* addComponent(Args&&... args) {

@@ -3,7 +3,16 @@
 
 namespace Cube {
 
+    void Scene::start() {
+        for(auto& entity: entities) {
+            entity->start();
+        }
+    }
+
     void Scene::update(float delta) {
+        for(auto& entity: entities) {
+            entity->update(delta);
+        }
         processDestroy();
     }
 

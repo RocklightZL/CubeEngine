@@ -3,6 +3,18 @@
 
 namespace Cube {
 
+    void Entity::start() {
+        for(auto& [typeID, component] : components) {
+            component->start();
+        }
+    }
+
+    void Entity::update(float delta) {
+        for(auto& [typeID, component] : components) {
+            component->update(delta);
+        }
+    }
+
     const std::string& Entity::getName() const {
         return name;
     }
