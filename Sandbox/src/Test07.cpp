@@ -18,10 +18,12 @@ int main() {
         Transform& tr = a->getTransform();
         // tr.setPosition({400.0f, 300.0f});
         // tr.setScale({1, 1});
-
         auto camera = scene->createEntity("camera");
         auto cc =  camera->addComponent<Camera2D>();
         cc->viewport = {app.getWindow()->getPros().width, app.getWindow()->getPros().height};
+        // cc->zoom = 2;
+        Transform& cameraTr = camera->getTransform();
+        // cameraTr.setPosition({-200.0f, -200.0f});
         return scene;
     });
     sceneManager.load("scene");
