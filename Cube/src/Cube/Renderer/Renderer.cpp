@@ -107,7 +107,6 @@ namespace Cube {
     }
 
     void Renderer2D::drawQuad(const glm::mat4& modelMatrix, const Color& tintColor, Texture2D* texture, const glm::vec4& texCoord) {
-        // TODO: 模型矩阵还要加上纹理长宽信息
         if(texture == nullptr) {
             texture = currentContext->whiteTex;
         }
@@ -164,12 +163,13 @@ namespace Cube {
 
     void Renderer2D::flushBatch() {
         std::vector<float> data;
+        Texture2D* tex = currentContext->currentTex;
         for(const QuadData& qd : currentContext->batchData) {
             glm::vec4 pos[4] = {
-                {-0.5f, -0.5f, 0.0f, 1.0f},
-                {0.5f, -0.5f, 0.0f, 1.0f},
-                {0.5f, 0.5f, 0.0f, 1.0f},
-                {-0.5f, 0.5f, 0.0f, 1.0f}
+                {0.0f, 0.0f, 0.0f, 1.0f},
+                {tex->getWidth(), 0.0f, 0.0f, 1.0f},
+                {tex->getWidth(), tex->getHeight(), 0.0f, 1.0f},
+                {0.0f, tex->getHeight(), 0.0f, 1.0f}
             };
             glm::vec2 texCoords[4] = {
                 {qd.textureCoord.x, qd.textureCoord.y},

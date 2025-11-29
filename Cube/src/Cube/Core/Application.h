@@ -2,10 +2,11 @@
 #include "Cube/Event/Event.h"
 #include "Window.h"
 #include "LayerStack.h"
+#include "Cube/Scene/RenderServer.h"
 #include "Cube/Scene/Scene.h"
 
 namespace Cube {
-	class Application {
+    class Application {
 	public:
 		Application();
 		Application(const WindowPros& windowPros);
@@ -22,7 +23,7 @@ namespace Cube {
 		Window* mainWindow;
 		bool running;
 		LayerStack layers;
-		std::unique_ptr<RenderServer> renderServer;
+		RenderServer renderServer;
 
 	private:
 		static bool isInitialized;

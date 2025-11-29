@@ -10,6 +10,9 @@ namespace Cube {
 		explicit Component(Entity* entity) : entity(entity) {}
 		virtual ~Component() = default;
 
+		virtual void start(){}
+		virtual void update(float delta){}
+
 		Entity* getEntity() const { return entity; }
 
 	protected:

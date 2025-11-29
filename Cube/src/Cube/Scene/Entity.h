@@ -12,7 +12,9 @@ namespace Cube {
 	public:
 		Entity() = default;
 		Entity(const std::string& name) : name(name) {}
-		virtual ~Entity() = default;
+		~Entity() = default;
+
+		
 
 		template<typename T, typename... Args>
 		T* addComponent(Args&&... args) {
