@@ -2,7 +2,6 @@
 #include "Entity.h"
 
 namespace Cube {
-    class System;
 
     class Scene {
     public:
@@ -35,7 +34,6 @@ namespace Cube {
     private:
         std::string name;
         std::vector<std::unique_ptr<Entity>> entities;
-        std::vector<std::unique_ptr<System>> systems;
 
         void processDestroy();
     };

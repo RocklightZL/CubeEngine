@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "SceneManager.h"
 
+#include "Scene.h"
+
 namespace Cube {
 
     void SceneManager::registerScene(const std::string& name, const SceneFactory& sceneFactory) {

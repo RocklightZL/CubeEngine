@@ -1,5 +1,5 @@
 ﻿// test UI
-#define TEST06
+// #define TEST06
 #ifdef TEST06
 
 #include "Cube.h"

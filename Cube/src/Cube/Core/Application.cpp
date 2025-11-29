@@ -4,6 +4,7 @@
 #include "Cube/Event/ApplicationEvent.h"
 #include "Window.h"
 #include "Cube/Renderer/Renderer.h"
+#include "Cube/Scene/Scene.h"
 
 #include <chrono>
 #include <iostream>
@@ -47,11 +48,24 @@ namespace Cube {
 
             Renderer::clearBuffer();
 
+            if(Scene* scene = sceneManager.getActive()) {
+                scene->update(deltaTime);
+                renderServer.renderScene(scene);
+            }
+
             mainWindow->update();
         }
     }
 
-    Window* Application::getWindow() { return mainWindow; }
+    Window* Application::getWindow() {
+        return mainWindow;
+    }
+    RenderServer& Application::getRenderServer() {
+        return renderServer;
+    }
+    SceneManager& Application::getSceneManager() {
+        return sceneManager;
+    }
 
     bool Application::onWindowClose(const Event& e) {
         running = false;

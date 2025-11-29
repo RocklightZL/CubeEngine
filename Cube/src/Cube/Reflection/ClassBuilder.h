@@ -38,7 +38,7 @@ namespace Cube {
 		}
 
 		template<typename ReturnType, typename... Args>
-		ClassBuilder& method(const std::string& name, ReturnType(T::*methodPtr)(Args)) {
+		ClassBuilder& method(const std::string& name, ReturnType(T::*methodPtr)(Args...)) {
 		    classInfo->addMethod(name, getTypeID<ReturnType>(), {getTypeID<Args>()...}, [methodPtr](void* obj, const std::vector<Any>& args) {
 		        T* instance = static_cast<T*>(obj);
 				if(args.size() != sizeof...(Args)) {
@@ -65,12 +65,12 @@ namespace Cube {
 		Class* classInfo;
 
 		template<typename ReturnType, typename... Args, size_t... Idx>
-		Any invokeImpl(T* instance, ReturnType(T::*methodPtr)(Args), const std::vector<Any>& args, std::index_sequence<Idx...>) {
+		Any invokeImpl(T* instance, ReturnType(T::*methodPtr)(Args...), const std::vector<Any>& args, std::index_sequence<Idx...>) {
 		    if constexpr (std::is_void_v<ReturnType>) {
-		        (instance->*methodPtr)(args[Idx].as<Args[Idx]>()...);
+		        (instance->*methodPtr)(args[Idx].template as<std::tuple_element_t<Idx, std::tuple<Args...>>>()...);
 				return Any();
 		    }else {
-				return Any((instance->*methodPtr)(args[Idx].as<Args[Idx]>()...));
+				return Any((instance->*methodPtr)(args[Idx].template as<std::tuple_element_t<Idx, std::tuple<Args...>>>()...));
 		    }
 		}
 	};

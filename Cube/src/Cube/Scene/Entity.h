@@ -19,6 +19,7 @@ namespace Cube {
 
 		template<typename T, typename... Args>
 		T* addComponent(Args&&... args) {
+			static_assert(std::is_base_of_v<Component, T>);
 			TypeID typeID = getTypeID<T>();
 			if(components.find(typeID) != components.end()) {
 				CB_CORE_ERROR("Entity::addComponent<T>(): component of type '{}' already exists", ClassRegistry::get().getClass<T>()->getName());
@@ -26,11 +27,12 @@ namespace Cube {
 			}
 			components[typeID] = std::make_unique<T>(std::forward<Args>(args)...);
             components[typeID]->entity = this;
-			return components[typeID].get();
+			return static_cast<T*>(components[typeID].get());
         }
 
 		template<typename T>
 		void removeComponent() {
+			static_assert(std::is_base_of_v<Component, T>);
             TypeID typeID = getTypeID<T>();
             auto it = components.find(typeID);
 			if(it == components.end()) {
@@ -42,18 +44,20 @@ namespace Cube {
 
 		template<typename T>
 		T* getComponent() const {
+			static_assert(std::is_base_of_v<Component, T>);
 			TypeID typeID = getTypeID<T>();
 			auto it = components.find(typeID);
 			if(it == components.end()) {
 				return nullptr;
 			}
-			return it->second.get();
+			return static_cast<T*>(it->second.get());
         }
 
 		const std::unordered_map<TypeID, std::unique_ptr<Component>>& getComponents() const { return components; }
 
 		template<typename T>
 		bool hasComponent() const {
+			static_assert(std::is_base_of_v<Component, T>);
 			TypeID typeID = getTypeID<T>();
 			return components.find(typeID) != components.end();
         }

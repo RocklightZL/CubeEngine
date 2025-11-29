@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Buffer.h"
+#include "Color.h"
 #include "Shader.h"
 #include "VertexArray.h"
 #include "Texture.h"
-#include "Cube/Resource/Resource.h"
 #include "Cube/Resource/ResourceManager.h"
+
+#include <glm/glm.hpp>
 
 #include <vector>
 
