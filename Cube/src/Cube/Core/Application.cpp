@@ -3,7 +3,6 @@
 
 #include "Cube/Event/ApplicationEvent.h"
 #include "Window.h"
-#include "Cube/Renderer/Buffer.h"
 #include "Cube/Renderer/Renderer.h"
 
 #include <chrono>
@@ -48,9 +47,6 @@ namespace Cube {
 
             Renderer::clearBuffer();
 
-            for(const auto& layer : layers.getLayers()) {
-                layer->onUpdate(deltaTime);
-            }
             mainWindow->update();
         }
     }
