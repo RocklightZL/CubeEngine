@@ -11,7 +11,7 @@ int main() {
     Application app;
     SceneManager& sceneManager = app.getSceneManager();
     sceneManager.registerScene("scene", [&app]() {
-        Scene* scene = new Scene("scene");
+        Scene* scene = new Scene("scene", true);
         auto a = scene->createEntity("a");
         auto sc = a->addComponent<Sprite>();
         sc->texture = ResPtr<Texture2D>("assets/texture/test07.jpg");

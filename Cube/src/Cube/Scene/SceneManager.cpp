@@ -12,6 +12,15 @@ namespace Cube {
         scenes[name] = sceneFactory;
     }
 
+    void SceneManager::registerScene(const std::string& name, const std::string& sceneFilePath) {
+        if(scenes.find(name) != scenes.end()) {
+            CB_CORE_WARN("SceneManager::registerScene(): Scene '{}' is already registered. Overwriting.", name);
+        }
+        scenes[name] = [sceneFilePath] {
+            return new Scene(sceneFilePath);
+        };
+    }
+
     Scene* SceneManager::load(const std::string& name) {
         auto it = loadedScenes.find(name);
         if(it != loadedScenes.end()) {

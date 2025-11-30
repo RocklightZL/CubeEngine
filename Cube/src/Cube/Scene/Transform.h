@@ -27,7 +27,7 @@ namespace Cube {
 		glm::vec2 getWorldScale() const;
 
 		void addChild(Transform* child);
-		void removeChild(const Transform* child);
+		void removeChild(Transform* child);
 
 	private:
 		glm::vec2 pos = {0.0f, 0.0f};

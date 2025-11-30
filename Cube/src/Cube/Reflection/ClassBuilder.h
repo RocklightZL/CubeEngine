@@ -1,4 +1,5 @@
 #pragma once
+#include "BaseClassCaster.h"
 #include "Class.h"
 #include "ClassRegistry.h"
 
@@ -53,6 +54,7 @@ namespace Cube {
 
 		template<typename BaseType>
 		ClassBuilder& base() {
+			BaseClassCaster<BaseType>::template registerCast<T>();
 		    classInfo->setBase(getTypeID<BaseType>());
 			return *this;
 		}

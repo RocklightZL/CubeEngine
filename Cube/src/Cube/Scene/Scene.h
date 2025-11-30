@@ -5,7 +5,8 @@ namespace Cube {
 
     class Scene {
     public:
-        Scene(const std::string& name) : name(name){}
+        Scene(const std::string& name, bool tagNoSceneFile) : name(name){}
+        Scene(const std::string& sceneFilePath);
         virtual ~Scene() = default;
 
         void start();

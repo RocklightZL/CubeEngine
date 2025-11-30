@@ -1,7 +1,26 @@
 #include "pch.h"
 #include "Scene.h"
 
+#include <fstream>
+#include <json.hpp>
+
 namespace Cube {
+
+    Scene::Scene(const std::string& sceneFilePath) {
+        std::ifstream file(sceneFilePath);
+        if(!file.is_open()) {
+            CB_CORE_ERROR("Scene::Scene(): Failed to open scene file '{}'", sceneFilePath);
+            return;
+        }
+        nlohmann::json data;
+        file >> data;
+        file.close();
+        name = data["name"];
+        for(auto& entityData : data["entities"]) {
+            auto entity = createEntity(entityData["name"]);
+            entity->deserialize(entityData);
+        }
+    }
 
     void Scene::start() {
         for(auto& entity: entities) {

@@ -6,6 +6,8 @@
 #include "Cube/Reflection/ClassRegistry.h"
 #include "Cube/Reflection/Type.h"
 
+#include <json.hpp>
+
 namespace Cube {
 
 	class Entity {
@@ -23,7 +25,7 @@ namespace Cube {
 			TypeID typeID = getTypeID<T>();
 			if(components.find(typeID) != components.end()) {
 				CB_CORE_ERROR("Entity::addComponent<T>(): component of type '{}' already exists", ClassRegistry::get().getClass<T>()->getName());
-				return nullptr;
+				return static_cast<T*>(components[typeID].get());
 			}
 			components[typeID] = std::make_unique<T>(std::forward<Args>(args)...);
             components[typeID]->entity = this;
@@ -68,6 +70,9 @@ namespace Cube {
 		const std::string& getName() const;
 		void setName(const std::string& name);
         Transform& getTransform();
+
+		void deserialize(const nlohmann::json& data);
+        nlohmann::json serialize() const;
 
 	private:
         std::string name;  // Temporarily used as the unique identifier

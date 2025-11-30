@@ -1,5 +1,6 @@
 #pragma once
 #include "Any.h"
+#include "BaseClassCaster.h"
 #include "Type.h"
 
 namespace Cube {
@@ -119,6 +120,11 @@ namespace Cube {
             }
             CB_CORE_ERROR("Reflection: Method \"{}\" in class {} not found.", name, this->name);
             return nullptr;
+        }
+
+        template<typename BaseType>
+        BaseType* castToBase(void* derivedPtr) const {
+            return BaseClassCaster<BaseType>::cast(typeID, derivedPtr);
         }
 
     private:

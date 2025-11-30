@@ -69,11 +69,13 @@ namespace Cube {
     }
 
     void Transform::addChild(Transform* child) {
+        child->parent = this;
         children.push_back(child);
     }
-    void Transform::removeChild(const Transform* child) {
+    void Transform::removeChild(Transform* child) {
         auto it = std::find(children.begin(), children.end(), child);
         if(it != children.end()) {
+            child->parent = nullptr;
             children.erase(it);
         }else {
             CB_CORE_ERROR("Transform::removeChild: child not found");
