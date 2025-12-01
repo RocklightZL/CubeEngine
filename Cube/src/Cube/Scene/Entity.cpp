@@ -38,7 +38,7 @@ namespace Cube {
                 CB_CORE_ERROR("Entity::deserialize(): Unknown component type '{}'", typeName);
                 continue;
             }
-            void* component = classInfo->createInstance();
+            Component* component = classInfo->castToBase<Component>(classInfo->createInstance());
             if(!component) {
                 CB_CORE_ERROR("Entity::deserialize(): Failed to create component of type '{}'", typeName);
                 continue;
@@ -47,7 +47,7 @@ namespace Cube {
                 property->setValue(component, Any(c[property->getName()]));
             }
             components[classInfo->getTypeID()] = std::unique_ptr<Component>(component);
-        }])
+        }
     }
 
     nlohmann::json Entity::serialize() const {

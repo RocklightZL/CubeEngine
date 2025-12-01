@@ -1,67 +1,47 @@
 #pragma once
 #include "Type.h"
 
+#include <any>
+
 namespace Cube {
 
     class Any final{
     public:
-        Any() : data(nullptr), typeID(0), size(0){}
+        Any() : data(nullptr), typeID(0), destructor(nullptr){}
+        Any(void* data, TypeID typeID, const std::function<void(void*)>& destructor)
+            : data(data), typeID(typeID), destructor(destructor) {}
 
         template<typename T>
-        Any(const T& value) : typeID(getTypeID<T>()), size(sizeof(T)) {
-            data = operator new(size);
-            new (data) T(value);
+        Any(const T& value) : typeID(getTypeID<T>()) {
+            data = new T(value);
+            destructor = [](void* ptr){
+                delete static_cast<T*>(ptr);
+            };
         }
 
-        Any(const Any& other) : typeID(other.typeID), size(other.size){
-            if(other.data) {
-                data = operator new(size);
-                std::memcpy(data, other.data, size);
-            } else {
-                data = nullptr;
-            }
-        }
+        Any(const Any& other) = delete;
+        Any& operator=(const Any& other) = delete;
 
-        Any(Any&& other) noexcept : data(other.data), typeID(other.typeID), size(other.size){
+        Any(Any&& other) noexcept : data(other.data), typeID(other.typeID), destructor(other.destructor){
             other.data = nullptr;
             other.typeID = 0;
-            other.size = 0;
+            other.destructor = nullptr;
         }
 
         ~Any() {
-            if(data) {
-                operator delete(data);
+            if(data && destructor) {
+                destructor(data);
             }
-        }
-
-        Any& operator=(const Any& other) {
-            if(this != &other) {
-                if(data) {
-                    operator delete(data);
-                }
-                typeID = other.typeID;
-                size = other.size;
-                if(other.data) {
-                    data = operator new(size);
-                    std::memcpy(data, other.data, size);
-                } else {
-                    data = nullptr;
-                }
-            }
-            return *this;
         }
 
         Any& operator=(Any&& other) noexcept {
             if(this != &other) {
-                if(data) {
-                    operator delete(data);
-                }
                 data = other.data;
                 typeID = other.typeID;
-                size = other.size;
+                destructor = other.destructor;
                 other.data = nullptr;
                 other.typeID = 0;
-                other.size = 0;
+                other.destructor = nullptr;
             }
             return *this;
         }
@@ -85,14 +65,13 @@ namespace Cube {
         }
 
         TypeID getTypeID() const { return typeID; }
-        size_t getSize() const { return size; }
         void* getData(){ return data; }
         const void* getData() const { return data; }
 
     private:
         void* data;
         TypeID typeID;
-        size_t size;
+        std::function<void(void*)> destructor;
     };
 
 }

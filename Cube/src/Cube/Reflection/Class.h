@@ -7,7 +7,7 @@ namespace Cube {
 
     class Property final {
     public:
-        using Getter = std::function<Any(void*)>;
+        using Getter = std::function<Any(const void*)>;
         using Setter = std::function<void(void*, const Any&)>;
         Property(const std::string& name, TypeID typeID, size_t offset, size_t size, Getter getter, Setter setter)
             : name(name), typeID(typeID), offset(offset), size(size), getter(std::move(getter)), setter(std::move(setter)) {}
@@ -17,7 +17,7 @@ namespace Cube {
         size_t getOffset() const { return offset; }
         size_t getSize() const { return size; }
 
-        Any getValue(void* instance) const {            
+        Any getValue(const void* instance) const {            
             return getter(instance);
         }
                     
@@ -64,8 +64,8 @@ namespace Cube {
         Class(const std::string& name, TypeID typeID, size_t size, Constructor constructor, Destructor destructor)
             : name(name), typeID(typeID), baseTypeID(0), size(size), constructor(std::move(constructor)), destructor(std::move(destructor)) {}
 
-        void* createInstance() const {
-            return constructor();
+        Any createInstance() const {
+            return Any(constructor(), typeID, destructor);
         }
 
         void destroyInstance(void* instance) const {
