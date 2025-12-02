@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Entity.h"
 
+#include "Cube/Reflection/Serializer.h"
+
 namespace Cube {
 
     void Entity::start() {
@@ -38,19 +40,15 @@ namespace Cube {
                 CB_CORE_ERROR("Entity::deserialize(): Unknown component type '{}'", typeName);
                 continue;
             }
-            Component* component = classInfo->castToBase<Component>(classInfo->createInstance());
-            if(!component) {
-                CB_CORE_ERROR("Entity::deserialize(): Failed to create component of type '{}'", typeName);
-                continue;
-            }
-            for(auto& property : classInfo->getAllProperties()) {
-                property->setValue(component, Any(c[property->getName()]));
-            }
-            components[classInfo->getTypeID()] = std::unique_ptr<Component>(component);
+            Any component = Serializer::get().deserialize(classInfo->getTypeID(), c);
+            Component* compPtr = component.moveToBase<Component>();
+            compPtr->entity = this;
+            components[classInfo->getTypeID()] = std::unique_ptr<Component>(compPtr);
         }
     }
 
     nlohmann::json Entity::serialize() const {
+        return {};
     }
 
 }  // namespace Cube

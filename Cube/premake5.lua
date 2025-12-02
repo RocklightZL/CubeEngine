@@ -1,7 +1,7 @@
 project "Cube"
     kind "StaticLib"
     language "C++"
-    cppdialect "C++17"
+    cppdialect "C++17" -- Uses some C++17 features, such as the inline keyword in headers.
     staticruntime "off"
 
     targetdir ("%{wks.location}/bin/"..outputdir.."/%{prj.name}")

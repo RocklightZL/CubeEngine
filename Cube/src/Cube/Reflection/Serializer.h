@@ -37,7 +37,7 @@ namespace Cube {
             auto it = registry.find(typeID);
             if(it == registry.end()) {
                 CB_CORE_ERROR("Serializer::deserialize(): No converter registered for type ID {}", typeID);
-                return nullptr;
+                return Any();
             }
             return it->second.fromJson(data);
         }
@@ -81,13 +81,28 @@ namespace Cube {
                 }
                 Any instance = classInfo->createInstance();
                 for(auto& property : classInfo->getAllProperties()) {
-                    nlohmann::json propData = data[property->getName()];
+                    const nlohmann::json& propData = data[property->getName()];
                     Any propValue = Serializer::get().deserialize(property->getTypeID(), propData);
-                    property->setValue(instance.getData(), propValue);
+                    property->setValue(instance.getData(), std::move(propValue));
                 }
                 return instance;
             };
         }
         Serializer::get().registerConverter(getTypeID<T>(), converter);
+    }
+
+    inline void registerBasicSerializers() {
+        registerSerializer<int8_t>();
+        registerSerializer<uint8_t>();
+        registerSerializer<int16_t>();
+        registerSerializer<uint16_t>();
+        registerSerializer<int32_t>();
+        registerSerializer<uint32_t>();
+        registerSerializer<int64_t>();
+        registerSerializer<uint64_t>();
+        registerSerializer<float>();
+        registerSerializer<double>();
+        registerSerializer<bool>();
+        registerSerializer<std::string>();
     }
 }

@@ -26,8 +26,9 @@ int main() {
         // cameraTr.setPosition({-200.0f, -200.0f});
         return scene;
     });
-    sceneManager.load("scene");
-    sceneManager.setActive("scene");
+    sceneManager.registerScene("Test01", "assets/scenes/Test01.scene");
+    sceneManager.load("Test01");
+    sceneManager.setActive("Test01");
     
     app.run();
     return 0;

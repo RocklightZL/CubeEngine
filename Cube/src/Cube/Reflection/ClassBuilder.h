@@ -2,6 +2,7 @@
 #include "BaseClassCaster.h"
 #include "Class.h"
 #include "ClassRegistry.h"
+#include "Serializer.h"
 
 namespace Cube {
 
@@ -14,13 +15,25 @@ namespace Cube {
 
 		template<typename PropertyType>
 		ClassBuilder& property(const std::string& name, PropertyType T::*memberPtr) {
-		    size_t offset = reinterpret_cast<size_t>(&(static_cast<T>(nullptr)->*memberPtr));
+		    size_t offset = reinterpret_cast<size_t>(&(static_cast<T*>(nullptr)->*memberPtr));
 			classInfo->addProperty(name, getTypeID<PropertyType>(), offset, sizeof(PropertyType), [memberPtr](const void* obj) {
-			    T* instance = static_cast<T*>(obj);
+			    const T* instance = static_cast<const T*>(obj);
 				return Any(instance->*memberPtr);
 			}, [memberPtr](void* obj, const Any& value) {
-			    T* instance = static_cast<T>(obj);
-				instance->*memberPtr = value.as<PropertyType>();
+				if constexpr(!std::is_copy_assignable_v<PropertyType>) {
+                    CB_CORE_ERROR("Reflection: Attempting to set value to a non-assignable property.");
+				} else {
+					T* instance = static_cast<T*>(obj);
+					instance->*memberPtr = value.as<PropertyType>();
+				}
+			    
+			}, [memberPtr](void* obj, Any&& value) {
+			    if constexpr (!std::is_move_assignable_v<PropertyType>) {
+					CB_CORE_ERROR("Reflection: Attempting to move-assign value to a non-move-assignable property.");
+				} else {
+					T* instance = static_cast<T*>(obj);
+					instance->*memberPtr = std::move(*value.move<PropertyType>());
+				}
 			});
 			return *this;
 		}
@@ -31,6 +44,9 @@ namespace Cube {
 			classInfo->addProperty(name, getTypeID<PropertyType>(), offset, sizeof(PropertyType), [getterPtr](const void* obj) {
 				T* instance = static_cast<T*>(obj);
 				return Any(instance->*getterPtr());
+			}, [setterPtr](void* obj, const Any& value) {
+				T* instance = static_cast<T>(obj);
+				instance->*setterPtr(value.as<PropertyType>());
 			}, [setterPtr](void* obj, const Any& value) {
 				T* instance = static_cast<T>(obj);
 				instance->*setterPtr(value.as<PropertyType>());
@@ -56,6 +72,11 @@ namespace Cube {
 		ClassBuilder& base() {
 			BaseClassCaster<BaseType>::template registerCast<T>();
 		    classInfo->setBase(getTypeID<BaseType>());
+			return *this;
+		}
+
+		ClassBuilder& serializer() {
+		    registerSerializer<T>();
 			return *this;
 		}
 

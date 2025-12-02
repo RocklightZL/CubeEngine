@@ -11,7 +11,7 @@ namespace Cube {
         template<typename DerivedType>
         static void registerCast() {
             static_assert(std::is_base_of_v<BaseType, DerivedType>, "DerivedType must inherit from BaseType");
-            if(registry.contains(getTypeID<DerivedType>())) {
+            if(registry.find(getTypeID<DerivedType>()) != registry.end()) {
                 CB_CORE_WARN("Reflection/BaseClassCaster::registerCast(): DerivedType {} is already registered");
                 return;
             }
@@ -34,7 +34,7 @@ namespace Cube {
         }
 
 	private:
-        std::unordered_map<TypeID, ToBaseCast> registry;
+        static inline std::unordered_map<TypeID, ToBaseCast> registry;
     };
 	
 }

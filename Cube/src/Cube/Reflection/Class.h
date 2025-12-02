@@ -9,8 +9,9 @@ namespace Cube {
     public:
         using Getter = std::function<Any(const void*)>;
         using Setter = std::function<void(void*, const Any&)>;
-        Property(const std::string& name, TypeID typeID, size_t offset, size_t size, Getter getter, Setter setter)
-            : name(name), typeID(typeID), offset(offset), size(size), getter(std::move(getter)), setter(std::move(setter)) {}
+        using MoveSetter = std::function<void(void*, Any&&)>;
+        Property(const std::string& name, TypeID typeID, size_t offset, size_t size, Getter getter, Setter setter, MoveSetter moveSetter)
+            : name(name), typeID(typeID), offset(offset), size(size), getter(std::move(getter)), setter(std::move(setter)), moveSetter(std::move(moveSetter)) {}
 
         const std::string& getName() const { return name; }
         TypeID getTypeID() const { return typeID; }
@@ -25,6 +26,10 @@ namespace Cube {
             setter(instance, value);
         }
 
+        void setValue(void* instance, Any&& value) const {
+            moveSetter(instance, std::move(value));
+        }
+
     private:
         std::string name;
         TypeID typeID;
@@ -32,6 +37,7 @@ namespace Cube {
         size_t size;
         Getter getter;
         Setter setter;
+        MoveSetter moveSetter;
     };
 
     class Method final {
@@ -65,15 +71,11 @@ namespace Cube {
             : name(name), typeID(typeID), baseTypeID(0), size(size), constructor(std::move(constructor)), destructor(std::move(destructor)) {}
 
         Any createInstance() const {
-            return Any(constructor(), typeID, destructor);
+            return {constructor(), typeID, destructor};
         }
 
-        void destroyInstance(void* instance) const {
-            destructor(instance);
-        }
-
-        void addProperty(const std::string& name, TypeID typeID, size_t offset, size_t size, const Property::Getter& getter, const Property::Setter& setter) {
-            properties.emplace(name, std::make_unique<Property>(name, typeID, offset, size, getter, setter));
+        void addProperty(const std::string& name, TypeID typeID, size_t offset, size_t size, Property::Getter getter, Property::Setter setter, Property::MoveSetter moveSetter) {
+            properties.emplace(name, std::make_unique<Property>(name, typeID, offset, size, std::move(getter), std::move(setter), std::move(moveSetter)));
         }
 
         void addMethod(const std::string& name, TypeID returnTypeID, const std::vector<TypeID>& parameters, const Method::Invoker& invoker) {

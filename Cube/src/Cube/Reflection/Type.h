@@ -3,9 +3,10 @@
 namespace Cube {
 
     using TypeID = uint32_t;
+
     namespace Detail {
         inline TypeID nextArithmeticID; // ensure a unique copy
-        inline TypeID nextClassID;
+        inline TypeID nextClassID = 0x100;
     }
 
     template<typename T>

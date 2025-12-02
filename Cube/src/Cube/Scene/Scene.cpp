@@ -16,9 +16,20 @@ namespace Cube {
         file >> data;
         file.close();
         name = data["name"];
+        std::vector<std::pair<std::string, std::vector<std::string>>> transformTree;
         for(auto& entityData : data["entities"]) {
             auto entity = createEntity(entityData["name"]);
             entity->deserialize(entityData);
+            transformTree.emplace_back(entity->getName(), entityData["transform"]["children"]);
+        }
+        for(auto& [entityName, childrenNames] : transformTree) {
+            Entity* parentEntity = getEntity(entityName);
+            Transform* parentTransform = &parentEntity->getTransform();
+            for(auto& childName : childrenNames) {
+                Entity* childEntity = getEntity(childName);
+                Transform* childTransform = &childEntity->getTransform();
+                parentTransform->addChild(childTransform);
+            }
         }
     }
 
