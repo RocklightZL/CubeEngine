@@ -73,7 +73,7 @@ namespace Cube {
 		serializer.registerConverter(getTypeID<ResPtr<Texture2D>>(), {
 			// toJson
 			[](const Any& obj) {
-				const Texture2D* resPtr = &obj.as<Texture2D>(); // TODO: 这个Any类可能还要优化一下
+				const Texture2D* resPtr = obj.as<Texture2D*>();
 				nlohmann::json j;
 				if(resPtr) {
 					j = nlohmann::json(resPtr->getPath());

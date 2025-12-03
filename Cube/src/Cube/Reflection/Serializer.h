@@ -64,12 +64,21 @@ namespace Cube {
             converter.toJson = [](const Any& obj) {
                 nlohmann::json j;
                 Class* classInfo = ClassRegistry::get().getClass<T>();
+                const void* data;
+                if(obj.getID() == getTypeID<T>()) {
+                    data = obj.getData();
+                } else if(removeAllPtr(obj.getID()) == classInfo->getTypeID() || removeAllPtr(obj.getID()) == classInfo->getBaseTypeID()) {
+                    data = *((T**)(obj.getData()));  // TODO: Any启用小对象优化后这里需要修改
+                } else {
+                    CB_CORE_INFO("{}", getTypeID<T*>());
+                    CB_ASSERT(0 && "Type mismatch!");
+                }
                 if(!classInfo) {
                     CB_CORE_ERROR("Serializer::toJson(): Class info not found for type ID {}", getTypeID<T>());
                     return j;
                 }
                 for(auto& property : classInfo->getAllProperties()) {
-                    j[property->getName()] = Serializer::get().serialize(property->getTypeID(), property->getValue(obj.getData()));
+                    j[property->getName()] = Serializer::get().serialize(property->getTypeID(), property->getValue(data));
                 }
                 return j;
             };

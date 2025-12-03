@@ -4,40 +4,50 @@
 
 namespace Cube {
 
+    // TODO: small object optimization
     class Any final{
     public:
         Any() : data(nullptr), typeID(0), destructor(nullptr){}
         Any(void* data, TypeID typeID, const std::function<void(void*)>& destructor)
             : data(data), typeID(typeID), destructor(destructor) {}
 
-        template<typename T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any>, int> = 0>
-        Any(const T& value) : typeID(getTypeID<T>()) {
-            if constexpr (std::is_copy_assignable_v<T>){
-                data = new T(value);
-                destructor = [](void* ptr){
-                    delete static_cast<T*>(ptr);
-                };
-            }else {
-                CB_CORE_ERROR("Reflection: Failed to create Any instance for non-copy-assignable class");
-                data = nullptr;
-                typeID = 0;
-                destructor = nullptr;
-            }
-        }
+        // template<typename T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any>, int> = 0>
+        // Any(const T& value) : typeID(getTypeID<T>()) {
+        //     if constexpr (std::is_copy_assignable_v<T>){
+        //         data = new T(value);
+        //         destructor = [](void* ptr){
+        //             delete static_cast<T*>(ptr);
+        //         };
+        //     }else {
+        //         CB_CORE_ERROR("Reflection: Failed to create Any instance for non-copy-assignable class");
+        //         data = nullptr;
+        //         typeID = 0;
+        //         destructor = nullptr;
+        //     }
+        // }
+        //
+        // template<typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any> && !std::is_lvalue_reference_v<T>>>
+        // Any(T&& value) : typeID(getTypeID<T>()) {
+        //     data = new T(std::forward<T>(value));
+        //     destructor = [](void* ptr){
+        //         delete static_cast<T*>(ptr);
+        //     };
+        // }
 
-        template<typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any> && !std::is_lvalue_reference_v<T>>>
-        Any(T&& value) : typeID(getTypeID<T>()) {
-            data = new T(std::forward<T>(value));
+        template<typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any>>>
+        Any(T&& value) : typeID(getTypeID<std::decay_t<T>>()) {
+            using RawT = std::decay_t<T>;
+            data = new RawT(std::forward<T>(value));
             destructor = [](void* ptr){
-                delete static_cast<T*>(ptr);
+                delete static_cast<RawT*>(ptr);
             };
         }
 
         // as an observer, does not own the pointer
-        template<typename T>
-        Any(T* ptr) : typeID(getTypeID<T>()), destructor(nullptr) {
-            data = ptr;
-        }
+        // template<typename T>
+        // Any(T* ptr) : typeID(getTypeID<T>()), destructor(nullptr) {
+        //     data = ptr;
+        // }
 
         Any(const Any& other) = delete;
         Any& operator=(const Any& other) = delete;
