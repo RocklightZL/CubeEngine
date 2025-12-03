@@ -69,6 +69,22 @@ namespace Cube {
         return it->get();
     }
 
+    void Scene::serialize(const std::string& sceneFilePath) const {
+        nlohmann::json data;
+        data["name"] = name;
+        data["entities"] = nlohmann::json::array();
+        for(const auto& entity : entities) {
+            data["entities"].push_back(entity->serialize());
+        }
+        std::ofstream file(sceneFilePath);
+        if(!file.is_open()) {
+            CB_CORE_ERROR("Scene::serialize(): Failed to open scene file '{}'", sceneFilePath);
+            return;
+        }
+        file << data.dump(4);
+        file.close();
+    }
+
     void Scene::processDestroy() {
         auto end = std::remove_if(entities.begin(), entities.end(), [this](const std::unique_ptr<Entity>& entity) {
             return !entity->isAlive();

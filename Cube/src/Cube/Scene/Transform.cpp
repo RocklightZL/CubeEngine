@@ -77,8 +77,12 @@ namespace Cube {
         if(it != children.end()) {
             child->parent = nullptr;
             children.erase(it);
-        }else {
+        } else {
             CB_CORE_ERROR("Transform::removeChild: child not found");
         }
+    }
+
+    const std::vector<Transform*>& Transform::getChildren() const {
+        return children;
     }
 }  // namespace Cube

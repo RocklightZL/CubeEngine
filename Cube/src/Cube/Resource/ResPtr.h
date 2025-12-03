@@ -13,7 +13,7 @@ namespace Cube {
         explicit ResPtr(const std::string& path) {
             resource = ResourceManager::get().load<T>(path);
         }
-        ResPtr(const ResPtr& other) = delete;
+        ResPtr(const ResPtr& other) : ResPtr(static_cast<ResourceBase*>(other.get())->getPath()){}
         ResPtr(ResPtr&& other) noexcept : resource(other.resource){
             other.resource = nullptr;
         }
@@ -23,7 +23,14 @@ namespace Cube {
             }
         }
 
-        ResPtr& operator=(const ResPtr& other) = delete;
+        ResPtr& operator=(const ResPtr& other) {
+            if(&other == this) return *this;
+            if(resource) {
+                ResourceManager::get().release(resource);
+            }
+            resource = ResourceManager::get().load<T>(static_cast<ResourceBase*>(other.get())->getPath());
+            return *this;
+        }
         ResPtr& operator=(ResPtr&& other) noexcept {
             if(&other == this) return *this;
             if(resource) {

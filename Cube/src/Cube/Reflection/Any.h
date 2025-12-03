@@ -25,12 +25,18 @@ namespace Cube {
             }
         }
 
-        template<typename T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any>, int> = 0>
+        template<typename T, typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Any> && !std::is_lvalue_reference_v<T>>>
         Any(T&& value) : typeID(getTypeID<T>()) {
             data = new T(std::forward<T>(value));
             destructor = [](void* ptr){
                 delete static_cast<T*>(ptr);
             };
+        }
+
+        // as an observer, does not own the pointer
+        template<typename T>
+        Any(T* ptr) : typeID(getTypeID<T>()), destructor(nullptr) {
+            data = ptr;
         }
 
         Any(const Any& other) = delete;
@@ -46,9 +52,7 @@ namespace Cube {
             if(data) {
                 if(destructor){
                     destructor(data);
-                    return;
                 }
-                CB_CORE_ERROR("Reflection: Destructor function is missing");
             }
         }
 

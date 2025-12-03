@@ -32,6 +32,8 @@ namespace Cube {
             return result;
         }
 
+        void serialize(const std::string& sceneFilePath) const;
+
     private:
         std::string name;
         std::vector<std::unique_ptr<Entity>> entities;

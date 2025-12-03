@@ -39,18 +39,9 @@ namespace Cube {
 		}
 
 		template<typename PropertyType>
-		ClassBuilder& property(const std::string& name, PropertyType T::*memberPtr, PropertyType(T::*getterPtr)(), void(T::*setterPtr)(PropertyType)) {
-			size_t offset = reinterpret_cast<size_t>(&(static_cast<T>(nullptr)->*memberPtr));
-			classInfo->addProperty(name, getTypeID<PropertyType>(), offset, sizeof(PropertyType), [getterPtr](const void* obj) {
-				T* instance = static_cast<T*>(obj);
-				return Any(instance->*getterPtr());
-			}, [setterPtr](void* obj, const Any& value) {
-				T* instance = static_cast<T>(obj);
-				instance->*setterPtr(value.as<PropertyType>());
-			}, [setterPtr](void* obj, const Any& value) {
-				T* instance = static_cast<T>(obj);
-				instance->*setterPtr(value.as<PropertyType>());
-			});
+		ClassBuilder& property(const std::string& name, PropertyType T::*memberPtr, Property::Getter getter, Property::Setter setter, Property::MoveSetter moveSetter) {
+			size_t offset = reinterpret_cast<size_t>(&(static_cast<T*>(nullptr)->*memberPtr));
+            classInfo->addProperty(name, getTypeID<PropertyType>(), offset, sizeof(PropertyType), std::move(getter), std::move(setter), std::move(moveSetter));
 			return *this;
 		}
 

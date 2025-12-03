@@ -48,7 +48,25 @@ namespace Cube {
     }
 
     nlohmann::json Entity::serialize() const {
-        return {};
+        nlohmann::json data;
+        data["name"] = name;
+        nlohmann::json tr;
+        tr["pos"] = {transform.getPosition().x, transform.getPosition().y};
+        tr["rotation"] = transform.getRotation();
+        tr["scale"] = {transform.getScale().x, transform.getScale().y};
+        tr["children"] = nlohmann::json::array();
+        for(auto& child : transform.getChildren()) {
+            Entity* childEntity = child->getEntity();
+            tr["children"].push_back(childEntity->getName());
+        }
+        data["transform"] = tr;
+        data["components"] = nlohmann::json::array();
+        for(const auto& [typeID, component] : components) {
+            nlohmann::json c = Serializer::get().serialize(typeID, Any(component.get()));
+            c["type"] = ClassRegistry::get().getClass(typeID)->getName();
+            data["components"].push_back(c);
+        }
+        return data;
     }
 
 }  // namespace Cube

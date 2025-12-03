@@ -49,7 +49,13 @@ namespace Cube {
 	    ClassBuilder<Component>("Component");
 		ClassBuilder<Sprite>("Sprite")
 			.base<Component>()
-			.property("texture", &Sprite::texture)
+			.property("texture", &Sprite::texture, [](const void* obj) {
+                const Sprite* sprite = static_cast<const Sprite*>(obj);
+			    return Any(sprite->texture.get());
+			}, nullptr, [](void* obj, Any&& value) {
+				Sprite* sprite = static_cast<Sprite*>(obj);
+				sprite->texture = std::move(*value.move<ResPtr<Texture2D>>());
+			})
 			.property("texRegion", &Sprite::texRegion)
 			.property("tintColor", &Sprite::tintColor)
 			.property("order", &Sprite::order)
@@ -67,10 +73,10 @@ namespace Cube {
 		serializer.registerConverter(getTypeID<ResPtr<Texture2D>>(), {
 			// toJson
 			[](const Any& obj) {
-				const ResPtr<Texture2D>& resPtr = obj.as<ResPtr<Texture2D>>();
+				const Texture2D* resPtr = &obj.as<Texture2D>(); // TODO: 这个Any类可能还要优化一下
 				nlohmann::json j;
 				if(resPtr) {
-					j = resPtr->getPath();
+					j = nlohmann::json(resPtr->getPath());
 				}else {
 					j = nullptr;
 				}

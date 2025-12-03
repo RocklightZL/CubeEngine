@@ -28,6 +28,7 @@ namespace Cube {
 
 		void addChild(Transform* child);
 		void removeChild(Transform* child);
+        const std::vector<Transform*>& getChildren() const;
 
 	private:
 		glm::vec2 pos = {0.0f, 0.0f};

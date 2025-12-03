@@ -9,6 +9,7 @@ using namespace Cube;
 
 int main() {
     Application app;
+    Renderer2D::setVSync(true);
     SceneManager& sceneManager = app.getSceneManager();
     sceneManager.registerScene("scene", [&app]() {
         Scene* scene = new Scene("scene", true);
@@ -26,10 +27,12 @@ int main() {
         // cameraTr.setPosition({-200.0f, -200.0f});
         return scene;
     });
-    sceneManager.registerScene("Test01", "assets/scenes/Test01.scene");
+    // sceneManager.registerScene("Test01", "assets/scenes/Test01.scene");
+    sceneManager.registerScene("Test01", "assets/scenes/out_scene.scene");
     sceneManager.load("Test01");
     sceneManager.setActive("Test01");
-    
+    Scene* scene = sceneManager.getActive();
+    // scene->serialize("assets/scenes/out_scene.scene");
     app.run();
     return 0;
 }
