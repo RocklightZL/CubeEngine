@@ -6,13 +6,13 @@
 namespace Cube {
 
     void Entity::start() {
-        for(auto& [typeID, component] : components) {
+        for(auto& component : components) {
             component->start();
         }
     }
 
     void Entity::update(float delta) {
-        for(auto& [typeID, component] : components) {
+        for(auto& component : components) {
             component->update(delta);
         }
     }
@@ -43,7 +43,8 @@ namespace Cube {
             Any component = Serializer::get().deserialize(classInfo->getTypeID(), c);
             Component* compPtr = component.moveToBase<Component>();
             compPtr->entity = this;
-            components[classInfo->getTypeID()] = std::unique_ptr<Component>(compPtr);
+            components.push_back(std::unique_ptr<Component>(compPtr));
+            componentsMap[classInfo->getTypeID()] = compPtr;
         }
     }
 
@@ -61,8 +62,8 @@ namespace Cube {
         }
         data["transform"] = tr;
         data["components"] = nlohmann::json::array();
-        for(const auto& [typeID, component] : components) {
-            nlohmann::json c = Serializer::get().serialize(typeID, Any(component.get()));
+        for(const auto& [typeID, component] : componentsMap) {
+            nlohmann::json c = Serializer::get().serialize(typeID, Any(component));
             c["type"] = ClassRegistry::get().getClass(typeID)->getName();
             data["components"].push_back(c);
         }

@@ -40,6 +40,10 @@ namespace Cube {
     }
 
     void Scene::update(float delta) {
+        if(!started) {
+            start();
+            started = true;
+        }
         for(auto& entity: entities) {
             entity->update(delta);
         }

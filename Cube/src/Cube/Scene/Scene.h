@@ -9,7 +9,6 @@ namespace Cube {
         Scene(const std::string& sceneFilePath);
         virtual ~Scene() = default;
 
-        void start();
         void update(float delta);
 
         Entity* createEntity(const std::string& name);
@@ -37,7 +36,9 @@ namespace Cube {
     private:
         std::string name;
         std::vector<std::unique_ptr<Entity>> entities;
+        bool started = false;
 
+        void start();
         void processDestroy();
     };
 

@@ -23,45 +23,53 @@ namespace Cube {
 		T* addComponent(Args&&... args) {
 			static_assert(std::is_base_of_v<Component, T>);
 			TypeID typeID = getTypeID<T>();
-			if(components.find(typeID) != components.end()) {
+			if(componentsMap.find(typeID) != componentsMap.end()) {
 				CB_CORE_ERROR("Entity::addComponent<T>(): component of type '{}' already exists", ClassRegistry::get().getClass<T>()->getName());
-				return static_cast<T*>(components[typeID].get());
+				return static_cast<T*>(componentsMap[typeID]);
 			}
-			components[typeID] = std::make_unique<T>(std::forward<Args>(args)...);
-            components[typeID]->entity = this;
-			return static_cast<T*>(components[typeID].get());
+			std::unique_ptr<Component> component = std::make_unique<T>(std::forward<Args>(args)...);
+            Component* ptr = component.get();
+            ptr->entity = this;
+            componentsMap[typeID] = ptr;
+            components.push_back(std::move(component));
+			return static_cast<T*>(ptr);
         }
 
+		// TODO: Lazy deletion may be considered later.
 		template<typename T>
 		void removeComponent() {
 			static_assert(std::is_base_of_v<Component, T>);
             TypeID typeID = getTypeID<T>();
-            auto it = components.find(typeID);
-			if(it == components.end()) {
+            auto it = componentsMap.find(typeID);
+			if(it == componentsMap.end()) {
 				CB_CORE_ERROR("Entity::removeComponent<T>(): component of type '{}' not found", ClassRegistry::get().getClass<T>()->getName());
 				return;
             }
-			components.erase(it);
+            Component* compPtr = it->second;
+			componentsMap.erase(it);
+			components.erase(std::remove_if(components.begin(), components.end(), [compPtr](const std::unique_ptr<Component>& c) {
+			    return c.get() == compPtr;
+			}), components.end());
 		}
 
 		template<typename T>
 		T* getComponent() const {
 			static_assert(std::is_base_of_v<Component, T>);
 			TypeID typeID = getTypeID<T>();
-			auto it = components.find(typeID);
-			if(it == components.end()) {
+			auto it = componentsMap.find(typeID);
+			if(it == componentsMap.end()) {
 				return nullptr;
 			}
-			return static_cast<T*>(it->second.get());
+			return static_cast<T*>(it->second);
         }
 
-		const std::unordered_map<TypeID, std::unique_ptr<Component>>& getComponents() const { return components; }
+		const std::vector<std::unique_ptr<Component>>& getComponents() const { return components; }
 
 		template<typename T>
 		bool hasComponent() const {
 			static_assert(std::is_base_of_v<Component, T>);
 			TypeID typeID = getTypeID<T>();
-			return components.find(typeID) != components.end();
+			return componentsMap.find(typeID) != componentsMap.end();
         }
 
 		bool isAlive() const { return alive; }
@@ -77,7 +85,8 @@ namespace Cube {
 	private:
         std::string name;  // Temporarily used as the unique identifier
 		bool alive = true;
-		std::unordered_map<TypeID, std::unique_ptr<Component>> components;
+        std::vector<std::unique_ptr<Component>> components;  // for iteration
+        std::unordered_map<TypeID, Component*> componentsMap;  // for lookup
 		Transform transform = Transform(this);
 	};
 

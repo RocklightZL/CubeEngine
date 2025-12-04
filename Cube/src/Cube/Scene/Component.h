@@ -3,6 +3,8 @@
 namespace Cube {
     class Entity;
 
+	// Game runtime data is declared private or protected;
+    // Data requiring persistent storage should be declared public for reflection serialization.
 	class Component {
 	public:
         friend class Entity;
