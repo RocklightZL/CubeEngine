@@ -8,7 +8,8 @@
 #include "Cube/Scene/Component.h"
 
 namespace Cube {
-
+    class Sprite;
+    
     // Frame animation controller for sprites
     class Animation : public Component{
     public:
@@ -17,6 +18,7 @@ namespace Cube {
         Animation() = default;
         ~Animation() override = default;
 
+        void start() override;
         void update(float deltaTime) override;
         TextureRegion getCurrentFrame();
 
@@ -26,9 +28,10 @@ namespace Cube {
         void stop();
 
     private:
+        AnimationClip* currentClip = nullptr;
         bool playing = false;
         float currentTime = 0.0f;
-        AnimationClip* currentClip = nullptr;
+        Sprite* sprite = nullptr;
     };
 
 }  // namespace Cube

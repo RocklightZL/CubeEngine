@@ -1,10 +1,15 @@
+#include "pch.h"
 #include "Animation.h"
 
 #include "Cube/Scene/Entity.h"
 #include "Cube/Scene/Sprite.h"
-#include "pch.h"
 
 namespace Cube {
+
+    void Animation::start() {
+        sprite = entity->getComponent<Sprite>();
+        CB_ASSERT(sprite && "No Sprite component!");
+    }
 
     void Animation::update(float deltaTime) {
         if(!playing || !currentClip) return;
@@ -16,9 +21,7 @@ namespace Cube {
                 currentTime = currentClip->getDuration();
             }
         }
-        if(Sprite* sprite = entity->getComponent<Sprite>()) {
-            sprite->texRegion = getCurrentFrame();
-        }
+        sprite->texRegion = getCurrentFrame();
     }
 
     TextureRegion Animation::getCurrentFrame() {
@@ -41,6 +44,7 @@ namespace Cube {
         auto clip = clips.find(clipName);
         if(clip != clips.end()) {
             currentClip = clip->second.get();
+            sprite->texture = clip->second->getTexture();
         }else {
             CB_CORE_ERROR("Clip not found");
         }

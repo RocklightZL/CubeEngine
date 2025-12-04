@@ -7,7 +7,7 @@
 #include <json.hpp>
 
 namespace Cube {
-    // .anim.res
+    // .anim
     AnimationClip::AnimationClip(const std::string& animationFilePath) : ResourceBase(animationFilePath) {
         std::ifstream file(animationFilePath);
         if(!file.is_open()) {
@@ -28,7 +28,7 @@ namespace Cube {
                 {f["textureRegion"]["uvMin"]["x"], f["textureRegion"]["uvMin"]["y"]},
                 {f["textureRegion"]["uvMax"]["x"], f["textureRegion"]["uvMax"]["y"]}
             };
-            af.duration = animData["duration"];
+            af.duration = f["duration"];
             frames.push_back(af);
         }
     }
@@ -48,5 +48,6 @@ namespace Cube {
     bool AnimationClip::isLooping() const { return looping; }
     float AnimationClip::getSpeed() const { return speed; }
     float AnimationClip::getDuration() const { return duration; }
+    const ResPtr<Texture2D>& AnimationClip::getTexture() const { return texture; }
 
 }  // namespace Cube

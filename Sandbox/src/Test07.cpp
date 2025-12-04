@@ -1,5 +1,5 @@
 // test GameObject-Component
-#define TEST07
+// #define TEST07
 #ifdef TEST07
 #include "Cube.h"
 #include "Cube/Scene/Camera2D.h"

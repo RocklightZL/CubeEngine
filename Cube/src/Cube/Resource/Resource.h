@@ -2,6 +2,7 @@
 
 namespace Cube {
 
+    // TODO: Add resource unique identifier(RUID)
     class ResourceBase {
     public:
         friend class ResourceManager;

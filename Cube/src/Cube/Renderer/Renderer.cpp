@@ -165,11 +165,12 @@ namespace Cube {
         std::vector<float> data;
         Texture2D* tex = currentContext->currentTex;
         for(const QuadData& qd : currentContext->batchData) {
+            glm::vec2 size = {tex->getWidth() * (qd.textureCoord.z - qd.textureCoord.x), tex->getHeight() * (qd.textureCoord.w - qd.textureCoord.y)};
             glm::vec4 pos[4] = {
                 {0.0f, 0.0f, 0.0f, 1.0f},
-                {tex->getWidth(), 0.0f, 0.0f, 1.0f},
-                {tex->getWidth(), tex->getHeight(), 0.0f, 1.0f},
-                {0.0f, tex->getHeight(), 0.0f, 1.0f}
+                {size.x, 0.0f, 0.0f, 1.0f},
+                {size.x, size.y, 0.0f, 1.0f},
+                {0.0f, size.y, 0.0f, 1.0f}
             };
             glm::vec2 texCoords[4] = {
                 {qd.textureCoord.x, qd.textureCoord.y},

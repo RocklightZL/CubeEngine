@@ -25,9 +25,10 @@ namespace Cube {
         bool isLooping() const;
         float getSpeed() const;
         float getDuration() const;
+        const ResPtr<Texture2D>& getTexture() const;
 
     private:
-        ResPtr<Texture2D> texture;
+        ResPtr<Texture2D> texture;  // use ResPtr instead of resource path to preload the texture resource
         std::vector<AnimationFrame> frames;
         std::string name;
         bool looping;

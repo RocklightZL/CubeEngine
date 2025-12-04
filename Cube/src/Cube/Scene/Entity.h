@@ -10,6 +10,7 @@
 
 namespace Cube {
 
+	// GameObject in scene
 	class Entity {
 	public:
 		Entity() = default;
