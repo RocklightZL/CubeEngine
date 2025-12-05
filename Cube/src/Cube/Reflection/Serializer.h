@@ -42,6 +42,10 @@ namespace Cube {
             return it->second.fromJson(data);
         }
 
+        bool isRegistered(TypeID typeID) {
+            return registry.find(typeID) != registry.end();
+        }
+
     private:
         std::unordered_map<TypeID, Converter> registry;
 
@@ -49,6 +53,7 @@ namespace Cube {
         ~Serializer() = default;
     };
 
+    // auto register serializers for basic types and classes
     template<typename T>
     void registerSerializer() {
         Converter converter;
@@ -59,12 +64,54 @@ namespace Cube {
             converter.fromJson = [](const nlohmann::json& data) {
                 return Any(data.get<T>());
             };
+        }else if constexpr (Type::SingleTraits<T>::container == Type::ContainerType::Vector) {
+            converter.toJson = [](const Any& obj) {
+                using ElementType = typename Type::SingleTraits<T>::Type;
+                const T& vec = obj.as<T>();
+                nlohmann::json j = nlohmann::json::array();
+                for(const auto& element : vec) {
+                    j.push_back(Serializer::get().serialize(getTypeID<ElementType>(), Any(element)));
+                }
+                return j;
+            };
+            converter.fromJson = [](const nlohmann::json& data) {
+                using ElementType = typename Type::SingleTraits<T>::Type;
+                T vec;
+                for(const auto& elementData : data) {
+                    Any element = Serializer::get().deserialize(getTypeID<ElementType>(), elementData);
+                    vec.emplace(std::move(element.as<ElementType>()));
+                }
+                return Any(std::move(vec));
+            };
+        }else if constexpr (Type::MapTraits<T>::container == Type::ContainerType::UnorderedMap) {
+            converter.toJson = [](const Any& obj) {
+                using KeyType = typename Type::MapTraits<T>::KeyType;
+                using ValueType = typename Type::MapTraits<T>::ValueType;
+                const T& map = obj.as<T>();
+                nlohmann::json j;
+                for(const auto& [key, value] : map) {
+                    j[Serializer::get().serialize(getTypeID<KeyType>(), Any(key)).get<std::string>()] =
+                        Serializer::get().serialize(getTypeID<ValueType>(), Any(value));
+                }
+                return j;
+            };
+            converter.fromJson = [](const nlohmann::json& data) {
+                using KeyType = typename Type::MapTraits<T>::KeyType;
+                using ValueType = typename Type::MapTraits<T>::ValueType;
+                T map;
+                for(auto it = data.begin(); it != data.end(); ++it) {
+                    Any keyAny = Serializer::get().deserialize(getTypeID<KeyType>(), nlohmann::json(it.key()));
+                    Any valueAny = Serializer::get().deserialize(getTypeID<ValueType>(), it.value());
+                    map.emplace(std::move(keyAny.as<KeyType>()), std::move(valueAny.as<ValueType>()));
+                }
+                return Any(std::move(map));
+            };
         }else {
             static_assert(std::is_class_v<T>);
             converter.toJson = [](const Any& obj) {
                 nlohmann::json j;
                 Class* classInfo = ClassRegistry::get().getClass<T>();
-                const void* data;
+                const void* data = nullptr;
                 if(obj.getID() == getTypeID<T>()) {
                     data = obj.getData();
                 } else if(removeAllPtr(obj.getID()) == classInfo->getTypeID() || removeAllPtr(obj.getID()) == classInfo->getBaseTypeID()) {

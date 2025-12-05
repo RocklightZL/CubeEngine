@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseClassCaster.h"
+#include "Cube/Core/Log.h"
 #include "Type.h"
 
 namespace Cube {

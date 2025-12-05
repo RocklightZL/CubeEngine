@@ -1,5 +1,8 @@
 #pragma once
 
+#include <set>
+#include <unordered_set>
+
 namespace Cube {
 
     using TypeID = uint32_t;
@@ -42,6 +45,64 @@ namespace Cube {
             static_assert(isBarePtr<RawT>());
             return PointerLevel<RawT>::value;
         }
+
+        enum class ContainerType : uint8_t{
+            Invalid,
+            Vector,
+            Set,
+            UnorderedSet,
+            Map,
+            UnorderedMap,
+            Pair
+        };
+
+        template<typename T>
+        struct SingleTraits {
+            using Type = void;
+            static constexpr ContainerType container = ContainerType::Invalid;
+        };
+
+        template<typename T>
+        struct SingleTraits<std::vector<T>> {
+            using Type = T;
+            static constexpr ContainerType container = ContainerType::Vector;
+        };
+        template<typename T>
+        struct SingleTraits<std::set<T>> {
+            using Type = T;
+            static constexpr ContainerType container = ContainerType::Set;
+        };
+        template<typename T>
+        struct SingleTraits<std::unordered_set<T>> {
+            using Type = T;
+            static constexpr ContainerType container = ContainerType::UnorderedSet;
+        };
+
+        template<typename T>
+        struct MapTraits {
+            using KeyType = void;
+            using ValueType = void;
+            static constexpr ContainerType container = ContainerType::Set;
+        };
+
+        template<typename Key, typename Value>
+        struct MapTraits<std::map<Key, Value>> {
+            using KeyType = Key;
+            using ValueType = Value;
+            static constexpr ContainerType container = ContainerType::Map;
+        };
+        template<typename Key, typename Value>
+        struct MapTraits<std::unordered_map<Key, Value>> {
+            using KeyType = Key;
+            using ValueType = Value;
+            static constexpr ContainerType container = ContainerType::UnorderedMap;
+        };
+        template<typename Key, typename Value>
+        struct MapTraits<std::pair<Key, Value>> {
+            using KeyType = Key;
+            using ValueType = Value;
+            static constexpr ContainerType container = ContainerType::Pair;
+        };
     }
 
     template<typename T>
