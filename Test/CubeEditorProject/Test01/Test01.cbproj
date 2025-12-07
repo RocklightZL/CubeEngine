@@ -1,7 +1,7 @@
 {
     "name": "Test01",
-    "projectDataDirectory": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/.cube",
-    "resourcesDirectory": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Resources",
-    "rootPath": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01",
-    "sceneDirectory": "D:/mycode/vsProject/CubeEngine/Test/TestProject/Test01/Scenes"
+    "projectDataDirectory": "D:/mycode/vsProject/CubeEngine/Test/CubeEditorProject/Test01/.cube",
+    "resourcesDirectory": "D:/mycode/vsProject/CubeEngine/Test/CubeEditorProject/Test01/Resources",
+    "rootPath": "D:/mycode/vsProject/CubeEngine/Test/CubeEditorProject/Test01",
+    "sceneDirectory": "D:/mycode/vsProject/CubeEngine/Test/CubeEditorProject/Test01/Scenes"
 }

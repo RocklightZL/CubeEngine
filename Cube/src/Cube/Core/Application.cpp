@@ -12,24 +12,12 @@
 
 namespace Cube {
 
-    bool Application::isInitialized = false;
-
-    void Application::init() {
-        Log::init();
-        registerTypes();
-    }
-
     Application::Application() : Application({1920, 1080, "Cube Engine"}){}
 
     Application::Application(const WindowPros& windowPros) : mainWindow(nullptr), running(true){
-        if(!isInitialized) {
-            init();
-            isInitialized = true;
-        }
         mainWindow = new Window(windowPros);
 
         EventDispatcher::get().subscribe<WindowCloseEvent>(std::bind(&Application::onWindowClose, this, std::placeholders::_1));
-        EventDispatcher::get().subscribe<WindowResizeEvent>(std::bind(&Application::onWindowResize, this, std::placeholders::_1));
     }
 
     Application::~Application() {
@@ -74,11 +62,4 @@ namespace Cube {
         CB_CORE_INFO("mainWindow close");
         return true;
     }
-
-    bool Application::onWindowResize(const Event& e) {
-        const auto ee = static_cast<const WindowResizeEvent&>(e);
-        Renderer::setViewport(ee.width, ee.width);
-        return true;
-    }
-
 }  // namespace Cube

@@ -89,6 +89,10 @@ namespace Cube {
         file.close();
     }
 
+    const std::string& Scene::getName() const {
+        return name;
+    }
+
     void Scene::processDestroy() {
         auto end = std::remove_if(entities.begin(), entities.end(), [this](const std::unique_ptr<Entity>& entity) {
             return !entity->isAlive();

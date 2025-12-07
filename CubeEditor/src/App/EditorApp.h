@@ -1,31 +1,30 @@
 #pragma once
-#include "Cube/Core/Application.h"
-#include "Cube/Core/Layer.h"
 #include "Cube/Core/Window.h"
+#include "Page.h"
 
-namespace Cube {
+class EditorApp{
+public:
+    static const std::string userConfigDir;
 
-    class EditorApp : public Application{
-    public:
-        static const std::string userConfigDir;
+    EditorApp(const Cube::WindowPros& windowPros);
+    ~EditorApp();
 
-        EditorApp(const WindowPros& windowPros);
-        ~EditorApp();
+    void switchPage(Page* page);
+    void run();
 
-        void switchLayer(const std::shared_ptr<Layer>& layer);
+    Cube::Window* getWindow() const;
 
-        Window* getWindow() const;
+    // global
+    std::unordered_map<std::string, Cube::Texture2D*> icons;
 
-        // global
-        std::unordered_map<std::string, Texture2D*> icons;
+private:
+    std::unique_ptr<Cube::Window> mainWindow;
+    std::unique_ptr<Page> currentPage;
+    bool running;
 
-    private:
-        void imGuiInit();
-
-        void loadAssets();
-        void releaseAssets();
-
-        void setDarkTheme();
-    };
-
-}
+    void imGuiInit();
+    void loadAssets();
+    void releaseAssets();
+    void setDarkTheme();
+    bool onWindowClose(const Cube::Event& e);
+};

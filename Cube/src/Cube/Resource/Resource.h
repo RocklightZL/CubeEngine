@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace Cube {
 
     // TODO: Add resource unique identifier(RUID)

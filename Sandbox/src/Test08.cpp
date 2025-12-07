@@ -4,6 +4,7 @@
 #ifdef TEST08
 #include "Cube.h"
 #include "Cube/Animation/Animation.h"
+#include "Cube/Core/Engine.h"
 #include "Cube/Core/Input.h"
 #include "Cube/Scene/Camera2D.h"
 #include "Cube/Scene/Sprite.h"
@@ -39,6 +40,7 @@ void Controller::update(float delta) {
 }
 
 int main() {
+    Engine::init();
     Application app;
     Renderer2D::setVSync(true);
     SceneManager& sceneManager = app.getSceneManager();

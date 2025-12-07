@@ -22,16 +22,11 @@ namespace Cube {
         SceneManager& getSceneManager();
 
 		bool onWindowClose(const Event& e);
-		bool onWindowResize(const Event& e);
 
 	protected:
 		Window* mainWindow;
 		bool running;
 		RenderServer renderServer;
         SceneManager sceneManager;
-
-	private:
-		static bool isInitialized;
-		void init();
 	};
 }

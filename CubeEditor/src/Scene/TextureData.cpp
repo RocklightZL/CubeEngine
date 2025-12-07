@@ -5,27 +5,24 @@
 #include <fstream>
 #include <json.hpp>
 
-namespace Cube {
-
-    // 暂不支持旋转和边缘裁剪，需要在TexturePacker里禁用
-    TextureData::TextureData(const std::string& filePath, const std::string& imagePath) : filePath(filePath), imagePath(imagePath){
-        std::ifstream file(filePath);
-        if(!file.is_open()) {
-            CB_EDITOR_ERROR("TextureData::TextureData: Failed to open file {}", filePath);
-            return;
-        }
-        nlohmann::json data;
-        file >> data;
-        file.close();
-        size = {data["meta"]["size"]["w"], data["meta"]["size"]["h"]};
-        for(auto& frame : data["frames"]) {
-            SubTexture st;
-            st.name = frame["filename"];
-            st.position = {frame["frame"]["x"], frame["frame"]["y"]};
-            st.size = {frame["frame"]["w"], frame["frame"]["h"]};
-            st.uvMin = glm::vec2(st.position.x, size.y - st.position.y - st.size.y) / size;
-            st.uvMax = st.uvMin + st.size / size;
-            textures.push_back(st);
-        }
+// 暂不支持旋转和边缘裁剪，需要在TexturePacker里禁用
+TextureData::TextureData(const std::string& filePath, const std::string& imagePath) : filePath(filePath), imagePath(imagePath){
+    std::ifstream file(filePath);
+    if(!file.is_open()) {
+        CB_EDITOR_ERROR("TextureData::TextureData: Failed to open file {}", filePath);
+        return;
     }
-}  // namespace Cube
+    nlohmann::json data;
+    file >> data;
+    file.close();
+    size = {data["meta"]["size"]["w"], data["meta"]["size"]["h"]};
+    for(auto& frame : data["frames"]) {
+        Cube::SubTexture st;
+        st.name = frame["filename"];
+        st.position = {frame["frame"]["x"], frame["frame"]["y"]};
+        st.size = {frame["frame"]["w"], frame["frame"]["h"]};
+        st.uvMin = glm::vec2(st.position.x, size.y - st.position.y - st.size.y) / size;
+        st.uvMax = st.uvMin + st.size / size;
+        textures.push_back(st);
+    }
+}
