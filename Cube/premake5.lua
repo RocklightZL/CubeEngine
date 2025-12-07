@@ -1,7 +1,7 @@
 project "Cube"
     kind "StaticLib"
     language "C++"
-    cppdialect "C++17"
+    cppdialect "C++17" -- Uses some C++17 features, such as the inline keyword in headers.
     staticruntime "off"
 
     targetdir ("%{wks.location}/bin/"..outputdir.."/%{prj.name}")
@@ -48,3 +48,9 @@ project "Cube"
 
     filter "files:external/**"
         buildoptions { "/Y-"}
+    
+    -- forbidden RTTI
+    filter "action:gmake"
+        buildoptions { "-fno-rtti" }
+    filter "action:vs*"
+        buildoptions { "/GR-" }

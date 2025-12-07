@@ -1,17 +1,18 @@
-#include "Project.h"
-#include "App/EditorApp.h"
-#include "App/GuidanceLayer.h"
-#include "Cube/Core/Application.h"
-#include "Cube/Core/Log.h"
-
 #include <iostream>
 
-Cube::EditorApp* app = nullptr;
-Cube::Project* proj = nullptr;
+#include "App/EditorApp.h"
+#include "App/GuidancePage.h"
+#include "Cube/Core/Engine.h"
+#include "Cube/Core/Log.h"
+#include "Project.h"
+
+EditorApp* app = nullptr;
+Project* proj = nullptr;
 
 int main() {
-    app = new Cube::EditorApp({1920, 1080, "Cube Editor"});
-    app->switchLayer(std::make_shared<Cube::GuidanceLayer>());
+    Cube::Engine::init();
+    app = new EditorApp({1920, 1080, "Cube Editor"});
+    app->switchPage(new GuidancePage);
     app->run();
 
     delete proj;

@@ -6,7 +6,6 @@
 
 namespace Cube {
 
-    // 顶点属性数据类型
     enum class ShaderDataType {
         None = 0,
         Float, Float2, Float3, Float4,
@@ -15,15 +14,12 @@ namespace Cube {
         Bool
     };
 
-    // 获取数据类型大小
     uint32_t shaderDataTypeSize(ShaderDataType type);
 
-    // 获取数据类型对应的OpenGL基本类型
     GLenum shaderDataTypeToOpenGlBaseType(ShaderDataType type);
 
     uint32_t shaderDataTypeCount(ShaderDataType type);
 
-    // 顶点属性配置
     struct BufferElement {
         std::string name;
         ShaderDataType type;
@@ -35,7 +31,6 @@ namespace Cube {
 
     };
 
-    // 布局
     class BufferLayout {
     public:
         BufferLayout() = default;

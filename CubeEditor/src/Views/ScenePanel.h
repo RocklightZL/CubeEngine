@@ -2,14 +2,10 @@
 
 #include "View.h"
 
-namespace Cube {
+class ScenePanel : public View {
+public:
+    ScenePanel() = default;
+    ~ScenePanel() override = default;
 
-    class ScenePanel : public View {
-    public:
-        ScenePanel() = default;
-        ~ScenePanel() override = default;
-
-        void render(float deltaTime) override;
-    };
-
-}
+    void render(float deltaTime) override;
+};

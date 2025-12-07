@@ -60,7 +60,7 @@ namespace Cube {
     // UIImage
     void UIImage::render() {
         UIWidget::render();
-        Renderer2D::drawQuad(getWorldPosition() + size / 2.0f, size, texture, glm::vec4(1), 0, texRegion.getUVCoord());
+        Renderer2D::drawQuad(getWorldPosition() + size / 2.0f, size, texture, WHITE, 0, texRegion.getUVCoord());
     }
 
     // UILabel

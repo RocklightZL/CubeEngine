@@ -1,8 +1,11 @@
 #pragma once
 
+#include <imgui/imgui.h>
+
 #include <functional>
 #include <string>
-#include <imgui/imgui.h>
+
+#include "Cube/Renderer/Color.h"
 
 void addDashLine(ImDrawList* drawList, const ImVec2& start, const ImVec2& end, const ImU32& color, float thickness = 1.0f, float segmentLen = 10.0f, float intervalLen = 10.0f);
 
@@ -30,3 +33,7 @@ private:
 bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_size, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {1, 1}, ImGuiButtonFlags flags = ImGuiButtonFlags_None);
 
 bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {1, 1}, const ImVec2& button_size = {0, 0}, const ImVec2& icon_size = ImVec2(ImGui::CalcTextSize("Text").y, ImGui::CalcTextSize("Text").y));
+
+inline ImVec4 toImColor(const Cube::Color& color) {
+    return {color.r, color.g, color.b, color.a};
+}

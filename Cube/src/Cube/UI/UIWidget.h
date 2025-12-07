@@ -12,9 +12,9 @@
 
 namespace Cube {
     struct UIStyle {
-        glm::vec4 bgColor;
+        Color bgColor;
         glm::vec4 border;
-        glm::vec4 borderColor;
+        Color borderColor;
     };
 
     // base class for all UI elements
@@ -47,7 +47,7 @@ namespace Cube {
     protected:
         glm::vec2 pos = {0.0f, 0.0f};     // relative position to parent
         glm::vec2 size = {100.0f, 30.0f};
-        UIStyle style;
+        UIStyle style = {};
         bool visible = true;
 
         UIWidget* parent = nullptr; // upper container
@@ -90,12 +90,12 @@ namespace Cube {
     // UILabel
     class UILabel : public UIWidget {
     public:
-        UILabel(const std::string& text, const std::string& fontMetaFile, const glm::vec4& color, const glm::vec2& pos) : text(text), color(color) {
+        UILabel(const std::string& text, const std::string& fontMetaFile, const Color& color, const glm::vec2& pos) : text(text), color(color) {
             this->pos = pos;
             font = ResourceManager::get().load<Font>(fontMetaFile);
             size = font->calcTextSize(text);
         }
-        UILabel(const std::string& text, const glm::vec4& color, const glm::vec2& pos = {0.0f, 0.0f}) : UILabel(text, globalFont, color, pos){}
+        UILabel(const std::string& text, const Color& color, const glm::vec2& pos = {0.0f, 0.0f}) : UILabel(text, globalFont, color, pos){}
         ~UILabel() override {
             ResourceManager::get().release(font);
         }
@@ -105,7 +105,7 @@ namespace Cube {
         static std::string globalFont;
     protected:
         std::string text;
-        glm::vec4 color;
+        Color color;
         Font* font;
     };
 

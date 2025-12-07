@@ -106,7 +106,7 @@ namespace Cube {
     void Renderer2D::shutdown() {
     }
 
-    void Renderer2D::drawQuad(const glm::mat4& modelMatrix, const glm::vec4& tintColor, Texture2D* texture, const glm::vec4& texCoord) {
+    void Renderer2D::drawQuad(const glm::mat4& modelMatrix, const Color& tintColor, Texture2D* texture, const glm::vec4& texCoord) {
         if(texture == nullptr) {
             texture = currentContext->whiteTex;
         }
@@ -122,23 +122,22 @@ namespace Cube {
         currentContext->batchCnt++;
     }
 
-    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& tintColor, float degree, const glm::vec4& texCoord) {
+    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const Color& tintColor, float degree, const glm::vec4& texCoord) {
         glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0.0f));
         modelMatrix = glm::rotate(modelMatrix, glm::radians(degree), {0.0f, 0.0f, 1.0f});
         modelMatrix = glm::scale(modelMatrix, glm::vec3(size, 1.0f));
         drawQuad(modelMatrix, tintColor, texture, texCoord);
     }
 
-    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4& transform) {
+    void Renderer2D::drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const Color& color, const glm::mat4& transform) {
         glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(pos, 0.0f));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(size, 1.0f));
         modelMatrix = transform * modelMatrix;
         drawQuad(modelMatrix, color, texture, texCoord);
     }
 
-    void Renderer2D::drawLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, float width) {
+    void Renderer2D::drawLine(const glm::vec2& p1, const glm::vec2& p2, const Color& color, float width) {
         if(width < 0.01f) return;
-        // 计算线段的方向向量和长度
         glm::vec2 direction = p2 - p1;
         float length = glm::length(direction);
         
@@ -146,13 +145,10 @@ namespace Cube {
             return;
         }
         
-        // 计算线段的角度（弧度）
         float angle = std::atan2(direction.y, direction.x);
         
-        // 计算线段的中心点
         glm::vec2 center = (p1 + p2) * 0.5f;
         
-        // 创建变换矩阵：平移到中心点，旋转，缩放为线段长度和宽度
         glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(center, 0.0f));
         modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(0.0f, 0.0f, 1.0f));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(length, width, 1.0f));
@@ -167,12 +163,14 @@ namespace Cube {
 
     void Renderer2D::flushBatch() {
         std::vector<float> data;
+        Texture2D* tex = currentContext->currentTex;
         for(const QuadData& qd : currentContext->batchData) {
+            glm::vec2 size = {tex->getWidth() * (qd.textureCoord.z - qd.textureCoord.x), tex->getHeight() * (qd.textureCoord.w - qd.textureCoord.y)};
             glm::vec4 pos[4] = {
-                {-0.5f, -0.5f, 0.0f, 1.0f},
-                {0.5f, -0.5f, 0.0f, 1.0f},
-                {0.5f, 0.5f, 0.0f, 1.0f},
-                {-0.5f, 0.5f, 0.0f, 1.0f}
+                {0.0f, 0.0f, 0.0f, 1.0f},
+                {size.x, 0.0f, 0.0f, 1.0f},
+                {size.x, size.y, 0.0f, 1.0f},
+                {0.0f, size.y, 0.0f, 1.0f}
             };
             glm::vec2 texCoords[4] = {
                 {qd.textureCoord.x, qd.textureCoord.y},

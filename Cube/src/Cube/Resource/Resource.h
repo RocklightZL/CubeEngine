@@ -1,13 +1,16 @@
 #pragma once
 
+#include <string>
+
 namespace Cube {
 
+    // TODO: Add resource unique identifier(RUID)
     class ResourceBase {
     public:
         friend class ResourceManager;
 
         // Derived classes must implement a constructor with a std::string type parameter.
-        ResourceBase(const std::string& path) : path(path){}
+        explicit ResourceBase(const std::string& path) : path(path){}
         ResourceBase() = default;
         virtual ~ResourceBase() = default;
 

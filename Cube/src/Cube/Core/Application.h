@@ -1,11 +1,14 @@
 #pragma once
 #include "Cube/Event/Event.h"
 #include "Window.h"
-#include "LayerStack.h"
-#include "Cube/Scene/Scene.h"
+#include "Cube/Scene/RenderServer.h"
+#include "Cube/Scene/SceneManager.h"
 
 namespace Cube {
-	class Application {
+
+	// TODO: 考虑改成单例模式，或者在Application外再包一层GameEngine类，GameEngine用单例管理Application，这样保证了Application被继承的可能。
+
+    class Application {
 	public:
 		Application();
 		Application(const WindowPros& windowPros);
@@ -15,16 +18,15 @@ namespace Cube {
 
 		Window* getWindow();
 
-		// 事件处理
+		RenderServer& getRenderServer();
+        SceneManager& getSceneManager();
+
 		bool onWindowClose(const Event& e);
-		bool onWindowResize(const Event& e);
 
 	protected:
 		Window* mainWindow;
 		bool running;
-		LayerStack layers;
-	private:
-		static bool isInitialized;
-		void init();
+		RenderServer renderServer;
+        SceneManager sceneManager;
 	};
 }

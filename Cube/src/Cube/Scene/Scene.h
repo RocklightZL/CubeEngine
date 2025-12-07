@@ -1,74 +1,48 @@
 #pragma once
-
 #include "Entity.h"
-#include "System.h"
-
-#include <vector>
 
 namespace Cube {
 
-    class SceneSerializer;
-
-	// 协调所有游戏实体（Entity）、组件（Component）和系统（System）
-	// 管理实体和系统的生命周期
-	class Scene {
+    // GameObject-Component
+    class Scene {
     public:
-        Scene() = default;
-        Scene(const glm::vec2& viewportSize, const std::string& name);
-        virtual ~Scene();
+        Scene(const std::string& name, bool tagNoSceneFile) : name(name){}
+        Scene(const std::string& sceneFilePath);
+        virtual ~Scene() = default;
 
-        virtual void onUpdate(float deltaTime);
+        void update(float delta);
 
-        Entity* createEntity();
         Entity* createEntity(const std::string& name);
-        void addSystem(System* system);
-        void markToDestroy(Entity* entity);
+        void destroyEntity(const std::string& name);
 
-        void clearAll();
+        const std::vector<std::unique_ptr<Entity>>& getAllEntities() const;
+        Entity* getEntity(const std::string& name) const;
 
-        template <typename... Components>
-        std::vector<Entity*> getEntitiesWith() {
-            std::vector<Entity*> res;
-
-            for(auto e : entities) {
+        template<typename... Types>
+        std::vector<Entity*> getEntitiesWith() const {
+            static_assert((std::is_base_of_v<Component, Types> && ...));
+            std::vector<Entity*> result;
+            for(const auto& entity : entities) {
                 bool hasAll = true;
-
-                // 使用初始化列表展开参数包
-                using expander = bool[];
-                (void)expander{ (hasAll = hasAll && e->hasComponent<Components>(), false)... };
-
+                ((hasAll = hasAll && entity->hasComponent<Types>()), ...);
                 if(hasAll) {
-                    res.push_back(e);
+                    result.push_back(entity.get());
                 }
             }
-            return res;
+            return result;
         }
 
-        const std::vector<Entity*>& getEntities() const;
-        const std::vector<System*>& getSystems() const;
-
-        const glm::vec2& getViewportSize() const;
-        void setViewportSize(const glm::vec2& size);
+        void serialize(const std::string& sceneFilePath) const;
 
         const std::string& getName() const;
-        void setName(const std::string& name);
-
-#ifdef EDITOR
-        bool hasSystem(const std::string& systemName) const;
-#endif
 
     private:
-        void processDestruction();
+        std::string name;
+        std::vector<std::unique_ptr<Entity>> entities;
+        bool started = false;
 
-        std::vector<Entity*> entities;
-        std::vector<System*> systems;
-
-        glm::vec2 viewportSize = {800, 600}; // TODO: 这个不应该被随便修改
-        std::string name = "Scene";
-
-        friend SceneSerializer;
+        void start();
+        void processDestroy();
     };
 
-    
-
-}  // namespace Cube
+}

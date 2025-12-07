@@ -1,62 +1,73 @@
 #include "pch.h"
 #include "Entity.h"
 
+#include "Cube/Reflection/Serializer.h"
+
 namespace Cube {
 
-	uint32_t Entity::currentID = 0;
-
-    Entity::Entity() { id = currentID++; }
-    Entity::Entity(const std::string& name) : Entity() { this->name = name; }
-
-    Entity::~Entity() {
-        for(auto& c : components) {
-            delete c.second;
+    void Entity::start() {
+        for(auto& component : components) {
+            component->start();
         }
     }
 
-    uint32_t Entity::getID() const { return id; }
-
-    const std::string& Entity::getName() const { return name; }
-    void Entity::setName(const std::string& name) { this->name = name; }
-
-    void Entity::destroy() { alive = false; }
-
-    bool Entity::isAlive() { return alive; }
-
-    const std::unordered_map<ComponentID, Component*>& Entity::getAllComponents() const {
-        return components;
-    }
-
-    Component* Entity::addComponent(const std::string& componentTypeName) {
-        ComponentID id = Component::getTypeID(componentTypeName);
-        if(hasComponent(componentTypeName)) {
-            removeComponent(componentTypeName);
+    void Entity::update(float delta) {
+        for(auto& component : components) {
+            component->update(delta);
         }
-        Component* component = Component::createComponent(componentTypeName);
-        components[id] = component;
-        return component;
     }
 
-    Component* Entity::getComponent(const std::string& componentTypeName) {
-        ComponentID id = Component::getTypeID(componentTypeName);
-        auto it = components.find(id);
-        if(it != components.end()) {
-            return it->second;
+    const std::string& Entity::getName() const {
+        return name;
+    }
+    void Entity::setName(const std::string& name) {
+        this->name = name;
+    }
+    Transform& Entity::getTransform() {
+        return transform;
+    }
+
+    void Entity::deserialize(const nlohmann::json& data) {
+        name = data["name"];
+        auto tr = data["transform"];
+        transform.setPosition({tr["pos"][0], tr["pos"][1]});
+        transform.setRotation(tr["rotation"]);
+        transform.setScale({tr["scale"][0], tr["scale"][1]});
+        for(auto& c : data["components"]) {
+            std::string typeName = c["type"];
+            Class* classInfo = ClassRegistry::get().getClass(typeName);
+            if(!classInfo) {
+                CB_CORE_ERROR("Entity::deserialize(): Unknown component type '{}'", typeName);
+                continue;
+            }
+            Any component = Serializer::get().deserialize(classInfo->getTypeID(), c);
+            Component* compPtr = component.moveToBase<Component>();
+            compPtr->entity = this;
+            components.push_back(std::unique_ptr<Component>(compPtr));
+            componentsMap[classInfo->getTypeID()] = compPtr;
         }
-        CB_CORE_ERROR("{} not found in {}", componentTypeName, name);
-        return nullptr;
     }
 
-    bool Entity::hasComponent(const std::string& componentTypeName) {
-        return components.find(Component::getTypeID(componentTypeName)) != components.end(); 
-    }
-
-    void Entity::removeComponent(const std::string& componentTypeName) {
-        auto it = components.find(Component::getTypeID(componentTypeName));
-        if(it != components.end()) {
-            delete it->second;
-            components.erase(it);
+    nlohmann::json Entity::serialize() const {
+        nlohmann::json data;
+        data["name"] = name;
+        nlohmann::json tr;
+        tr["pos"] = {transform.getPosition().x, transform.getPosition().y};
+        tr["rotation"] = transform.getRotation();
+        tr["scale"] = {transform.getScale().x, transform.getScale().y};
+        tr["children"] = nlohmann::json::array();
+        for(auto& child : transform.getChildren()) {
+            Entity* childEntity = child->getEntity();
+            tr["children"].push_back(childEntity->getName());
         }
+        data["transform"] = tr;
+        data["components"] = nlohmann::json::array();
+        for(const auto& [typeID, component] : componentsMap) {
+            nlohmann::json c = Serializer::get().serialize(typeID, Any(component));
+            c["type"] = ClassRegistry::get().getClass(typeID)->getName();
+            data["components"].push_back(c);
+        }
+        return data;
     }
 
 }  // namespace Cube

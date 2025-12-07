@@ -5,25 +5,22 @@
 
 #include <imgui/imgui.h>
 
-extern Cube::Project* proj;
+extern Project* proj;
 
-namespace Cube {
+void SceneSelectPanel::render(float deltaTime) {
+    ImGui::Begin("Scene Select Panel");
 
-    void SceneSelectPanel::render(float deltaTime) {
-        ImGui::Begin("Scene Select Panel");
-
-        for(SceneData& scene : proj->scenes) {
-            ImGui::PushID(scene.scene);
-            bool flag = false;
-            if(proj->selectedScene == &scene) {
-                flag = true;
-            }
-            if(ImGui::Selectable(std::string(scene.scene->getName() + (scene.isSaved ? "" : "*")).c_str(), &flag)) {
-                proj->selectedScene = &scene;
-            }
-            ImGui::PopID();
+    for(SceneData& scene : proj->scenes) {
+        ImGui::PushID(scene.scene);
+        bool flag = false;
+        if(proj->selectedScene == &scene) {
+            flag = true;
         }
-
-        ImGui::End();
+        if(ImGui::Selectable(std::string(scene.scene->getName() + (scene.isSaved ? "" : "*")).c_str(), &flag)) {
+            proj->selectedScene = &scene;
+        }
+        ImGui::PopID();
     }
-}  // namespace Cube
+
+    ImGui::End();
+}

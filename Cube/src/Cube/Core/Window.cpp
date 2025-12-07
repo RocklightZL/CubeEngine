@@ -38,7 +38,7 @@ namespace Cube {
             }
             CB_CORE_INFO("glfw initialize");
         }
-        glfwWindowHint(GLFW_ALPHA_BITS, 8); // 8Î»AlphaÍ¨µÀ
+        glfwWindowHint(GLFW_ALPHA_BITS, 8); // 8-bits Alpha
         window = glfwCreateWindow(pros.width, pros.height, pros.title.c_str(), nullptr, shareContext);
 
         glfwSetWindowUserPointer(window, this);
@@ -139,5 +139,7 @@ namespace Cube {
         return {x, y};
     }
 
-    void Window::windowErrorCallBack(int error_code, const char* description) { CB_CORE_ERROR("glfwWindowError: {}", description); }
+    void Window::windowErrorCallBack(int error_code, const char* description) {
+        CB_CORE_ERROR("glfwWindowError: {}", description);
+    }
 }  // namespace Cube

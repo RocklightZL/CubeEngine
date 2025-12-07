@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Color.h"
 #include "Context.h"
 #include "Texture.h"
 #include "Shader.h"
@@ -30,10 +31,10 @@ namespace Cube {
         static void beginFrame(const glm::mat4& pvMatrix);
         static void endFrame();
         static void shutdown();
-        static void drawQuad(const glm::mat4& modelMatrix, const glm::vec4& color, Texture2D* texture, const glm::vec4& texCoord);
-        static void drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& tintColor = glm::vec4(1.0f), float degree = 0.0f, const glm::vec4& texCoord = {0.0f, 0.0f, 1.0f, 1.0f});
-        static void drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const glm::vec4& color, const glm::mat4& transform);
-        static void drawLine(const glm::vec2& p1, const glm::vec2& p2, const glm::vec4& color, float width = 1.0f);
+        static void drawQuad(const glm::mat4& modelMatrix, const Color& color, Texture2D* texture, const glm::vec4& texCoord);
+        static void drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const Color& tintColor = WHITE, float degree = 0.0f, const glm::vec4& texCoord = {0.0f, 0.0f, 1.0f, 1.0f});
+        static void drawQuad(const glm::vec2& pos, const glm::vec2& size, Texture2D* texture, const glm::vec4& texCoord, const Color& color, const glm::mat4& transform);
+        static void drawLine(const glm::vec2& p1, const glm::vec2& p2, const Color& color, float width = 1.0f);
         // TODO: 自定义着色器
 
         static thread_local Context* currentContext;

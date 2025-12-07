@@ -1,36 +1,37 @@
 #pragma once
 
-#include "Cube/Renderer/Texture.h"
-#include "Cube/Renderer/TextureRegion.h"
-
 #include <string>
-#include <vector>
+#include <unordered_map>
+
+#include "AnimationClip.h"
+#include "Cube/Renderer/TextureRegion.h"
+#include "Cube/Scene/Component.h"
 
 namespace Cube {
-
-    struct AnimationFrame {
-        TextureRegion textureRegion;
-        float duration; // unit: second
-    };
-
-    class AnimationClip : public ResourceBase{
+    class Sprite;
+    
+    // Frame animation controller for sprites
+    class Animation : public Component{
     public:
-        AnimationClip(const std::string& animationFilePath);
-        ~AnimationClip();
+        std::unordered_map<std::string, ResPtr<AnimationClip>> clips;
 
-        TextureRegion getFrameAtTime(float time) const;
+        Animation() = default;
+        ~Animation() override = default;
 
-        const std::string& getName() const;
-        bool isLooping() const;
-        float getSpeed() const;
-        float getDuration() const;
+        void start() override;
+        void update(float deltaTime) override;
+        TextureRegion getCurrentFrame();
+
+        void addClip(const std::string& animClipFilePath);
+
+        void play(const std::string& clipName);
+        void stop();
+
     private:
-        Texture2D* texture;
-        std::vector<AnimationFrame> frames;
-        std::string name;
-        bool looping;
-        float speed;
-        float duration;
+        AnimationClip* currentClip = nullptr;
+        bool playing = false;
+        float currentTime = 0.0f;
+        Sprite* sprite = nullptr;
     };
 
-}
+}  // namespace Cube

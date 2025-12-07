@@ -1,0 +1,82 @@
+#include "pch.h"
+#include "TypeRegister.h"
+
+#include <glm/glm.hpp>
+
+#include "Cube/Animation/Animation.h"
+#include "Cube/Reflection/ClassBuilder.h"
+#include "Cube/Scene/Camera2D.h"
+#include "Cube/Scene/Component.h"
+#include "Cube/Scene/Sprite.h"
+
+namespace Cube {
+
+	void registerTypes() {
+		// glm
+		ClassBuilder<glm::vec1>("vec1")
+			.property("x", &glm::vec1::x)
+            .serializer();
+		ClassBuilder<glm::vec2>("vec2")
+			.property("x", &glm::vec2::x)
+			.property("y", &glm::vec2::y)
+			.serializer();
+		ClassBuilder<glm::vec3>("vec3")
+			.property("x", &glm::vec3::x)
+			.property("y", &glm::vec3::y)
+			.property("z", &glm::vec3::z)
+			.serializer();
+		ClassBuilder<glm::vec4>("vec4")
+			.property("x", &glm::vec4::x)
+			.property("y", &glm::vec4::y)
+			.property("z", &glm::vec4::z)
+			.property("w", &glm::vec4::w)
+			.serializer();
+
+		// TextureRegion
+		ClassBuilder<TextureRegion>("TextureRegion")
+			.property("uvMin", &TextureRegion::uvMin)
+			.property("uvMax", &TextureRegion::uvMax)
+			.serializer();
+
+		// Color
+		ClassBuilder<Color>("Color")
+			.property("r", &Color::r)
+			.property("g", &Color::g)
+			.property("b", &Color::b)
+			.property("a", &Color::a)
+			.serializer();
+
+		// Component
+	    ClassBuilder<Component>("Component").serializer();
+		ClassBuilder<Sprite>("Sprite")
+			.base<Component>()
+			.property("texture", &Sprite::texture, [](const void* obj) {
+                const Sprite* sprite = static_cast<const Sprite*>(obj);
+			    return Any(sprite->texture.get());
+			}, nullptr, [](void* obj, Any&& value) {
+				Sprite* sprite = static_cast<Sprite*>(obj);
+				sprite->texture = std::move(*value.move<ResPtr<Texture2D>>());
+			})
+			.property("texRegion", &Sprite::texRegion)
+			.property("tintColor", &Sprite::tintColor)
+			.property("order", &Sprite::order)
+			.serializer();
+		ClassBuilder<Camera2D>("Camera2D")
+			.base<Component>()
+			.property("viewport", &Camera2D::viewport)
+			.property("zoom", &Camera2D::zoom)
+		    .property("available", &Camera2D::available)
+			.serializer();
+		ClassBuilder<Animation>("Animation")
+			.base<Component>()
+			.property("clips", &Animation::clips)
+			.serializer();
+
+		// register serializer
+		registerBasicSerializers();
+		registerSerializer<std::unordered_map<std::string, ResPtr<AnimationClip>>>();
+		registerResPtrSerializer<Texture2D>();
+		registerResPtrSerializer<AnimationClip>();
+		registerResPtrSerializer<Font>();
+	}
+}

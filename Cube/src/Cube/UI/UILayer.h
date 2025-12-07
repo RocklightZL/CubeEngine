@@ -1,16 +1,15 @@
 #pragma once
 
 #include "UIWidget.h"
-#include "Cube/Core/Layer.h"
 
 namespace Cube {
 
-    class UILayer : public Layer{
+    class UILayer{
     public:
         UILayer() = default;
-        ~UILayer() override = default;
+        ~UILayer() = default;
 
-        void onUpdate(float deltaTime) override;
+        void onUpdate(float deltaTime);
 
         void addWidget(UIWidget* widget) { widgets.emplace_back(widget); }
     private:
