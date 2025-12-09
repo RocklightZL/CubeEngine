@@ -50,13 +50,7 @@ namespace Cube {
 	    ClassBuilder<Component>("Component").serializer();
 		ClassBuilder<Sprite>("Sprite")
 			.base<Component>()
-			.property("texture", &Sprite::texture, [](const void* obj) {
-                const Sprite* sprite = static_cast<const Sprite*>(obj);
-			    return Any(sprite->texture.get());
-			}, nullptr, [](void* obj, Any&& value) {
-				Sprite* sprite = static_cast<Sprite*>(obj);
-				sprite->texture = std::move(*value.move<ResPtr<Texture2D>>());
-			})
+			.property("texture", &Sprite::texture)
 			.property("texRegion", &Sprite::texRegion)
 			.property("tintColor", &Sprite::tintColor)
 			.property("order", &Sprite::order)

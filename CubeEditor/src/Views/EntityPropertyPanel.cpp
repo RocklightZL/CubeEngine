@@ -1,9 +1,10 @@
 #include "EntityPropertyPanel.h"
 
-#include "SceneView.h"
 #include "../Project.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Resource/ResourceManager.h"
+#include "Cube/Scene/Sprite.h"
+#include "SceneView.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 
@@ -14,127 +15,149 @@ extern Project* proj;
 void EntityPropertyPanel::render(float deltaTime) {
     ImGui::Begin("Entity Properties");
 
-    // Ó²±àÂë
-    // if(proj->selectedEntity) {
-    //     float posX = ImGui::GetWindowWidth() / 2 - 30.0f;
-    //     float width = ImGui::GetWindowWidth() - posX - 10.0f;
-    //
-    //     char name[256] = {};
-    //     strcpy_s(name, proj->selectedEntity->getName().c_str());
-    //     ImGui::Text("name");
-    //     ImGui::SameLine();
-    //     ImGui::SetCursorPosX(posX);
-    //     ImGui::SetNextItemWidth(width);
-    //     if(ImGui::InputText("##InputTextEntityName", name, IM_ARRAYSIZE(name))) proj->selectedScene->isSaved = false;
-    //     proj->selectedEntity->setName(name);
-    //
-    //     if(proj->selectedEntity->hasComponent<TransformComponent>()) {
-    //         TransformComponent* tc = proj->selectedEntity->getComponent<TransformComponent>();
-    //         if(ImGui::TreeNodeEx("TransformComponent", treeNodeFlags)) {
-    //             ImGui::Text("Position");
-    //             float pos[2] = {tc->position.x, tc->position.y};
-    //             ImGui::SameLine();
-    //             ImGui::SetCursorPosX(posX);
-    //             ImGui::SetNextItemWidth(width);
-    //             if(ImGui::DragFloat2("##Position", pos, 1, 0, 0, "%.1f")) proj->selectedScene->isSaved = false;
-    //             tc->position = {pos[0], pos[1]};
-    //
-    //             ImGui::Text("Scale");
-    //             float scale[2] = {tc->scale.x, tc->scale.y};
-    //             ImGui::SameLine();
-    //             ImGui::SetCursorPosX(posX);
-    //             ImGui::SetNextItemWidth(width);
-    //             if(ImGui::DragFloat2("##Scale", scale, 1, 0, 0, "%.1f")) proj->selectedScene->isSaved = false;
-    //             tc->scale = {scale[0], scale[1]};
-    //
-    //             ImGui::Text("Rotation");
-    //             ImGui::SameLine();
-    //             ImGui::SetCursorPosX(posX);
-    //             ImGui::SetNextItemWidth(width);
-    //             if(ImGui::DragFloat("##Rotation", &tc->rotation, 1, 0, 0, "%.1f")) proj->selectedScene->isSaved = false;
-    //
-    //             ImGui::TreePop();
-    //         }
-    //
-    //     }
-    //
-    //     if(proj->selectedEntity->hasComponent<SpriteComponent>()) {
-    //         SpriteComponent* sc = proj->selectedEntity->getComponent<SpriteComponent>();
-    //         if(ImGui::TreeNodeEx("SpriteComponent", treeNodeFlags)) {
-    //             ImGui::Text("TextureRegion");
-    //             float in[4] = {sc->region.uvMin.x, sc->region.uvMin.y, sc->region.uvMax.x, sc->region.uvMax.y};
-    //             ImGui::SameLine();
-    //             ImGui::SetCursorPosX(posX);
-    //             ImGui::SetNextItemWidth(width);
-    //             if(ImGui::DragFloat4("##TextureRegion", in, 0.001f, 0, 1)) proj->selectedScene->isSaved = false;
-    //             sc->region.uvMin = {in[0], in[1]};
-    //             sc->region.uvMax = {in[2], in[3]};
-    //
-    //             ImGui::Text("Color");
-    //             float color[4] = {sc->color.r, sc->color.g, sc->color.b, sc->color.a};
-    //             ImGui::SameLine();
-    //             ImGui::SetCursorPosX(posX);
-    //             ImGui::SetNextItemWidth(width);
-    //             if(ImGui::ColorEdit4("##Color", color, ImGuiColorEditFlags_DisplayHex)) proj->selectedScene->isSaved = false;
-    //             sc->color = {color[0], color[1], color[2], color[3]};
-    //
-    //             static bool showSelectedSubTexturePopup = false;
-    //             static std::string texturePath = "Texture";
-    //             static std::shared_ptr<TextureData> textureData;
-    //             ImGui::Text("Texture");
-    //             ImGui::SameLine();
-    //             ImGui::SetCursorPosX(posX);
-    //             ImGui::SetNextItemWidth(width);
-    //             if(sc->texture) {
-    //                 ImVec2 size = ImVec2(sc->texture->getWidth(), sc->texture->getHeight()) * ImVec2(sc->region.uvMax.x - sc->region.uvMin.x, sc->region.uvMax.y - sc->region.uvMin.y);
-    //                 ImGui::Image(sc->texture->getId(), size * 50 / std::max(size.x, size.y), ImVec2(sc->region.uvMin.x, sc->region.uvMax.y), ImVec2(sc->region.uvMax.x, sc->region.uvMin.y));
-    //                 ImGui::SetItemTooltip(sc->texture->getFilePath().c_str());
-    //             }else {
-    //                 ImGui::Button("None");
-    //                 ImGui::SetItemTooltip("No texture");
-    //             }
-    //             if(ImGui::BeginDragDropTarget()) {
-    //                 if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePath")) {
-    //                     texturePath = (const char*)payload->Data;
-    //                     if(Utils::isFileExists(texturePath + ".meta")) {
-    //                         showSelectedSubTexturePopup = true;
-    //                         textureData = std::make_shared<TextureData>(texturePath + ".meta", texturePath);
-    //                     }else{
-    //                         if(sc->texture) {
-    //                             ResourceManager::get().release(sc->texture->getFilePath());
-    //                         }
-    //                         sc->texture = ResourceManager::get().load<Texture2D>(texturePath)->data;
-    //                         proj->selectedScene->isSaved = false;
-    //                     }
-    //                 }
-    //                 ImGui::EndDragDropTarget();
-    //             }
-    //             if(showSelectedSubTexturePopup && textureData) {
-    //                 if(auto* res = SceneView::selectSubTexturePopup(*textureData, &showSelectedSubTexturePopup)) {
-    //                     if(sc->texture) {
-    //                         ResourceManager::get().release(sc->texture->getFilePath());
-    //                     }
-    //                     sc->texture = ResourceManager::get().load<Texture2D>(texturePath)->data;
-    //                     sc->region = {res->uvMin, res->uvMax};
-    //                     proj->selectedScene->isSaved = false;
-    //                 }
-    //             }
-    //             ImGui::TreePop();
-    //         }
-    //     }
-    //
-    //     if(proj->selectedEntity->hasComponent<CameraComponent>()) {
-    //         CameraComponent* cc = proj->selectedEntity->getComponent<CameraComponent>();
-    //         if(ImGui::TreeNodeEx("CameraComponent", treeNodeFlags)) {
-    //             ImGui::Text("Available");
-    //             ImGui::SameLine();
-    //             ImGui::SetCursorPosX(posX);
-    //             ImGui::SetNextItemWidth(width);
-    //             if(ImGui::Checkbox("##available", &cc->available)) proj->selectedScene->isSaved = false;
-    //
-    //             ImGui::TreePop();
-    //         }
-    //     }
-    // }
+    if(proj->selectedEntity) {
+        if(proj->selectedEntity != preEntity) {
+            updateCache();
+            preEntity = proj->selectedEntity;
+        }
+        float posX = ImGui::GetWindowWidth() / 2 - 30.0f;
+        float width = ImGui::GetWindowWidth() - posX - 10.0f;
+        if(ImGui::TreeNodeEx("Transform", treeNodeFlags)) {
+            Transform& transform = proj->selectedEntity->getTransform();
+            ImGui::Text("position");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(posX);
+            ImGui::SetNextItemWidth(width);
+            float pos[2] = {transform.getPosition().x, transform.getPosition().y};
+            if(ImGui::DragFloat2("##position", pos, 1, 0, 0, "%.1f")) {
+                proj->selectedScene->isSaved = false;
+                transform.setPosition({pos[0], pos[1]});
+            }
+
+            ImGui::Text("scale");
+            float scale[2] = {transform.getScale().x, transform.getScale().x};
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(posX);
+            ImGui::SetNextItemWidth(width);
+            if(ImGui::DragFloat2("##Scale", scale, 1, 0, 0, "%.1f")){
+                proj->selectedScene->isSaved = false;
+                transform.setScale({scale[0], scale[1]});
+            }
+            
+            ImGui::Text("rotation");
+            ImGui::SameLine();
+            ImGui::SetCursorPosX(posX);
+            ImGui::SetNextItemWidth(width);
+            float rotation = transform.getRotation();
+            if(ImGui::DragFloat("##Rotation", &rotation, 1, 0, 0, "%.1f")) {
+                proj->selectedScene->isSaved = false;
+                transform.setRotation(rotation);
+            }
+
+            ImGui::TreePop();
+        }
+        for(auto [typeID, c] : componentsCache) {
+            Class* classInfo = ClassRegistry::get().getClass(typeID);
+            if(ImGui::TreeNodeEx(classInfo->getName().c_str(), treeNodeFlags)) {
+                for(auto& property : classInfo->getAllProperties()) {
+                    ImGui::Text(property->getName().c_str());
+                    ImGui::SameLine();
+                    ImGui::SetCursorPosX(posX);
+                    ImGui::SetNextItemWidth(width);
+                    if(property->getTypeID() == getTypeID<float>()) {
+                        float v = property->getValue(c).as<float>();
+                        if(ImGui::DragFloat(("##" + property->getName()).c_str(), &v, 1, 0, 0, "%.3f")) {
+                            proj->selectedScene->isSaved = false;
+                            property->setValue(c, v);
+                        }
+                    } else if(property->getTypeID() == getTypeID<double>()) {
+                        float v = (float)property->getValue(c).as<double>();
+                        if(ImGui::DragFloat(("##" + property->getName()).c_str(), &v, 1, 0, 0, "%.3f")) {
+                            proj->selectedScene->isSaved = false;
+                            property->setValue(c, v);
+                        }
+                    } else if(property->getTypeID() == getTypeID<glm::vec2>()) {
+                        glm::vec2 v = property->getValue(c).as<glm::vec2>();
+                        float v2[2] = {v.x, v.y};
+                        if(ImGui::DragFloat2(("##" + property->getName()).c_str(), v2, 1, 0, 0, "%.3f")) {
+                            proj->selectedScene->isSaved = false;
+                            property->setValue(c, glm::vec2(v2[0], v2[1]));
+                        }
+                    } else if(property->getTypeID() == getTypeID<glm::vec3>()) {
+                        glm::vec3 v = property->getValue(c).as<glm::vec3>();
+                        float v3[3] = {v.x, v.y, v.z};
+                        if(ImGui::DragFloat3(("##" + property->getName()).c_str(), v3, 1, 0, 0, "%.3f")) {
+                            proj->selectedScene->isSaved = false;
+                            property->setValue(c, glm::vec3(v3[0], v3[1], v3[2]));
+                        }
+                    } else if(property->getTypeID() == getTypeID<glm::vec4>()) {
+                        glm::vec4 v = property->getValue(c).as<glm::vec4>();
+                        float v4[4] = {v.x, v.y, v.z, v.w};
+                        if(ImGui::DragFloat3(("##" + property->getName()).c_str(), v4, 1, 0, 0, "%.3f")) {
+                            proj->selectedScene->isSaved = false;
+                            property->setValue(c, glm::vec4(v4[0], v4[1], v4[2], v4[3]));
+                        }
+                    } else if(property->getTypeID() == getTypeID<bool>()) {
+                        bool v = property->getValue(c).as<bool>();
+                        if(ImGui::Checkbox(("##" + property->getName()).c_str(), &v)) {
+                            proj->selectedScene->isSaved = false;
+                            property->setValue(c, v);
+                        }
+                    } else if(property->getTypeID() == getTypeID<int>()) {
+                        int v = property->getValue(c).as<int>();
+                        if(ImGui::DragInt(("##" + property->getName()).c_str(), &v, 1, 0, 0)) {
+                            proj->selectedScene->isSaved = false;
+                            property->setValue(c, v);
+                        }
+                    } else if(property->getTypeID() == getTypeID<std::string>()) {
+                        char buffer[256] = {};
+                        strcpy_s(buffer, property->getValue(c).as<std::string>().c_str());
+                        if(ImGui::InputText(("##" + property->getName()).c_str(), buffer, IM_ARRAYSIZE(buffer))) {
+                            proj->selectedScene->isSaved = false;
+                            property->setValue(c, std::string(buffer));
+                        }
+                    } else if(property->getTypeID() == getTypeID<Color>()) {
+                        Color color = property->getValue(c).as<Color>();
+                        float colorV[4] = {color.r, color.g, color.b, color.a};
+                        if(ImGui::ColorEdit4(("##" + property->getName()).c_str(), colorV, ImGuiColorEditFlags_DisplayHex)) {
+                            proj->selectedScene->isSaved = false;
+                            property->setValue(c, Color(colorV[0], colorV[1], colorV[2], colorV[3]));
+                        }
+                    } else if(property->getTypeID() == getTypeID<TextureRegion>()) {
+                        glm::vec4 v = property->getValue(c).as<TextureRegion>().getUVCoord();
+                        float v4[4] = {v.x, v.y, v.z, v.w};
+                        if(ImGui::DragFloat4(("##" + property->getName()).c_str(), v4, 0.001f, 0, 1)) {
+                            proj->selectedScene->isSaved = false;
+                            TextureRegion tr;
+                            tr.uvMin = {v4[0], v4[1]};
+                            tr.uvMax = {v4[2], v4[3]};
+                            property->setValue(c, tr);
+                        }
+                    } else if(property->getTypeID() == getTypeID<ResPtr<Texture2D>>()) {
+                        ResPtr<Texture2D> res = property->getValue(c).as<ResPtr<Texture2D>>();
+                        ImGui::Text(res.get() ? res->getPath().c_str() : "");
+                    } else {
+                        ImGui::Text("Failed to display");
+                    }
+                }
+                ImGui::TreePop();
+            }
+        }
+        float w = ImGui::GetContentRegionAvail().x;
+        if(ImGui::Button("Add Component", {w, 0})) {
+            proj->selectedEntity->addComponent<Sprite>();
+            updateCache();
+        }
+    }
     ImGui::End();
+}
+
+void EntityPropertyPanel::updateCache() {
+    componentsCache.clear();
+    for(auto& c : proj->selectedEntity->getComponents()) {
+        auto it = std::find_if(proj->selectedEntity->getComponentsMap().begin(), proj->selectedEntity->getComponentsMap().end(), [&c](const auto& pair) {
+            return pair.second == c.get();
+        });
+        componentsCache.emplace_back(std::pair<TypeID, Component*>{it->first, c.get()});
+    }
 }

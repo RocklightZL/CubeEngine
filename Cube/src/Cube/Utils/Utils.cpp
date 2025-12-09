@@ -55,15 +55,6 @@ namespace Cube {
         return true;
     }
 
-    // '\\' to '/'
-    void Utils::normalizePath(std::string& path) {
-        for(int i = 0; i < path.size(); ++i) {
-            if(path[i] == '\\') {
-                path[i] = '/';
-            }
-        }
-    }
-
     // get file name from path
     std::string Utils::getFileName(const std::string& path, bool keepSuffix) {
         size_t begin = path.find_last_of('/');
@@ -81,18 +72,6 @@ namespace Cube {
         } else {
             return path.substr(begin + 1, end - begin - 1);
         }
-    }
-
-    std::string Utils::getFileSuffix(const std::string& path) {
-        size_t pos = path.find_last_of('.');
-        if(pos == std::string::npos) {
-            return "";
-        }
-        return path.substr(pos);
-    }
-
-    bool Utils::isFileExists(const std::string& path) {
-        return std::filesystem::exists(path) && std::filesystem::is_regular_file(path);
     }
 
     std::vector<uint32_t> Utils::utf8To32(const std::string& utf8_str) {

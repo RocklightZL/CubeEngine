@@ -81,7 +81,7 @@ void ResourcesPanel::render(float deltaTime) {
             }else {
                 IconTextButton(app->icons["file.png"]->getId(), n->name.c_str(), ImVec2(imageSize, imageSize), {0, 1}, {1, 0});
                 if(ImGui::BeginDragDropSource()) {
-                    std::string texturePath = proj->getConfig().resourcesDirectory + "/" + n->name;
+                    std::string texturePath = proj->getConfig().assetsDirectory + "/" + n->name;
                     ImGui::Text(texturePath.c_str());
                     ImGui::SetDragDropPayload("TexturePath", texturePath.c_str(), texturePath.size() + 1);
                     ImGui::EndDragDropSource();
@@ -119,7 +119,7 @@ void ResourcesPanel::render(float deltaTime) {
                     // ImGui::Selectable(n->name.c_str());
                     IconTextButtonLeft(n->name.c_str(), app->icons["file.png"]->getId(), {0, 1}, {1, 0}, {ImGui::GetContentRegionAvail().x, 0});
                     if(ImGui::BeginDragDropSource()) {
-                        std::string texturePath = proj->getConfig().resourcesDirectory + "/" + n->name;
+                        std::string texturePath = proj->getConfig().assetsDirectory + "/" + n->name;
                         ImGui::Text(texturePath.c_str());
                         ImGui::SetDragDropPayload("TexturePath", texturePath.c_str(), texturePath.size() + 1);
                         ImGui::EndDragDropSource();
@@ -183,8 +183,8 @@ void ResourcesPanel::importResources() {
     std::shared_ptr<Node> currentNode = proj->resStack.back();
     for(auto& path : FileDialog::openMultiFiles("Resources(.png.jpg)\0*.png;*.jpg\0", app->getWindow()->getWin32Window())) {
         std::string fileName = Utils::getFileName(path, true);
-        if(!Utils::isFileInDirectory(path, proj->getConfig().resourcesDirectory)) {
-            Utils::copyFile(path, proj->getConfig().resourcesDirectory + "/" + fileName);
+        if(!Utils::isFileInDirectory(path, proj->getConfig().assetsDirectory)) {
+            Utils::copyFile(path, proj->getConfig().assetsDirectory + "/" + fileName);
         }
         if(std::find_if(currentNode->children.begin(), currentNode->children.end(), [fileName](std::shared_ptr<Node> x){ return x->name == fileName; }) == currentNode->children.end()){
             std::shared_ptr<Node> n = std::make_shared<Node>();

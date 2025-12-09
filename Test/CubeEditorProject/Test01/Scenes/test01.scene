@@ -1,0 +1,21 @@
+{
+    "entities": [
+        {
+            "components": [],
+            "name": "player",
+            "transform": {
+                "children": [],
+                "pos": [
+                    0.0,
+                    0.0
+                ],
+                "rotation": 0.0,
+                "scale": [
+                    1.0,
+                    1.0
+                ]
+            }
+        }
+    ],
+    "name": "test01"
+}

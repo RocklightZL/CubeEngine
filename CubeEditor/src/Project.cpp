@@ -1,10 +1,11 @@
 #include "Project.h"
 
-#include "Cube/Core/Log.h"
-
-#include <json.hpp>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
+#include <json.hpp>
+
+#include "Cube/Core/Log.h"
+#include "Cube/Utils/Utils.h"
 
 using namespace Cube;
 
@@ -12,12 +13,12 @@ Project::Project(const std::string& name, const std::string& rootPath) {
     config.name = name;
     config.rootPath = rootPath;
     config.projectDataDirectory = rootPath + "/.cube";
-    config.resourcesDirectory = rootPath + "/Resources";
+    config.assetsDirectory = rootPath + "/Assets";
     config.sceneDirectory = rootPath + "/Scenes";
 
     std::filesystem::create_directories(config.projectDataDirectory);
     std::filesystem::create_directories(config.sceneDirectory);
-    std::filesystem::create_directories(config.resourcesDirectory);
+    std::filesystem::create_directories(config.assetsDirectory);
 
     writeToConfigFile(rootPath + "/" + name + ".cbproj");
 
@@ -36,13 +37,13 @@ Project::Project(const std::string& configFilePath) {
         return;
     }
     file >> data;
+    file.close();
 
     config.name = data["name"];
-    config.rootPath = data["rootPath"];
-    config.projectDataDirectory = data["projectDataDirectory"];
-    config.resourcesDirectory = data["resourcesDirectory"];
-    config.sceneDirectory = data["sceneDirectory"];
-    // TODO: 应该每次根据根目录自动生成，而不是记录在配置文件中，否则当整个项目文件夹移动后路径会失效。
+    config.rootPath = Utils::getParentPath(configFilePath);
+    config.projectDataDirectory = config.rootPath + "/.cube";
+    config.assetsDirectory = config.rootPath + "/Assets";
+    config.sceneDirectory = config.rootPath + "/Scenes";
     load();
 }
 
@@ -100,10 +101,6 @@ void Project::save() {
 void Project::writeToConfigFile(const std::string& configFilePath) const {
     nlohmann::json data;
     data["name"] = config.name;
-    data["rootPath"] = config.rootPath;
-    data["projectDataDirectory"] = config.projectDataDirectory;
-    data["resourcesDirectory"] = config.resourcesDirectory;
-    data["sceneDirectory"] = config.sceneDirectory;
 
     std::ofstream file(configFilePath);
     if(!file.is_open()) {

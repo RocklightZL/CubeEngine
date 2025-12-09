@@ -65,6 +65,7 @@ namespace Cube {
         }
 
 		const std::vector<std::unique_ptr<Component>>& getComponents() const { return components; }
+        const std::unordered_map<TypeID, Component*>& getComponentsMap() const { return componentsMap; }
 
 		template<typename T>
 		bool hasComponent() const {

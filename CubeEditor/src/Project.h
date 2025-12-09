@@ -17,12 +17,12 @@ struct ProjectConfig {
 	std::string name;
 	std::string rootPath; // project root directory
 	std::string projectDataDirectory;
-	std::string resourcesDirectory;
+	std::string assetsDirectory;
 	std::string sceneDirectory;
 };
 
 struct SceneData {
-    Cube::Scene* scene = nullptr; // TODO: 不用指针
+    Cube::Scene* scene = nullptr;
 	bool isSaved = false;
 };
 
@@ -54,5 +54,5 @@ private:
 	void save();
 
 	ProjectConfig config;
-    std::vector<SceneData> scenes;  // TODO: 改成智能指针
+    std::vector<SceneData> scenes;
 };

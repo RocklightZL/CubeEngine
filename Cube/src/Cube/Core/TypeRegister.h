@@ -12,7 +12,7 @@ namespace Cube {
         Serializer::get().registerConverter(getTypeID<ResPtr<T>>(), {
             // toJson
             [](const Any& obj) {
-                  const T* resPtr = obj.as<T*>();
+                  const ResPtr<T>& resPtr = obj.as<ResPtr<T>>();
                   nlohmann::json j;
                   if(resPtr) {
                       j = nlohmann::json(resPtr->getPath());
