@@ -17,6 +17,14 @@ namespace Cube {
         Sprite() = default;
         Sprite(const std::string& texturePath, const TextureRegion& textureRegion, const Color& tintColor)
             : texture(texturePath), texRegion(textureRegion), tintColor(tintColor){}
+
+        glm::vec2 getSize() const {
+            if(texture) {
+                return glm::vec2(texture->getWidth(), texture->getHeight()) * (texRegion.uvMax - texRegion.uvMin);
+            } else {
+                return glm::vec2(1.0f);
+            }
+        }
     };
 
 }

@@ -28,7 +28,7 @@ namespace Cube {
             if(spriteA->order != spriteB->order) {
                 return spriteA < spriteB;
             }
-            return spriteA->texture->getId() < spriteB->texture->getId();
+            return (spriteA->texture.get() ? spriteA->texture->getId() : -1) < (spriteB->texture.get() ? spriteB->texture->getId() : -1);
         });
         Renderer2D::beginFrame(camera->getPVMatrix());
         for(auto& entity : entities) {

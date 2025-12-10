@@ -52,7 +52,7 @@ namespace Cube {
     }
     void Transform::setScale(const glm::vec2& scale) {
         this->scale = scale;
-        markWorldDirty();
+        markLocalDirty();
     }
     const glm::vec2& Transform::getScale() const {
         return scale;

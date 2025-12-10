@@ -1,8 +1,11 @@
 #include "EntityPropertyPanel.h"
 
 #include "../Project.h"
+#include "../Utils/ImGuiExternal.h"
+#include "Cube/Animation/Animation.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Resource/ResourceManager.h"
+#include "Cube/Scene/Camera2D.h"
 #include "Cube/Scene/Sprite.h"
 #include "SceneView.h"
 #include "imgui/imgui.h"
@@ -35,7 +38,7 @@ void EntityPropertyPanel::render(float deltaTime) {
             }
 
             ImGui::Text("scale");
-            float scale[2] = {transform.getScale().x, transform.getScale().x};
+            float scale[2] = {transform.getScale().x, transform.getScale().y};
             ImGui::SameLine();
             ImGui::SetCursorPosX(posX);
             ImGui::SetNextItemWidth(width);
@@ -143,10 +146,26 @@ void EntityPropertyPanel::render(float deltaTime) {
                 ImGui::TreePop();
             }
         }
+
         float w = ImGui::GetContentRegionAvail().x;
+        static bool show = false;
         if(ImGui::Button("Add Component", {w, 0})) {
-            proj->selectedEntity->addComponent<Sprite>();
-            updateCache();
+            ImGui::OpenPopup("addComponent");
+        }
+        if(ImGui::BeginPopup("addComponent")) {
+            if(ImGui::MenuItem("Sprite")) {
+                proj->selectedEntity->addComponent<Sprite>();
+                updateCache();
+            }
+            if(ImGui::MenuItem("Camera2D")) {
+                proj->selectedEntity->addComponent<Camera2D>();
+                updateCache();
+            }
+            if(ImGui::MenuItem("Animation")) {
+                proj->selectedEntity->addComponent<Animation>();
+                updateCache();
+            }
+            ImGui::EndPopup();
         }
     }
     ImGui::End();
