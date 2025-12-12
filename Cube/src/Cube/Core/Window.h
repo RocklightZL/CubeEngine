@@ -27,7 +27,7 @@ namespace Cube {
 
     class Window {
     public:
-        Window(const WindowPros& pros, GLFWwindow* shareContext = nullptr);
+        Window(const WindowPros& pros, EventDispatcher* eventDispatcher, GLFWwindow* shareContext = nullptr);
         virtual ~Window();
         void init(GLFWwindow* shareContext);
         const WindowPros& getPros() const;
@@ -36,8 +36,8 @@ namespace Cube {
         HWND getWin32Window();
 
         void update();
-
         void makeContext() const;
+        void close();
 
         //  ‰»Î¬÷—Ø
         bool isKeyPressed(KeyCode keyCode);
@@ -51,5 +51,6 @@ namespace Cube {
         WindowPros pros;
         GLFWwindow* window;
         Context* context = nullptr;
+        EventDispatcher* eventDispatcher;
     };
 }  // namespace Cube

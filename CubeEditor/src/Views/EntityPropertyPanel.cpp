@@ -138,7 +138,7 @@ void EntityPropertyPanel::render(float deltaTime) {
                         }
                     } else if(property->getTypeID() == getTypeID<ResPtr<Texture2D>>()) {
                         ResPtr<Texture2D> res = property->getValue(c).as<ResPtr<Texture2D>>();
-                        ImGui::Text(res.get() ? res->getPath().c_str() : "");
+                        ImGui::Text(res.get() ? std::to_string(res->getRuid()).c_str() : "");
                     } else {
                         ImGui::Text("Failed to display");
                     }

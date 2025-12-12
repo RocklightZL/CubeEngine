@@ -18,5 +18,7 @@ private:
     ImVec2 sceneViewSize = {800, 600};
     Cube::FrameBuffer* frameBuffer = nullptr;
 
+    std::unique_ptr<Cube::Texture2D> play_png = std::make_unique<Cube::Texture2D>("assets/icons/play.png");
+
     void sceneRender(float deltaTime);
 };

@@ -8,10 +8,10 @@
 
 namespace Cube {
     // .anim
-    AnimationClip::AnimationClip(const std::string& animationFilePath) : ResourceBase(animationFilePath) {
-        std::ifstream file(animationFilePath);
+    AnimationClip::AnimationClip(const AssetMeta& assetMeta) : ResourceBase(assetMeta) {
+        std::ifstream file(assetMeta.sourcePath);
         if(!file.is_open()) {
-            CB_CORE_ERROR("Failed to open animation file {}", animationFilePath);
+            CB_CORE_ERROR("Failed to open animation file {}", assetMeta.sourcePath);
             return;
         }
         nlohmann::json animData;

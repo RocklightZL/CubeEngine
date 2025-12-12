@@ -30,18 +30,9 @@ namespace Cube {
      * }
      *
      */
-    Font::Font(const std::string& path) : ResourceBase(path) {
-        std::ifstream file(path);
-        if(!file.is_open()) {
-            CB_CORE_ERROR("Failed to open font resource file: {}", path);
-            return;
-        }
-        nlohmann::json fontData;
-        file >> fontData;
-        file.close();
-        fontFilePath = fontData["fontFilePath"];
-        fontSize = fontData["fontSize"];
-
+    Font::Font(const AssetMeta& assetMeta) : ResourceBase(assetMeta) {
+        fontFilePath = assetMeta.sourcePath;
+        fontSize = assetMeta.metaData.value("fontSize", 24);
         loadFontFile();
     }
 

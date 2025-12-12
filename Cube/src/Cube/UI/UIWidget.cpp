@@ -4,6 +4,8 @@
 #include "Cube/Core/Input.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Core/Log.h"
+#include "Cube/Utils/Utils.h"
+#include "Cube/Event/MouseEvent.h"
 
 namespace Cube {
 

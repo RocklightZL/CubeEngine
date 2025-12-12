@@ -8,6 +8,7 @@
 #include "Cube/Scene/Camera2D.h"
 #include "Cube/Scene/Component.h"
 #include "Cube/Scene/Sprite.h"
+#include "Cube/Renderer/Font.h"
 
 namespace Cube {
 

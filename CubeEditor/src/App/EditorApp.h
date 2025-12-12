@@ -1,7 +1,12 @@
 #pragma once
+#include <thread>
+
 #include "Cube/Core/Window.h"
 #include "Page.h"
 
+namespace Cube {
+    class Application;
+}
 class EditorApp{
 public:
     static const std::string userConfigDir;
@@ -15,16 +20,16 @@ public:
     Cube::Window* getWindow() const;
 
     // global
-    std::unordered_map<std::string, Cube::Texture2D*> icons;
+    std::thread gameThread;
+    Cube::Application* game = nullptr;
 
 private:
     std::unique_ptr<Cube::Window> mainWindow;
     std::unique_ptr<Page> currentPage;
     bool running;
+    Cube::EventDispatcher eventDispatcher;
 
     void imGuiInit();
-    void loadAssets();
-    void releaseAssets();
     void setDarkTheme();
     bool onWindowClose(const Cube::Event& e);
 };

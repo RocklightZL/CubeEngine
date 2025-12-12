@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Cube/Event/Event.h"
-#include "Cube/Event/MouseEvent.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Renderer/Texture.h"
 #include "Cube/Renderer/TextureRegion.h"
@@ -9,6 +8,8 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
+
+#include "Cube/Renderer/Font.h"
 
 namespace Cube {
     struct UIStyle {
@@ -74,8 +75,8 @@ namespace Cube {
     // UIImage
     class UIImage : public UIWidget {
     public:
-        UIImage(const std::string& path, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}, const TextureRegion& texRegion = {{0.0f, 1.0f}, {1.0f, 0.0f}}) : UIWidget(pos, size), texRegion(texRegion) {
-            texture = ResourceManager::get().load<Texture2D>(path);
+        UIImage(RUID texRuid, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}, const TextureRegion& texRegion = {{0.0f, 1.0f}, {1.0f, 0.0f}}) : UIWidget(pos, size), texRegion(texRegion) {
+            texture = ResourceManager::get().load<Texture2D>(texRuid);
         }
         ~UIImage() override {
             ResourceManager::get().release(texture);
@@ -90,9 +91,9 @@ namespace Cube {
     // UILabel
     class UILabel : public UIWidget {
     public:
-        UILabel(const std::string& text, const std::string& fontMetaFile, const Color& color, const glm::vec2& pos) : text(text), color(color) {
+        UILabel(const std::string& text, RUID fontRuid, const Color& color, const glm::vec2& pos) : text(text), color(color) {
             this->pos = pos;
-            font = ResourceManager::get().load<Font>(fontMetaFile);
+            font = ResourceManager::get().load<Font>(fontRuid);
             size = font->calcTextSize(text);
         }
         UILabel(const std::string& text, const Color& color, const glm::vec2& pos = {0.0f, 0.0f}) : UILabel(text, globalFont, color, pos){}
@@ -102,7 +103,7 @@ namespace Cube {
 
         void render() override;
 
-        static std::string globalFont;
+        static RUID globalFont;
     protected:
         std::string text;
         Color color;
@@ -113,7 +114,7 @@ namespace Cube {
     class UIButton : public UIWidget{
     public:
         UIButton(const std::function<void()>& onClicked, const glm::vec2& pos = {0.0f, 0.0f}, const glm::vec2& size = {100.0f, 30.0f}) : UIWidget(pos, size), onClicked(onClicked) {
-            EventDispatcher::get().subscribe<MousePressedEvent>(std::bind(&UIButton::onMousePressed, this, std::placeholders::_1));
+            // EventDispatcher::get().subscribe<MousePressedEvent>(std::bind(&UIButton::onMousePressed, this, std::placeholders::_1));
         }
         ~UIButton() = default;
     private:

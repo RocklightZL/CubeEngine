@@ -15,16 +15,15 @@ namespace Cube {
     Application::Application() : Application({1920, 1080, "Cube Engine"}){}
 
     Application::Application(const WindowPros& windowPros) : mainWindow(nullptr), running(true){
-        mainWindow = new Window(windowPros);
-
-        EventDispatcher::get().subscribe<WindowCloseEvent>(std::bind(&Application::onWindowClose, this, std::placeholders::_1));
+        mainWindow = new Window(windowPros, &eventDispatcher);
+        eventDispatcher.subscribe<WindowCloseEvent>(std::bind(&Application::onWindowClose, this, std::placeholders::_1));
     }
 
     Application::~Application() {
         delete mainWindow;
     }
 
-    void Application::run(){
+    void Application::run() {
         running = true;
         CB_CORE_INFO("Application run");
 
@@ -47,19 +46,12 @@ namespace Cube {
         }
     }
 
-    Window* Application::getWindow() {
-        return mainWindow;
-    }
-    RenderServer& Application::getRenderServer() {
-        return renderServer;
-    }
-    SceneManager& Application::getSceneManager() {
-        return sceneManager;
-    }
-
     bool Application::onWindowClose(const Event& e) {
-        running = false;
-        CB_CORE_INFO("mainWindow close");
-        return true;
+        if(static_cast<const WindowCloseEvent*>(&e)->window == mainWindow){
+            running = false;
+            CB_CORE_INFO("mainWindow close");
+            return true;
+        }
+        return false;
     }
 }  // namespace Cube

@@ -31,8 +31,8 @@ namespace Cube {
         return {};
     }
 
-    void Animation::addClip(const std::string& animClipFilePath) {
-        ResPtr<AnimationClip> clip(animClipFilePath);
+    void Animation::addClip(RUID animClipRuid) {
+        ResPtr<AnimationClip> clip(animClipRuid);
         if(clip) {
             clips[clip->getName()] = std::move(clip);
         }

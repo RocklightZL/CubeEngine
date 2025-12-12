@@ -1,15 +1,17 @@
 ﻿#include "EditorApp.h"
 
-#include "EditorPage.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 #include "../Project.h"
 #include "../Utils/misc.h"
+#include "Cube/Core/Application.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Event/ApplicationEvent.h"
 #include "Cube/Renderer/Renderer.h"
-
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
-#include <imgui/imgui.h>
+#include "Cube/Utils/Utils.h"
+#include "EditorPage.h"
 
 using namespace Cube;
 
@@ -23,14 +25,18 @@ const std::string EditorApp::userConfigDir = []() {
 }();
 
 EditorApp::EditorApp(const WindowPros& windowPros) {
-    mainWindow = std::make_unique<Window>(windowPros);
-    EventDispatcher::get().subscribe<WindowCloseEvent>(std::bind(&EditorApp::onWindowClose, this, std::placeholders::_1));
+    mainWindow = std::make_unique<Window>(windowPros, &eventDispatcher);
+    eventDispatcher.subscribe<WindowCloseEvent>(std::bind(&EditorApp::onWindowClose, this, std::placeholders::_1));
     imGuiInit();
-    loadAssets();
 }
 
 EditorApp::~EditorApp() {
-    releaseAssets();
+    if(game) {
+        game->getWindow()->close();
+    }
+    if(gameThread.joinable()) {
+        gameThread.join();
+    }
 
     ImGui_ImplGlfw_Shutdown();
     ImGui_ImplOpenGL3_Shutdown();
@@ -75,23 +81,6 @@ void EditorApp::imGuiInit() {
 
     ImGui_ImplGlfw_InitForOpenGL(mainWindow->getNativeWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
-}
-
-void EditorApp::loadAssets() {
-    icons.insert({"directory.png", ResourceManager::get().load<Texture2D>("assets/icons/directory.png")});
-    icons.insert({"file.png", ResourceManager::get().load<Texture2D>("assets/icons/file.png")});
-    icons.insert({"new_project.png", ResourceManager::get().load<Texture2D>("assets/icons/new_project.png")});
-    icons.insert({"open_project.png", ResourceManager::get().load<Texture2D>("assets/icons/open_project.png")});
-    icons.insert({"play.png", ResourceManager::get().load<Texture2D>("assets/icons/play.png")});
-    icons.insert({"back.png", ResourceManager::get().load<Texture2D>("assets/icons/back.png")});
-    icons.insert({"icon_mode.png", ResourceManager::get().load<Texture2D>("assets/icons/icon_mode.png")});
-    icons.insert({"list_mode.png", ResourceManager::get().load<Texture2D>("assets/icons/list_mode.png")});
-}
-
-void EditorApp::releaseAssets() {
-    for(const auto& icon : icons) {
-        ResourceManager::get().release(icon.second);
-    }
 }
 
 void EditorApp::setDarkTheme() {
@@ -740,6 +729,9 @@ void EditorApp::setDarkTheme() {
 }
 
 bool EditorApp::onWindowClose(const Cube::Event& e) {
-    running = false;
-    return true;
+    if(static_cast<const WindowCloseEvent*>(&e)->window == mainWindow.get()){
+        running = false;
+        return true;
+    }
+    return false;
 }

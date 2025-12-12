@@ -2,22 +2,29 @@
 
 #include <string>
 
+#include "AssetMeta.h"
+#include "RUID.h"
+
 namespace Cube {
 
-    // TODO: Add resource unique identifier(RUID)
     class ResourceBase {
     public:
         friend class ResourceManager;
 
-        // Derived classes must implement a constructor with a std::string type parameter.
-        explicit ResourceBase(const std::string& path) : path(path){}
+        // Derived classes must implement a constructor with a AssetMeta type parameter.
+        explicit ResourceBase(const AssetMeta& metadata) : ruid(metadata.ruid){}
         ResourceBase() = default;
         virtual ~ResourceBase() = default;
 
-        std::string getPath() const { return path; }
+        RUID getRuid() const { return ruid; }
+        ResourceType getType() const {
+            return getResourceType(ruid);
+        }
 
     protected:
-        std::string path; // resource file path
+        RUID ruid = 0;
+
+    private:
         int refCount = 0;
     };
 }

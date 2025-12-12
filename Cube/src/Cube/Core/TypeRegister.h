@@ -15,7 +15,7 @@ namespace Cube {
                   const ResPtr<T>& resPtr = obj.as<ResPtr<T>>();
                   nlohmann::json j;
                   if(resPtr) {
-                      j = nlohmann::json(resPtr->getPath());
+                      j = nlohmann::json(resPtr->getRuid());
                   } else {
                       j = nullptr;
                   }
@@ -26,8 +26,8 @@ namespace Cube {
                 if(data.is_null()) {
                     return Any(ResPtr<T>(nullptr));
                 } else {
-                    std::string path = data.get<std::string>();
-                    return Any(ResPtr<T>(path));
+                    RUID ruid = data.get<RUID>();
+                    return Any(ResPtr<T>(ruid));
                 }
             }
         });

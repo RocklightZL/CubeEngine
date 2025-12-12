@@ -22,7 +22,7 @@ namespace Cube {
         void update(float deltaTime) override;
         TextureRegion getCurrentFrame();
 
-        void addClip(const std::string& animClipFilePath);
+        void addClip(RUID animClipRuid);
 
         void play(const std::string& clipName);
         void stop();

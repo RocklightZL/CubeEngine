@@ -16,10 +16,21 @@ namespace Cube {
 
 		virtual void run();
 
-		Window* getWindow();
-
-		RenderServer& getRenderServer();
-        SceneManager& getSceneManager();
+		void stop() {
+		    running = false;
+		}
+		Window* getWindow() {
+		    return mainWindow;
+		}
+		RenderServer& getRenderServer() {
+		    return renderServer;
+		}
+        SceneManager& getSceneManager() {
+		    return sceneManager;
+		}
+		EventDispatcher& getEventDispatcher() {
+		    return eventDispatcher;
+		}
 
 		bool onWindowClose(const Event& e);
 
@@ -28,5 +39,6 @@ namespace Cube {
 		bool running;
 		RenderServer renderServer;
         SceneManager sceneManager;
+		EventDispatcher eventDispatcher;
 	};
 }

@@ -18,7 +18,7 @@ namespace Cube {
 	// Font class. based on FreeType
 	class Font : public ResourceBase{
 	public:
-		Font(const std::string& path);
+		Font(const AssetMeta& assetMeta);
 		Font(const std::string& fontFilePath, int fontSize);
 		~Font() = default;
 

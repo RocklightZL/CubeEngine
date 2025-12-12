@@ -8,4 +8,6 @@ public:
     ~ScenePanel() override = default;
 
     void render(float deltaTime) override;
+
+private:
 };

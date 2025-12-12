@@ -1,3 +1,3 @@
 #pragma once
 
-void gameThreadFunction(bool* isGameStarted);
+void gameThreadFunction(bool*);

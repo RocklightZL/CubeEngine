@@ -81,7 +81,7 @@ void GuidancePage::render(float deltaTime) {
     ImGui::PushStyleColor(ImGuiCol_Button, toImColor({70, 77, 88, 255}));
 
     ImGui::BeginGroup();
-    if(ImGui::ImageButton("New Project##1", app->icons["new_project.png"]->getId(), buttonSize, {0, 1}, {1, 0})) {
+    if(ImGui::ImageButton("New Project##1", new_project_png->getId(), buttonSize, {0, 1}, {1, 0})) {
         newProject->open();
     }
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (buttonSize.x + ImGui::GetStyle().FramePadding.x * 2) / 2 - ImGui::CalcTextSize("New Project").x / 2);
@@ -91,7 +91,7 @@ void GuidancePage::render(float deltaTime) {
     ImGui::SameLine(0.0f, 100.0f);
 
     ImGui::BeginGroup();
-    if(ImGui::ImageButton("Open Project##1", app->icons["open_project.png"]->getId(), buttonSize, {0, 1}, {1, 0})) {
+    if(ImGui::ImageButton("Open Project##1", open_project_png->getId(), buttonSize, {0, 1}, {1, 0})) {
         delete proj;
         std::string path = FileDialog::openFile("Cube Project File(.cbproj)\0*.cbproj\0", app->getWindow()->getWin32Window());
         if(!path.empty()) {

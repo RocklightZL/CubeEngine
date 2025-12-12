@@ -10,12 +10,12 @@ namespace Cube {
     public:
         ResPtr() = default;
         ResPtr(std::nullptr_t) : resource(nullptr){}
-        explicit ResPtr(const std::string& path) {
-            resource = ResourceManager::get().load<T>(path);
+        explicit ResPtr(RUID ruid) {
+            resource = ResourceManager::get().load<T>(ruid);
         }
         ResPtr(const ResPtr& other) : resource(nullptr){
             if(other.resource) {
-                resource = ResourceManager::get().load<T>(static_cast<ResourceBase*>(other.get())->getPath());
+                resource = ResourceManager::get().load<T>(static_cast<ResourceBase*>(other.get())->getRuid());
             }
         }
         ResPtr(ResPtr&& other) noexcept : resource(other.resource){
@@ -32,7 +32,7 @@ namespace Cube {
             if(resource) {
                 ResourceManager::get().release(resource);
             }
-            resource = ResourceManager::get().load<T>(static_cast<ResourceBase*>(other.get())->getPath());
+            resource = ResourceManager::get().load<T>(static_cast<ResourceBase*>(other.get())->getRuid());
             return *this;
         }
         ResPtr& operator=(ResPtr&& other) noexcept {
@@ -68,9 +68,9 @@ namespace Cube {
                 resource = nullptr;
             }
         }
-        void reset(const std::string& path) {
+        void reset(RUID ruid) {
             reset();
-            resource = ResourceManager::get().load<T>(path);
+            resource = ResourceManager::get().load<T>(ruid);
         }
 
         T* get() const {

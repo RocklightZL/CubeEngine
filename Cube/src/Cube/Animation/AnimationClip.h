@@ -16,7 +16,7 @@ namespace Cube {
 
     class AnimationClip : public ResourceBase{
     public:
-        AnimationClip(const std::string& animationFilePath);
+        AnimationClip(const AssetMeta& assetMeta);
         ~AnimationClip() = default;
 
         TextureRegion getFrameAtTime(float time) const;

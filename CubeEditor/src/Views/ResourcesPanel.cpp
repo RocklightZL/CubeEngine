@@ -1,18 +1,19 @@
 #include "ResourcesPanel.h"
 
-#include "../Project.h"
+#include <memory>
+#include <stack>
+
 #include "../App/EditorApp.h"
+#include "../Project.h"
 #include "../Scene/TextureMetadata.h"
 #include "../Utils/ImGuiExternal.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Resource/ResourceManager.h"
 #include "Cube/UI/FileDialog.h"
+#include "Cube/Utils/Utils.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
-
-#include <memory>
-#include <stack>
 
 using namespace Cube;
 
@@ -33,7 +34,7 @@ void ResourcesPanel::render(float deltaTime) {
 
     ImGui::BeginChild("TopBar", ImVec2(ImGui::GetContentRegionAvail().x, topHeight));
     topHeight -= ImGui::GetStyle().FramePadding.x * 2;
-    if(ImGui::ImageButton("back", app->icons["back.png"]->getId(), ImVec2(topHeight, topHeight), {0, 1}, {1, 0})) {
+    if(ImGui::ImageButton("back", back_png->getId(), ImVec2(topHeight, topHeight), {0, 1}, {1, 0})) {
         if(resStack.size() > 1) resStack.pop_back();
     }
     ImGui::SameLine();
@@ -41,11 +42,11 @@ void ResourcesPanel::render(float deltaTime) {
     ImGui::SameLine();
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - topHeight - ImGui::GetStyle().FramePadding.x * 2);
     if(showMode == 0) {
-        if(ImGui::ImageButton("iconMode", app->icons["icon_mode.png"]->getId(), ImVec2(topHeight, topHeight))) {
+        if(ImGui::ImageButton("iconMode", icon_mode_png->getId(), ImVec2(topHeight, topHeight))) {
             showMode = 1;
         }
     }else if(showMode == 1) {
-        if(ImGui::ImageButton("listMode", app->icons["list_mode.png"]->getId(), ImVec2(topHeight, topHeight))) {
+        if(ImGui::ImageButton("listMode", list_mode_png->getId(), ImVec2(topHeight, topHeight))) {
             showMode = 0;
         }
     }
@@ -74,12 +75,12 @@ void ResourcesPanel::render(float deltaTime) {
                 ImGui::NewLine();
             }
             if(n->isGroup){
-                IconTextButton(app->icons["directory.png"]->getId(), n->name.c_str(), ImVec2(imageSize, imageSize), {0, 1}, {1, 0});
+                IconTextButton(directory_png->getId(), n->name.c_str(), ImVec2(imageSize, imageSize), {0, 1}, {1, 0});
                 if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                     resStack.push_back(n);
                 }
             }else {
-                IconTextButton(app->icons["file.png"]->getId(), n->name.c_str(), ImVec2(imageSize, imageSize), {0, 1}, {1, 0});
+                IconTextButton(file_png->getId(), n->name.c_str(), ImVec2(imageSize, imageSize), {0, 1}, {1, 0});
                 if(ImGui::BeginDragDropSource()) {
                     std::string texturePath = proj->getConfig().assetsDirectory + "/" + n->name;
                     ImGui::Text(texturePath.c_str());
@@ -111,13 +112,13 @@ void ResourcesPanel::render(float deltaTime) {
             } else {
                 if(n->isGroup) {
                     // ImGui::Selectable(n->name.c_str());
-                    IconTextButtonLeft(n->name.c_str(), app->icons["directory.png"]->getId(), {0, 1}, {1, 0}, {ImGui::GetContentRegionAvail().x, 0});
+                    IconTextButtonLeft(n->name.c_str(), directory_png->getId(), {0, 1}, {1, 0}, {ImGui::GetContentRegionAvail().x, 0});
                     if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                         resStack.push_back(n);
                     }
                 } else {
                     // ImGui::Selectable(n->name.c_str());
-                    IconTextButtonLeft(n->name.c_str(), app->icons["file.png"]->getId(), {0, 1}, {1, 0}, {ImGui::GetContentRegionAvail().x, 0});
+                    IconTextButtonLeft(n->name.c_str(), file_png->getId(), {0, 1}, {1, 0}, {ImGui::GetContentRegionAvail().x, 0});
                     if(ImGui::BeginDragDropSource()) {
                         std::string texturePath = proj->getConfig().assetsDirectory + "/" + n->name;
                         ImGui::Text(texturePath.c_str());

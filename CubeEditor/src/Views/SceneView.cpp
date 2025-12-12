@@ -32,12 +32,14 @@ void SceneView::render(float deltaTime) {
     
     ImGui::BeginChild("ToolBar", {ImGui::GetWindowWidth(), 45});
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-    static bool isGameWindowOpened = false;
     ImVec2 toolButtonSize(37, 37);
-    if(ImGui::ImageButton("play", app->icons["play.png"]->getId(), toolButtonSize, ImVec2(0, 1), ImVec2(1, 0)) && !isGameWindowOpened) {
-        isGameWindowOpened = true;
-        std::thread gameThread(gameThreadFunction, &isGameWindowOpened);
-        gameThread.detach();
+    static bool isGameOver = true;
+    if(ImGui::ImageButton("play", play_png->getId(), toolButtonSize, ImVec2(0, 1), ImVec2(1, 0)) && isGameOver) {
+        isGameOver = false;
+        if(app->gameThread.joinable()) {
+            app->gameThread.join();
+        }
+        app->gameThread = std::thread(gameThreadFunction, &isGameOver);
     }
     ImGui::PopStyleColor();
     ImGui::EndChild();
@@ -288,8 +290,8 @@ void SceneView::sceneRender(float deltaTime) {
     const EditorCamera& editorCamera = proj->editorCamera;
     Renderer2D::beginFrame(editorCamera.getPVMatrix());
     // the axis lines
-    Renderer2D::drawQuad({0, 0}, glm::vec2(1, 30000) * editorCamera.zoom, nullptr, {1.0f, 0.0f, 0.0f, 1.0f});
-    Renderer2D::drawQuad({0, 0}, glm::vec2(30000, 1) * editorCamera.zoom, nullptr, {0.0f, 0.0f, 1.0f, 1.0f});
+    Renderer2D::drawQuad({0, -15000}, glm::vec2(1, 30000) * editorCamera.zoom, nullptr, {1.0f, 0.0f, 0.0f, 1.0f});
+    Renderer2D::drawQuad({-15000, 0}, glm::vec2(30000, 1) * editorCamera.zoom, nullptr, {0.0f, 0.0f, 1.0f, 1.0f});
     
     for(auto& camera : cameras) {
         auto* tc = &camera->getTransform();

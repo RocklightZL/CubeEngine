@@ -1,33 +1,25 @@
 #include "Game.h"
 
-#include "Project.h"
+#include "App/EditorApp.h"
 #include "Cube/Core/Application.h"
 #include "Cube/Core/Log.h"
+#include "Project.h"
 
 using namespace Cube;
 
+extern EditorApp* app;
 extern Project* proj;
 
-// class PreGame : public Application {
-// public:
-//     PreGame(const WindowPros& windowPros, const std::shared_ptr<Scene>& scene) : Application(windowPros) {
-//         layers.pushLayer(std::make_shared<SceneLayer>(scene));
-//     }
-// };
-
-void gameThreadFunction(bool* isGameStarted) {
+void gameThreadFunction(bool* isGameOver) {
 	CB_EDITOR_TRACE("gameThread begin");
-
-	// Scene* s = proj->selectedScene->scene;
- //
-	// std::shared_ptr<Scene> mainScene = std::make_shared<Scene>();
-	// SceneSerializer::deserialize(mainScene.get(), proj->getConfig().sceneDirectory + "/" + s->getName() + ".scene");
- //
-	// PreGame* game = new PreGame({(int)s->getViewportSize().x, (int)s->getViewportSize().y, s->getName()}, mainScene);
- //
-	// game->run();
- //
-	// delete game;
- //    *isGameStarted = false;
+    Scene* s = proj->selectedScene->scene;
+    Application game({1280, 720, s->getName()});  // TODO: viewport size
+    app->game = &game;
+    game.getSceneManager().registerScene(s->getName(), proj->getConfig().sceneDirectory + "/" + s->getName() + ".scene");  // TODO: scene file path
+    game.getSceneManager().load(s->getName());
+    game.getSceneManager().setActive(s->getName());
+	game.run();
 	CB_EDITOR_TRACE("gameThread exit");
+    *isGameOver = true;
+    app->game = nullptr;
 }

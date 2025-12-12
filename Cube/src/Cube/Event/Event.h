@@ -1,39 +1,38 @@
 #pragma once
 
-#include <unordered_map>
 #include <functional>
-#include <typeindex>
+#include <unordered_map>
+
+#include "Cube/Reflection/Type.h"
 
 namespace Cube {
 
-#define EVENT_TYPE(type) virtual std::type_index getType() const override { return typeid(type); }\
+#define EVENT_TYPE(type) virtual TypeID getType() const override { return getTypeID<type>(); }\
                          virtual std::string toString() const override { return #type; }
 
     class Event {
     public:
         Event() = default;
         virtual ~Event() = default;
-        virtual std::type_index getType() const = 0;
+        virtual TypeID getType() const = 0;
         virtual std::string toString() const = 0;
     };
 
     class EventDispatcher {
         using Handler = std::function<bool(const Event& e)>;
     public:
-
-        static EventDispatcher& get();
-
-        void dispatch(const Event& e);
-
-        template<typename Type>
-        void subscribe(const Handler& handler) {
-            listener[typeid(Type)].push_back(handler);
-        }
-
-    private:
         EventDispatcher() = default;
         ~EventDispatcher() = default;
 
-        std::unordered_map<std::type_index, std::vector<Handler>> listener;
+        void dispatch(const Event& e);
+
+        // TODO: unsubscribe
+        template<typename Type>
+        void subscribe(const Handler& handler) {
+            listener[getTypeID<Type>()].push_back(handler);
+        }
+
+    private:
+        std::unordered_map<TypeID, std::vector<Handler>> listener;
     };
 }  // namespace Cube
