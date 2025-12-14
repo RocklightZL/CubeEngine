@@ -6,6 +6,8 @@
 #include <string>
 
 #include "Cube/Renderer/Color.h"
+#include "Cube/Renderer/Texture.h"
+#include "Cube/Renderer/TextureRegion.h"
 
 void addDashLine(ImDrawList* drawList, const ImVec2& start, const ImVec2& end, const ImU32& color, float thickness = 1.0f, float segmentLen = 10.0f, float intervalLen = 10.0f);
 
@@ -34,6 +36,13 @@ bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_si
 
 bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {1, 1}, const ImVec2& button_size = {0, 0}, const ImVec2& icon_size = ImVec2(ImGui::CalcTextSize("Text").y, ImGui::CalcTextSize("Text").y));
 
+bool iconTextButton(const Cube::Texture2D* icon, std::string_view label, bool isSelected = false, const ImVec2& size = {0, 0}, const Cube::TextureRegion& texUV = {{0, 0}, {1, 1}});
+bool iconTextButtonH(const Cube::Texture2D* icon, std::string_view label, bool isSelected = false, const Cube::TextureRegion& texUV = {{0, 0}, {1, 1}});
+
 inline ImVec4 toImColor(const Cube::Color& color) {
     return {color.r, color.g, color.b, color.a};
+}
+
+inline ImVec2 toImVec2(const glm::vec2& vec) {
+    return ImVec2(vec.x, vec.y);
 }

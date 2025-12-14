@@ -18,8 +18,8 @@ namespace Cube {
         ResourceManager& operator=(ResourceManager&&) = delete;
         ResourceManager& operator=(const ResourceManager&) = delete;
 
-        void registerAssetMeta(const AssetMeta& meta);
-        void registerAssetMeta(const std::string& metaFilePath);
+        AssetMeta* registerAssetMeta(const AssetMeta& meta);
+        AssetMeta* registerAssetMeta(const std::string& metaFilePath);
 
         // load
         template<typename T>

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "App/EditorPage.h"
+#include "Cube/Resource/RUID.h"
 #include "Cube/Scene/Entity.h"
 #include "Cube/Scene/Scene.h"
 #include "Scene/EditorCamera.h"
@@ -47,11 +48,13 @@ public:
     std::shared_ptr<Node> resRoot;  // TODO: Unique_ptr
 	std::deque<std::shared_ptr<Node>> resStack;
 	EditorCamera editorCamera;
+	std::unordered_map<std::filesystem::path, Cube::RUID> assetMetaCache;
 
 private:
 	void writeToConfigFile(const std::string& configFilePath) const;
 	void load();
 	void save();
+	void importAssets();
 
 	ProjectConfig config;
     std::vector<SceneData> scenes;

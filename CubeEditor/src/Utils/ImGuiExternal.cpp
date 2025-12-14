@@ -75,6 +75,7 @@ bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_si
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     if(window->SkipItems) return false;
 
+    float averageWidth = ImGui::CalcTextSize("0").x;
     // ¼ÆËãÎÄ±¾³ß´ç
     ImVec2 text_size = ImGui::CalcTextSize(label);
     float padding = ImGui::GetStyle().FramePadding.y;
@@ -118,7 +119,8 @@ bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_si
 // ×ó²àÍ¼±êÓÒ²àÎÄ×Ö°´Å¥
 bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_min, const ImVec2& uv_max, const ImVec2& button_size, const ImVec2& icon_size) {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
-    if(window->SkipItems) return false;
+    if(window->SkipItems)
+        return false;
 
     const ImGuiStyle& style = ImGui::GetStyle();
 
@@ -165,4 +167,122 @@ bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_
     window->DrawList->AddText(text_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
 
     return is_clicked;
+}
+
+bool iconTextButton(const Cube::Texture2D* icon, std::string_view label, bool isSelected, const ImVec2& size, const Cube::TextureRegion& texUV) {
+    float rounding = ImGui::GetStyle().FrameRounding;
+    float padding = ImGui::GetStyle().FramePadding.y;
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    if(window->SkipItems) return false;
+
+    ImVec2 iconSize = ImVec2(icon->getWidth(), icon->getHeight()) * toImVec2(texUV.uvMax - texUV.uvMin);
+    ImVec2 textSize = ImGui::CalcTextSize(label.data());
+    ImVec2 itemSize = ImVec2(ImMax(iconSize.x, textSize.x) + padding * 2, iconSize.y + textSize.y + padding * 3);
+    if(size.x > 0) {
+        itemSize.x = size.x;
+        if(iconSize.x > size.x - padding * 2) {
+            iconSize.x = size.x - padding * 2;
+            float aspectRatio = static_cast<float>(icon->getHeight()) / static_cast<float>(icon->getWidth());
+            iconSize.y = iconSize.x * aspectRatio;
+        }
+    }
+    if(size.y > 0) {
+        itemSize.y = size.y;
+        if(iconSize.y > size.y - textSize.y - padding * 3) {
+            iconSize.y = size.y - textSize.y - padding * 3;
+            float aspectRatio = static_cast<float>(icon->getWidth()) / static_cast<float>(icon->getHeight());
+            iconSize.x = iconSize.y * aspectRatio;
+        }
+    }
+
+    static const float w = ImGui::CalcTextSize("...").x;
+    float charWidth = ImGui::CalcTextSize("0").x;
+    float maxTextWidth = ImMax(size.x, iconSize.x) - ImGui::GetStyle().FramePadding.y * 2;
+    bool isTextHidden = false;
+    std::string text = label.data();
+    if(textSize.x > maxTextWidth) {
+        int charCount = static_cast<int>((maxTextWidth - w) / charWidth);
+        text = text.substr(0, charCount);
+        text.append("...");
+        textSize = ImGui::CalcTextSize(text.c_str());
+        isTextHidden = true;
+    }
+
+    ImGui::InvisibleButton(label.data(), itemSize);
+
+    bool isHovered = ImGui::IsItemHovered();
+    bool isActive = ImGui::IsItemActive();
+    bool isClicked = ImGui::IsItemClicked();
+
+    ImU32 bgColor = ImGui::GetColorU32(isActive ? ImGuiCol_ButtonActive : isHovered ? ImGuiCol_ButtonHovered : isSelected ? ImGuiCol_TextSelectedBg : ImGuiCol_Button);
+    
+    ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), bgColor, rounding);
+
+    if(isHovered || isActive) {
+        ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImGui::GetColorU32(ImGuiCol_Border), rounding, 0, 1.5f);
+        if(isTextHidden) {
+            ImGui::BeginTooltip();
+            ImGui::Text(label.data());
+            ImGui::EndTooltip();
+        }
+    }
+
+    ImVec2 iconPos = ImVec2(ImGui::GetItemRectMin().x + (itemSize.x - iconSize.x) * 0.5f, ImGui::GetItemRectMin().y + padding);
+
+    ImGui::GetWindowDrawList()->AddImage(icon->getId(), iconPos, ImVec2(iconPos.x + iconSize.x, iconPos.y + iconSize.y), {texUV.uvMin.x, texUV.uvMax.y}, {texUV.uvMax.x, texUV.uvMin.y});
+
+    ImVec2 textPos = ImVec2(ImGui::GetItemRectMin().x + (itemSize.x - textSize.x) * 0.5f, ImGui::GetItemRectMin().y + itemSize.y - padding - textSize.y);
+
+    ImGui::GetWindowDrawList()->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), text.c_str());
+
+    return isClicked;
+}
+
+bool iconTextButtonH(const Cube::Texture2D* icon, std::string_view label, bool isSelected, const Cube::TextureRegion& texUV) {
+    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    if(window->SkipItems)
+        return false;
+
+    const ImGuiStyle& style = ImGui::GetStyle();
+    const ImVec2 padding = style.FramePadding;
+    const float rounding = style.FrameRounding;
+
+    ImVec2 textSize = ImGui::CalcTextSize(label.data());
+    ImVec2 iconSize = ImVec2(icon->getWidth(), icon->getHeight()) * toImVec2(texUV.uvMax - texUV.uvMin);
+    if(iconSize.x > textSize.y || iconSize.y > textSize.y) {
+        float aspectRatio = static_cast<float>(icon->getHeight()) / static_cast<float>(icon->getWidth());
+        if(aspectRatio < 1.0f) {
+            iconSize.x = textSize.y;
+            iconSize.y = iconSize.x * aspectRatio;
+        } else {
+            iconSize.y = textSize.y;
+            iconSize.x = iconSize.y / aspectRatio;
+        }
+    }
+    float iconTextSpacing = 8.0f;
+    ImVec2 buttonSize = {ImGui::GetContentRegionAvail().x, textSize.y + padding.y * 2};
+
+    ImGui::InvisibleButton(label.data(), buttonSize);
+
+    bool isHovered = ImGui::IsItemHovered();
+    bool isActive = ImGui::IsItemActive();
+    bool isClicked = ImGui::IsItemClicked();
+
+    ImU32 bgColor = ImGui::GetColorU32(isActive ? ImGuiCol_ButtonActive : isHovered ? ImGuiCol_ButtonHovered : isSelected ? ImGuiCol_TextSelectedBg : ImGuiCol_Button);
+
+    ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), bgColor, rounding);
+
+    if(isHovered || isActive) {
+        ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImGui::GetColorU32(ImGuiCol_Border), rounding, 0, 1.5f);
+    }
+
+    ImVec2 pos = ImGui::GetItemRectMin();
+    ImVec2 iconMin = pos + ImVec2((buttonSize.y - iconSize.x) * 0.5f, (buttonSize.y - iconSize.y) * 0.5f);
+    window->DrawList->AddImage(icon->getId(), iconMin, iconMin + iconSize, {texUV.uvMin.x, texUV.uvMax.y}, {texUV.uvMax.x, texUV.uvMin.y});
+
+    float textY = pos.y + (buttonSize.y - textSize.y) * 0.5f;
+    ImVec2 textPos(pos.x + buttonSize.y + iconTextSpacing, textY);
+    window->DrawList->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), label.data());
+
+    return isClicked;
 }

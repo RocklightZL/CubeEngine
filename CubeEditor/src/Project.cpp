@@ -5,6 +5,7 @@
 #include <json.hpp>
 
 #include "Cube/Core/Log.h"
+#include "Cube/Resource/ResourceManager.h"
 #include "Cube/Utils/Utils.h"
 
 using namespace Cube;
@@ -45,6 +46,7 @@ Project::Project(const std::string& configFilePath) {
     config.assetsDirectory = config.rootPath + "/Assets";
     config.sceneDirectory = config.rootPath + "/Scenes";
     load();
+    importAssets();
 }
 
 Project::~Project() {
@@ -146,4 +148,13 @@ void Project::load() {
     resRoot->fromJson(resData, resRoot);
     resStack.push_back(resRoot);
     resFile.close();
+}
+
+void Project::importAssets() {
+    for(const auto& entry : std::filesystem::recursive_directory_iterator(config.assetsDirectory)) {
+        if(entry.is_regular_file() && entry.path().extension() == ".meta") {
+            AssetMeta* assetMeta = ResourceManager::get().registerAssetMeta(std::filesystem::absolute(entry.path()).string());
+            assetMetaCache[entry.path()] = assetMeta->ruid;
+        }
+    }
 }

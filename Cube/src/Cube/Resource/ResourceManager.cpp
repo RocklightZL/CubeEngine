@@ -11,22 +11,31 @@ namespace Cube {
         return Renderer2D::currentContext->getResourceManager();
     }
 
-    void ResourceManager::registerAssetMeta(const AssetMeta& meta) {
+    AssetMeta* ResourceManager::registerAssetMeta(const AssetMeta& meta) {
         assetMetaRegistry[meta.ruid] = meta;
+        return &assetMetaRegistry[meta.ruid];
     }
 
-    void ResourceManager::registerAssetMeta(const std::string& metaFilePath) {
+    AssetMeta* ResourceManager::registerAssetMeta(const std::string& metaFilePath) {
         std::ifstream metaFile(metaFilePath);
         if(!metaFile.is_open()) {
             CB_CORE_ERROR("Failed to open meta file: {}", metaFilePath);
-            return;
+            return nullptr;
         }
         nlohmann::json j;
         metaFile >> j;
         metaFile.close();
         AssetMeta meta;
         meta.fromJson(j);
-        registerAssetMeta(meta);
+        return registerAssetMeta(meta);
+    }
+
+    AssetMeta* ResourceManager::getAssetMeta(RUID ruid) {
+        auto it = assetMetaRegistry.find(ruid);
+        if(it != assetMetaRegistry.end()) {
+            return &it->second;
+        }
+        return nullptr;
     }
 
     void ResourceManager::release(ResourceBase* resource) {
