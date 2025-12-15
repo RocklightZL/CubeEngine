@@ -1,8 +1,9 @@
 #include "ResourcesPanel.h"
 
+#include <filesystem>
+#include <fstream>
 #include <memory>
 #include <stack>
-#include <filesystem>
 
 #include "../App/EditorApp.h"
 #include "../Project.h"
@@ -29,7 +30,7 @@ void ResourcesPanel::render(float deltaTime) {
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
     static const fs::path ASSETS_DIR(proj->getConfig().assetsDirectory);
-    static fs::path path("");
+    fs::path& path = proj->currentAssetsDir;
     const std::string topText = "Assets: " + path.string();
     float topHeight = ImGui::CalcTextSize(topText.c_str()).y;
 
@@ -70,8 +71,6 @@ void ResourcesPanel::render(float deltaTime) {
                 }
             }else if(entry.is_regular_file() && entry.path().extension() == ".meta"){
                 RUID ruid = proj->assetMetaCache[path];
-                AssetMeta* assetMeta = ResourceManager::get().getAssetMeta(ruid);
-
                 iconTextButton(file_png.get(), entry.path().filename().string(), selectedEntry == entry.path(), ImVec2(imageSize, imageSize));
                 if(ImGui::BeginDragDropSource()) {
                     ImGui::Text(std::to_string(ruid).c_str());
@@ -122,18 +121,34 @@ void ResourcesPanel::render(float deltaTime) {
     ImGui::End();
 }
 
-void ResourcesPanel::importResources() {
-    std::shared_ptr<Node> currentNode = proj->resStack.back();
-    for(auto& path : FileDialog::openMultiFiles("Resources(.png.jpg)\0*.png;*.jpg\0", app->getWindow()->getWin32Window())) {
-        std::string fileName = Utils::getFileName(path, true);
-        if(!Utils::isFileInDirectory(path, proj->getConfig().assetsDirectory)) {
-            Utils::copyFile(path, proj->getConfig().assetsDirectory + "/" + fileName);
-        }
-        if(std::find_if(currentNode->children.begin(), currentNode->children.end(), [fileName](std::shared_ptr<Node> x){ return x->name == fileName; }) == currentNode->children.end()){
-            std::shared_ptr<Node> n = std::make_shared<Node>();
-            n->isGroup = false;
-            n->name = fileName;
-            currentNode->children.push_back(n);
-        } // TODO: 提醒用户不能添加重复资源
+void ResourcesPanel::importFromFileDialog() {
+    for(auto& path : FileDialog::openMultiFiles("Resources(.png.jpg)\0*.png;*.jpg\0All(.*)\0*.*\0", app->getWindow()->getWin32Window())) {
+        importResource(path);
     }
+}
+
+void ResourcesPanel::importResource(const std::string& path) {
+    std::filesystem::path filepath(path);
+    std::filesystem::path targetFile = proj->getConfig().assetsDirectory / proj->currentAssetsDir / filepath.filename();
+    if(std::filesystem::exists(targetFile.string() + ".meta")) {
+        CB_EDITOR_WARN("Asset {} is already imported", path);
+        return;
+    }
+    if(targetFile != filepath) {
+        std::error_code ec;
+        std::filesystem::copy_file(filepath, targetFile, std::filesystem::copy_options::none, ec);
+        if(ec) {
+            CB_EDITOR_ERROR("Failed to copy file from {} to {}. Error Code: {}", filepath.string(), targetFile.string(), ec.message());
+            return;
+        }
+    }
+    AssetMeta assetMeta;
+    if(targetFile.extension() == ".png" || targetFile.extension() == ".jpg") {
+        assetMeta.ruid = RUIDGenerator::gen(ResourceType::Texture);
+        assetMeta.sourcePath = std::filesystem::canonical(targetFile).string();
+    } else {
+        CB_EDITOR_ERROR("Unknown assets format: {}", filepath.extension().string());
+        return;
+    }
+    assetMeta.writeToFile(targetFile.string() + ".meta");
 }

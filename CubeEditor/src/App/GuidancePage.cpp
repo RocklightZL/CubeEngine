@@ -27,6 +27,16 @@ void GuidancePage::render(float deltaTime) {
 
     ImGui::Begin("Guidance");
 
+    ImGui::BeginGroup();
+    bool f = false;
+    for(auto& p : app->projectsPathCache) {
+        if(ImGui::Button(p.c_str())) {
+            proj = new Project(p);
+            f = true;
+        }
+    }
+    ImGui::EndGroup();
+
     static bool isNameValid = true;
     static bool isPathValid = true;
     static char name[50] = {};
@@ -61,6 +71,7 @@ void GuidancePage::render(float deltaTime) {
         isPathValid = std::filesystem::exists(path);
         if(isNameValid && isPathValid){
             delete proj;
+            app->projectsPathCache.push_back(std::string(path) + "/" + name + ".cbproj");
             proj = new Project(name, path);
             newProject->close();
             ImGui::CloseCurrentPopup();
@@ -95,6 +106,9 @@ void GuidancePage::render(float deltaTime) {
         delete proj;
         std::string path = FileDialog::openFile("Cube Project File(.cbproj)\0*.cbproj\0", app->getWindow()->getWin32Window());
         if(!path.empty()) {
+            if(std::find(app->projectsPathCache.begin(), app->projectsPathCache.end(), path) == app->projectsPathCache.end()) {
+                app->projectsPathCache.push_back(path);
+            }
             proj = new Project(path);
             app->switchPage(new EditorPage);
         }
@@ -112,4 +126,8 @@ void GuidancePage::render(float deltaTime) {
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    if(f) {
+        app->switchPage(new EditorPage);
+    }
 }

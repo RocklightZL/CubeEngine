@@ -28,9 +28,11 @@ EditorApp::EditorApp(const WindowPros& windowPros) {
     mainWindow = std::make_unique<Window>(windowPros, &eventDispatcher);
     eventDispatcher.subscribe<WindowCloseEvent>(std::bind(&EditorApp::onWindowClose, this, std::placeholders::_1));
     imGuiInit();
+    loadConfig();
 }
 
 EditorApp::~EditorApp() {
+    saveConfig();
     if(game) {
         game->getWindow()->close();
     }
@@ -44,7 +46,7 @@ EditorApp::~EditorApp() {
 }
 
 void EditorApp::switchPage(Page* page) {
-    currentPage.reset(page);
+    currentPage.reset(page); // TODO: 需要延迟销毁
 }
 
 void EditorApp::run() {
@@ -81,6 +83,41 @@ void EditorApp::imGuiInit() {
 
     ImGui_ImplGlfw_InitForOpenGL(mainWindow->getNativeWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
+}
+
+void EditorApp::loadConfig() {
+    std::string projectPathCacheFile = userConfigDir + "/project_path_cache.json";
+    if(!std::filesystem::exists(projectPathCacheFile)) {
+        // std::ofstream newFile(projectPathCacheFile);
+        // if(!newFile.is_open()) {
+        //     CB_EDITOR_ERROR("Failed to create file: {}", projectPathCacheFile);
+        //     return;
+        // }
+        // newFile.close();
+        saveConfig();
+    }
+    std::ifstream file(projectPathCacheFile);
+    if(!file.is_open()) {
+        CB_EDITOR_ERROR("Failed to open file: {}", projectPathCacheFile);
+        return;
+    }
+    nlohmann::json j;
+    file >> j;
+    file.close();
+    projectsPathCache = j["projectsPathCache"];
+}
+
+void EditorApp::saveConfig() {
+    std::string projectPathCacheFile = userConfigDir + "/project_path_cache.json";
+    std::ofstream file(projectPathCacheFile);
+    if(!file.is_open()) {
+        CB_EDITOR_ERROR("Failed to open file: {}", projectPathCacheFile);
+        return;
+    }
+    nlohmann::json j;
+    j["projectsPathCache"] = projectsPathCache;
+    file << j.dump(4);
+    file.close();
 }
 
 void EditorApp::setDarkTheme() {

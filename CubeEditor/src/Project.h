@@ -49,6 +49,7 @@ public:
 	std::deque<std::shared_ptr<Node>> resStack;
 	EditorCamera editorCamera;
 	std::unordered_map<std::filesystem::path, Cube::RUID> assetMetaCache;
+	std::filesystem::path currentAssetsDir = "";
 
 private:
 	void writeToConfigFile(const std::string& configFilePath) const;

@@ -7,6 +7,7 @@
 namespace Cube {
     class Application;
 }
+
 class EditorApp{
 public:
     static const std::string userConfigDir;
@@ -22,6 +23,7 @@ public:
     // global
     std::thread gameThread;
     Cube::Application* game = nullptr;
+    std::vector<std::string> projectsPathCache;
 
 private:
     std::unique_ptr<Cube::Window> mainWindow;
@@ -30,6 +32,8 @@ private:
     Cube::EventDispatcher eventDispatcher;
 
     void imGuiInit();
+    void loadConfig();
+    void saveConfig();
     void setDarkTheme();
     bool onWindowClose(const Cube::Event& e);
 };

@@ -13,7 +13,8 @@ public:
 
 	void render(float deltaTime) override;
 
-    static void importResources();
+    static void importFromFileDialog();
+    static void importResource(const std::string& path);
 
 private:
     std::unique_ptr<Cube::Texture2D> back_png        = std::make_unique<Cube::Texture2D>("assets/icons/back.png");

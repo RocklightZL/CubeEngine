@@ -20,6 +20,7 @@ namespace Cube {
 
         AssetMeta* registerAssetMeta(const AssetMeta& meta);
         AssetMeta* registerAssetMeta(const std::string& metaFilePath);
+        AssetMeta* getAssetMeta(RUID ruid);
 
         // load
         template<typename T>

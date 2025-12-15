@@ -31,6 +31,12 @@ EditorPage::EditorPage() {
     views.push_back(std::make_unique<EntityPropertyPanel>());
     views.push_back(std::make_unique<SceneSelectPanel>());
     views.push_back(std::make_unique<ResourcesPanel>());
+
+    glfwSetDropCallback(app->getWindow()->getNativeWindow(), [](GLFWwindow* window, int path_count, const char* paths[]) {
+        for(int i = 0; i < path_count; ++i) {
+            ResourcesPanel::importResource(paths[i]);
+        }
+    });
 }
 
 void EditorPage::render(float deltaTime) {
@@ -126,7 +132,7 @@ void EditorPage::render(float deltaTime) {
 
         if(ImGui::BeginMenu("Resources")) {
             if(ImGui::MenuItem("Import Resources##1")) {
-                ResourcesPanel::importResources();
+                ResourcesPanel::importFromFileDialog();
             }
             ImGui::EndMenu();
         }
