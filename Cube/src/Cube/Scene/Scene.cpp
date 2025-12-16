@@ -59,9 +59,13 @@ namespace Cube {
 
     void Scene::destroyEntity(const std::string& name) {
         auto it = std::find_if(entities.begin(), entities.end(), [&name](const std::unique_ptr<Entity>& entity) {
-            return entity->getName() == name; 
+            return entity->getName() == name;
         });
         it->get()->destroy();
+    }
+
+    void Scene::destroyEntity(Entity* entity) {
+        entity->destroy();
     }
 
     const std::vector<std::unique_ptr<Entity>>& Scene::getAllEntities() const {

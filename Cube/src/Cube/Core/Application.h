@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Cube/Event/Event.h"
 #include "Window.h"
 #include "Cube/Scene/RenderServer.h"
@@ -6,7 +6,7 @@
 
 namespace Cube {
 
-	// TODO: ¿¼ÂÇ¸Ä³Éµ¥ÀıÄ£Ê½£¬»òÕßÔÚApplicationÍâÔÙ°üÒ»²ãGameEngineÀà£¬GameEngineÓÃµ¥Àı¹ÜÀíApplication£¬ÕâÑù±£Ö¤ÁËApplication±»¼Ì³ĞµÄ¿ÉÄÜ¡£
+	// TODO: è€ƒè™‘æ”¹æˆå•ä¾‹æ¨¡å¼ï¼Œæˆ–è€…åœ¨Applicationå¤–å†åŒ…ä¸€å±‚GameEngineç±»ï¼ŒGameEngineç”¨å•ä¾‹ç®¡ç†Applicationï¼Œè¿™æ ·ä¿è¯äº†Applicationè¢«ç»§æ‰¿çš„å¯èƒ½ã€‚
 
     class Application {
 	public:

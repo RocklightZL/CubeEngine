@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Cube/Renderer/Texture.h"
 
@@ -6,7 +6,7 @@
 #include <vector>
 #include <glm/vec2.hpp>
 
-// ½âÎöTexturePackerÉú³ÉµÄJson(Array)Êı¾İÎÄ¼ş
+// è§£æTexturePackerç”Ÿæˆçš„Json(Array)æ•°æ®æ–‡ä»¶
 class TextureData {
 public:
 	std::string filePath;

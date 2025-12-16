@@ -31,7 +31,7 @@ namespace Cube {
 	private:
 		ResourceManager resourceManager;
 		std::shared_ptr<VertexArray> vao;
-		std::shared_ptr<VertexBuffer> vbo; // TODO: ¸ÄÓÃÂãÖ¸Õë
+		std::shared_ptr<VertexBuffer> vbo; // TODO: use raw ptr
 		std::vector<QuadData> batchData;
 		unsigned int batchCnt = 0;
 		Shader* shader = nullptr;

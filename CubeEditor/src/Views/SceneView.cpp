@@ -14,6 +14,7 @@
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Scene/Camera2D.h"
 #include "Cube/Scene/Sprite.h"
+#include "Cube/Utils/Utils.h"
 
 using namespace Cube;
 
@@ -25,7 +26,9 @@ SceneView::SceneView() {
     frameBuffer->bindAttachment((int)sceneViewSize.x, (int)sceneViewSize.y);
 }
 
-SceneView::~SceneView() { delete frameBuffer; }
+SceneView::~SceneView() {
+    delete frameBuffer;
+}
 
 void SceneView::render(float deltaTime) {
     ImGui::Begin("Scene View");
@@ -41,6 +44,12 @@ void SceneView::render(float deltaTime) {
         }
         app->gameThread = std::thread(gameThreadFunction, &isGameOver);
     }
+    ImGui::SameLine();
+    if(ImGui::Button("Reset")) {
+        proj->editorCamera.position = {0, 0};
+        proj->editorCamera.zoom = 1.0f;
+        proj->editorCamera.viewport = toGlmVec2(sceneViewSize);
+    }
     ImGui::PopStyleColor();
     ImGui::EndChild();
     
@@ -54,9 +63,12 @@ void SceneView::render(float deltaTime) {
             proj->editorCamera.viewport = {sceneViewSize.x, sceneViewSize.y};
             frameBuffer->resize((int)sceneViewSize.x, (int)sceneViewSize.y);
         }
+
+        proj->selectedScene->scene->update(deltaTime);
     
         frameBuffer->bind();
         Renderer2D::setViewport((int)sceneViewSize.x, (int)sceneViewSize.y);
+        Renderer2D::setClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         Renderer2D::clearBuffer();
         // scene render
         sceneRender(deltaTime);
@@ -65,30 +77,21 @@ void SceneView::render(float deltaTime) {
     
         static bool showSelectSubTexturePopup = false;
         static std::shared_ptr<TextureData> textureData;
-        static glm::vec2 pos;
-        static std::string texturePath;
         ImGui::Image(frameBuffer->getTexture(), sceneViewSize, ImVec2(0, 1), ImVec2(1, 0));
-        // if(ImGui::BeginDragDropTarget()) {
-        //     if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePath")) {
-        //         texturePath = (const char*)payload->Data;
-        //         pos = glm::vec2(ImGui::GetMousePos().x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (ImGui::GetMousePos().y - ImGui::GetWindowPos().y));
-        //         if(Utils::isFileExists(texturePath + ".meta")) {
-        //             showSelectSubTexturePopup = true;
-        //             textureData = std::make_shared<TextureData>(texturePath + ".meta", texturePath);
-        //         } else {
-        //             Texture2D* texture = ResourceManager::get().load<Texture2D>(texturePath)->data;
-        //             Scene* scene = proj->selectedScene->scene;
-        //             Entity* entity = scene->createEntity(texturePath);
-        //             TransformComponent* tc = entity->addComponent<TransformComponent>();
-        //             tc->scale = {texture->getWidth(), texture->getHeight()};
-        //             tc->position = pos;
-        //             SpriteComponent* sc = entity->addComponent<SpriteComponent>();
-        //             sc->texture = texture;
-        //             proj->selectedScene->isSaved = false;
-        //         }
-        //     }
-        //     ImGui::EndDragDropTarget();
-        // }
+        if(ImGui::BeginDragDropTarget()) {
+            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("AssetRUID")) {
+                RUID ruid = *(RUID*)payload->Data;
+                glm::vec2 pos = glm::vec2(ImGui::GetMousePos().x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (ImGui::GetMousePos().y - ImGui::GetWindowPos().y));
+                pos += proj->editorCamera.position / proj->editorCamera.zoom;
+                if(getResourceType(ruid) == ResourceType::Texture) {
+                    auto e = proj->selectedScene->scene->createEntity(std::filesystem::path(ResourceManager::get().getAssetMeta(ruid)->sourcePath).filename().string());
+                    e->getTransform().setPosition(pos);
+                    auto sprite = e->addComponent<Sprite>();
+                    sprite->texture = ResPtr<Texture2D>(ruid);
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
         // if(showSelectSubTexturePopup && textureData) {
         //     if(auto* subTexture = selectSubTexturePopup(*textureData, &showSelectSubTexturePopup)) {
         //         Texture2D* texture = ResourceManager::get().load<Texture2D>(texturePath)->data;
@@ -104,7 +107,7 @@ void SceneView::render(float deltaTime) {
         //     }
         // }
     
-        if(ImGui::IsWindowFocused()) {
+        if(ImGui::IsWindowFocused() && ImGui::IsWindowHovered()) {
             EditorCamera& editorCamera = proj->editorCamera;
             if(ImGui::IsKeyDown(ImGuiKey_LeftArrow)) {
                 editorCamera.position.x -= deltaTime * 500;
@@ -135,7 +138,12 @@ void SceneView::render(float deltaTime) {
             }
     
             if(io.MouseWheel != 0.0f) {
-                editorCamera.zoom += io.MouseWheel * 0.1f;
+                glm::vec2 mousePos = {io.MousePos.x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (io.MousePos.y - ImGui::GetWindowPos().y)};
+                glm::vec2 mouseWorldPos = mousePos * editorCamera.zoom + editorCamera.position;
+                static constexpr float E = 0.08f;
+                float k = std::pow(1.0f + E, io.MouseWheel);
+                editorCamera.zoom = editorCamera.zoom * k;
+                editorCamera.position = mouseWorldPos - mousePos * editorCamera.zoom;
             }
             static bool isDragging = false;
             if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered()) {
@@ -306,18 +314,20 @@ void SceneView::sceneRender(float deltaTime) {
             Renderer2D::drawQuad(pos + glm::vec2(size.x, 0), glm::vec2(1, size.y) * glm::vec2(editorCamera.zoom, 1), nullptr, color);
         }
     }
-    // the outline of selected entity
-    if(proj->selectedEntity && proj->selectedEntity->hasComponent<Sprite>()) {
-        auto* selectEntityTC = &proj->selectedEntity->getTransform();
-        Renderer2D::drawQuad(selectEntityTC->getWorldPos(), glm::vec2(selectEntityTC->getWorldScale().x, 1) * glm::vec2(1, editorCamera.zoom), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
-        Renderer2D::drawQuad(selectEntityTC->getWorldPos() + glm::vec2(0, selectEntityTC->getWorldScale().y), glm::vec2(selectEntityTC->getWorldScale().x, 1) * glm::vec2(1, editorCamera.zoom), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
-        Renderer2D::drawQuad(selectEntityTC->getWorldPos(), glm::vec2(1, selectEntityTC->getWorldScale().y) * glm::vec2(editorCamera.zoom, 1), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
-        Renderer2D::drawQuad(selectEntityTC->getWorldPos() + glm::vec2(selectEntityTC->getWorldScale().x, 0), glm::vec2(1, selectEntityTC->getWorldScale().y) * glm::vec2(editorCamera.zoom, 1), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
-    }
 
     for(auto& e : sprites) {
         auto* sc = e->getComponent<Sprite>();
         Renderer2D::drawQuad(e->getTransform().getWorldMatrix(), sc->tintColor, sc->texture.get(), sc->texRegion.getUVCoord());
+    }
+
+    // the outline of selected entity
+    if(proj->selectedEntity && proj->selectedEntity->hasComponent<Sprite>()) {
+        auto* selectEntityTC = &proj->selectedEntity->getTransform();
+        glm::vec2 spriteSize = proj->selectedEntity->getComponent<Sprite>()->getSize();
+        Renderer2D::drawQuad(selectEntityTC->getWorldPos(), glm::vec2(selectEntityTC->getWorldScale().x * spriteSize.x, 1) * glm::vec2(1, editorCamera.zoom), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
+        Renderer2D::drawQuad(selectEntityTC->getWorldPos() + glm::vec2(0, selectEntityTC->getWorldScale().y * spriteSize.y), glm::vec2(selectEntityTC->getWorldScale().x * spriteSize.x, 1) * glm::vec2(1, editorCamera.zoom), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
+        Renderer2D::drawQuad(selectEntityTC->getWorldPos(), glm::vec2(1, selectEntityTC->getWorldScale().y * spriteSize.y) * glm::vec2(editorCamera.zoom, 1), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
+        Renderer2D::drawQuad(selectEntityTC->getWorldPos() + glm::vec2(selectEntityTC->getWorldScale().x * spriteSize.x, 0), glm::vec2(1, selectEntityTC->getWorldScale().y * spriteSize.y) * glm::vec2(editorCamera.zoom, 1), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
     }
 
     Renderer2D::endFrame();

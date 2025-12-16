@@ -46,7 +46,7 @@ EditorApp::~EditorApp() {
 }
 
 void EditorApp::switchPage(Page* page) {
-    currentPage.reset(page); // TODO: 需要延迟销毁
+    currentPage.reset(page);
 }
 
 void EditorApp::run() {

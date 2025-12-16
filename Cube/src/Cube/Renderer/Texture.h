@@ -18,9 +18,10 @@ namespace Cube {
         void unbind();
         void updateData(int x, int y, int w, int h, const unsigned char* data);
 
-        int getWidth() const;
-        int getHeight() const;
-        GLuint getId() const;
+        int getWidth() const { return width; }
+        int getHeight() const { return height; }
+        glm::vec2 getSize() const {return { static_cast<float>(width), static_cast<float>(height)}; }
+        GLuint getId() const { return id; }
     private:
         int width;
         int height;

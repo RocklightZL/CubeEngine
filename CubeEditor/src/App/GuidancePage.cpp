@@ -28,11 +28,11 @@ void GuidancePage::render(float deltaTime) {
     ImGui::Begin("Guidance");
 
     ImGui::BeginGroup();
-    bool f = false;
+    bool switchPage = false;
     for(auto& p : app->projectsPathCache) {
         if(ImGui::Button(p.c_str())) {
             proj = new Project(p);
-            f = true;
+            switchPage = true;
         }
     }
     ImGui::EndGroup();
@@ -66,7 +66,7 @@ void GuidancePage::render(float deltaTime) {
             strcpy_s(path, pathStr.append("/").append(name).c_str());
         }
         ImGui::PopStyleColor();
-    }, [] {
+    }, [&switchPage] {
         isNameValid = !std::string(name).empty();
         isPathValid = std::filesystem::exists(path);
         if(isNameValid && isPathValid){
@@ -76,7 +76,7 @@ void GuidancePage::render(float deltaTime) {
             newProject->close();
             ImGui::CloseCurrentPopup();
 
-            app->switchPage(new EditorPage);
+            switchPage = true;
         }
     }, [] {
 
@@ -110,7 +110,7 @@ void GuidancePage::render(float deltaTime) {
                 app->projectsPathCache.push_back(path);
             }
             proj = new Project(path);
-            app->switchPage(new EditorPage);
+            switchPage = true;
         }
     }
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (buttonSize.x + ImGui::GetStyle().FramePadding.x * 2) / 2 - ImGui::CalcTextSize("Open Project").x / 2);
@@ -127,7 +127,7 @@ void GuidancePage::render(float deltaTime) {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-    if(f) {
+    if(switchPage) {
         app->switchPage(new EditorPage);
     }
 }

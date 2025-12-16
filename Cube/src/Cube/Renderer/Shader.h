@@ -17,7 +17,7 @@ namespace Cube {
 
         uint32_t getId() const;
 
-        // …Ë÷√Uniform
+        // set Uniform
         void setFloat(const std::string& name, float val);
         void setInt(const std::string& name, int val);
         void setVec2(const std::string& name, glm::vec2 val);

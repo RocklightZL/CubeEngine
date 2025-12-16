@@ -57,9 +57,8 @@ void ResourcesPanel::render(float deltaTime) {
     ImGui::BeginChild("Content", ImGui::GetContentRegionAvail());
     constexpr float imageSize = 128.0f;
     static fs::path selectedEntry;
-    for(const auto& entry : fs::directory_iterator(ASSETS_DIR / path)) {
-        ImGui::PushID(&entry);
-        if(showMode == 0) {
+    if(showMode == 0){
+        for(const auto& entry : fs::directory_iterator(ASSETS_DIR / path)) {
             ImGui::SameLine();
             if(ImGui::GetContentRegionAvail().x < imageSize) {
                 ImGui::NewLine();
@@ -70,13 +69,15 @@ void ResourcesPanel::render(float deltaTime) {
                     path = path / entry.path().filename();
                 }
             }else if(entry.is_regular_file() && entry.path().extension() == ".meta"){
-                RUID ruid = proj->assetMetaCache[path];
+                RUID ruid = proj->assetMetaCache[entry.path()];
                 iconTextButton(file_png.get(), entry.path().filename().string(), selectedEntry == entry.path(), ImVec2(imageSize, imageSize));
                 if(ImGui::BeginDragDropSource()) {
                     ImGui::Text(std::to_string(ruid).c_str());
                     ImGui::SetDragDropPayload("AssetRUID", &ruid, sizeof(ruid));
                     ImGui::EndDragDropSource();
                 }
+            }else {
+                goto end;
             }
             if(ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                 selectedEntry = entry.path();
@@ -84,7 +85,10 @@ void ResourcesPanel::render(float deltaTime) {
             if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
                 ImGui::OpenPopup("NodeRightButtonMenu");
             }
-        }else if(showMode == 1){
+            end:;
+        }
+    } else if(showMode == 1){
+        for(const auto& entry : fs::directory_iterator(ASSETS_DIR / path)) {
             if(entry.is_directory()){
                 iconTextButtonH(directory_png.get(), entry.path().filename().string(), selectedEntry == entry.path());
                 if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
@@ -92,12 +96,12 @@ void ResourcesPanel::render(float deltaTime) {
                 }
             }else {
                 iconTextButtonH(file_png.get(), entry.path().filename().string(), selectedEntry == entry.path());
-                if(ImGui::BeginDragDropSource()) {
-                    RUID ruid = proj->assetMetaCache[path];
-                    ImGui::Text(std::to_string(ruid).c_str());
-                    ImGui::SetDragDropPayload("AssetRUID", &ruid, sizeof(ruid));
-                    ImGui::EndDragDropSource();
-                }
+                // if(ImGui::BeginDragDropSource()) {
+                //     RUID ruid = proj->assetMetaCache[path];
+                //     ImGui::Text(std::to_string(ruid).c_str());
+                //     ImGui::SetDragDropPayload("AssetRUID", &ruid, sizeof(ruid));
+                //     ImGui::EndDragDropSource();
+                // }
             }
             if(ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
                 selectedEntry = entry.path();
@@ -106,7 +110,6 @@ void ResourcesPanel::render(float deltaTime) {
                 ImGui::OpenPopup("NodeRightButtonMenu");
             }
         }
-        ImGui::PopID();
     }
     if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered()) {
         selectedEntry = "";
@@ -125,30 +128,47 @@ void ResourcesPanel::importFromFileDialog() {
     for(auto& path : FileDialog::openMultiFiles("Resources(.png.jpg)\0*.png;*.jpg\0All(.*)\0*.*\0", app->getWindow()->getWin32Window())) {
         importResource(path);
     }
+    proj->updateAssetMetaCache();
+}
+
+void importRes(const std::filesystem::path& source, const std::filesystem::path& target) {
+    if(std::filesystem::is_directory(source)) {
+        if(!std::filesystem::exists(target)) {
+            std::filesystem::create_directories(target);
+        }
+        for(auto& entry : std::filesystem::directory_iterator(source)) {
+            importRes(entry.path(), target / entry.path().filename());
+        }
+    }else {
+        if(std::filesystem::exists(target.string() + ".meta")) {
+            CB_EDITOR_WARN("Asset {} is already imported", target.string());
+            return;
+        }
+        if(target != source) {
+            std::error_code ec;
+            std::filesystem::copy_file(source, target, std::filesystem::copy_options::none, ec);
+            if(ec) {
+                CB_EDITOR_ERROR("Failed to copy file from {} to {}. Error Code: {}", source.string(), target.string(), ec.message());
+                return;
+            }
+        }
+        AssetMeta assetMeta;
+        if(target.extension() == ".png" || target.extension() == ".jpg") {
+            assetMeta.ruid = RUIDGenerator::gen(ResourceType::Texture);
+        } else if(target.extension() == ".anim") {
+            assetMeta.ruid = RUIDGenerator::gen(ResourceType::AnimationClip);
+        }
+        else {
+            CB_EDITOR_ERROR("Unknown assets format: {}", source.extension().string());
+            return;
+        }
+        assetMeta.sourcePath = std::filesystem::canonical(target).string();
+        assetMeta.writeToFile(target.string() + ".meta");
+    }
 }
 
 void ResourcesPanel::importResource(const std::string& path) {
     std::filesystem::path filepath(path);
     std::filesystem::path targetFile = proj->getConfig().assetsDirectory / proj->currentAssetsDir / filepath.filename();
-    if(std::filesystem::exists(targetFile.string() + ".meta")) {
-        CB_EDITOR_WARN("Asset {} is already imported", path);
-        return;
-    }
-    if(targetFile != filepath) {
-        std::error_code ec;
-        std::filesystem::copy_file(filepath, targetFile, std::filesystem::copy_options::none, ec);
-        if(ec) {
-            CB_EDITOR_ERROR("Failed to copy file from {} to {}. Error Code: {}", filepath.string(), targetFile.string(), ec.message());
-            return;
-        }
-    }
-    AssetMeta assetMeta;
-    if(targetFile.extension() == ".png" || targetFile.extension() == ".jpg") {
-        assetMeta.ruid = RUIDGenerator::gen(ResourceType::Texture);
-        assetMeta.sourcePath = std::filesystem::canonical(targetFile).string();
-    } else {
-        CB_EDITOR_ERROR("Unknown assets format: {}", filepath.extension().string());
-        return;
-    }
-    assetMeta.writeToFile(targetFile.string() + ".meta");
+    importRes(path, targetFile);
 }

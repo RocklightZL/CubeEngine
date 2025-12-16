@@ -42,6 +42,8 @@ public:
 
 	const ProjectConfig& getConfig() const;
 
+	void updateAssetMetaCache();
+
 	// global data
 	SceneData* selectedScene = nullptr;
     Cube::Entity* selectedEntity = nullptr;
@@ -55,7 +57,6 @@ private:
 	void writeToConfigFile(const std::string& configFilePath) const;
 	void load();
 	void save();
-	void importAssets();
 
 	ProjectConfig config;
     std::vector<SceneData> scenes;

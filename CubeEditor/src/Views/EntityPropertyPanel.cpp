@@ -59,9 +59,16 @@ void EntityPropertyPanel::render(float deltaTime) {
 
             ImGui::TreePop();
         }
+        TypeID toDelete = 0;
         for(auto [typeID, c] : componentsCache) {
             Class* classInfo = ClassRegistry::get().getClass(typeID);
             if(ImGui::TreeNodeEx(classInfo->getName().c_str(), treeNodeFlags)) {
+                if(ImGui::BeginPopupContextItem()) {
+                    if(ImGui::MenuItem("Delete")) {
+                        toDelete = typeID;
+                    }
+                    ImGui::EndPopup();
+                }
                 for(auto& property : classInfo->getAllProperties()) {
                     ImGui::Text(property->getName().c_str());
                     ImGui::SameLine();
@@ -138,13 +145,33 @@ void EntityPropertyPanel::render(float deltaTime) {
                         }
                     } else if(property->getTypeID() == getTypeID<ResPtr<Texture2D>>()) {
                         ResPtr<Texture2D> res = property->getValue(c).as<ResPtr<Texture2D>>();
-                        ImGui::Text(res.get() ? std::to_string(res->getRuid()).c_str() : "");
+                        if(res) {
+                            glm::vec2 size = res->getSize() * (100.0f / (float)std::max(res->getWidth(), res->getHeight()));
+                            ImGui::Image(res->getId(), toImVec2(size), {0, 1}, {1, 0});
+                        }else {
+                            ImGui::Text("None");
+                        }
+                        if(ImGui::BeginDragDropTarget()) {
+                            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("AssetRUID")) {
+                                RUID ruid = *(RUID*)payload->Data;
+                                if(getResourceType(ruid) == ResourceType::Texture) {
+                                    proj->selectedScene->isSaved = false;
+                                    property->setValue(c, ResPtr<Texture2D>(ruid));
+                                }
+                            }
+                            ImGui::EndDragDropTarget();
+                        }
                     } else {
                         ImGui::Text("Failed to display");
                     }
                 }
                 ImGui::TreePop();
             }
+        }
+        if(toDelete) {
+            proj->selectedEntity->removeComponent(toDelete);
+            proj->selectedScene->isSaved = false;
+            updateCache();
         }
 
         float w = ImGui::GetContentRegionAvail().x;

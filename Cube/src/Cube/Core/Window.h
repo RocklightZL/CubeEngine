@@ -39,7 +39,7 @@ namespace Cube {
         void makeContext() const;
         void close();
 
-        //  ‰»Î¬÷—Ø
+        // input
         bool isKeyPressed(KeyCode keyCode);
         bool isMouseButtonPressed(MouseCode mouseCode);
         MousePos getMousePosition();

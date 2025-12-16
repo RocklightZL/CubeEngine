@@ -12,7 +12,7 @@ using namespace Cube;
 extern Project* proj;
 
 void ScenePanel::render(float deltaTime) {
-    ImGui::Begin("Scene Panel"); 
+    ImGui::Begin("Entity Panel"); 
     if(proj->selectedScene){
         static char name[50] = {};
         static std::unique_ptr<ModalPopup> addEntityPopup = std::make_unique<ModalPopup>("Add Entity", [] {
@@ -26,29 +26,34 @@ void ScenePanel::render(float deltaTime) {
             memset(name, '\0', sizeof(name));
         });
         addEntityPopup->render();
-    
-        if(ImGui::TreeNodeEx("Entities", treeNodeFlags)) {
-            if(ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
-                ImGui::OpenPopup("RightMenu");
+
+        if(ImGui::BeginPopupContextWindow()) {
+            if(ImGui::MenuItem("Add Entity")) {
+                addEntityPopup->open();
             }
-            if(ImGui::BeginPopup("RightMenu")) {
-                if(ImGui::MenuItem("add new entity")) {
-                    addEntityPopup->open();
+            ImGui::EndPopup();
+        }
+        for(auto& entity : proj->selectedScene->scene->getAllEntities()) {
+            ImGui::PushID(entity.get());
+            bool f = false;
+            if(proj->selectedEntity == entity.get()) {
+                f = true;
+            }
+            if(ImGui::Selectable(entity->getName().c_str(), &f)) {
+                proj->selectedEntity = entity.get();
+            }
+            if(ImGui::BeginPopupContextItem()) {
+                if(ImGui::MenuItem("Delete")) {
+                    // TODO: add confirm dialog
+                    if(entity.get() == proj->selectedEntity) {
+                        proj->selectedEntity = nullptr;
+                    }
+                    proj->selectedScene->scene->destroyEntity(entity.get());
+                    proj->selectedScene->isSaved = false;
                 }
                 ImGui::EndPopup();
             }
-            for(auto& entity : proj->selectedScene->scene->getAllEntities()) {
-                ImGui::PushID(entity.get());
-                bool f = false;
-                if(proj->selectedEntity == entity.get()) {
-                    f = true;
-                }
-                if(ImGui::Selectable(entity->getName().c_str(), &f)) {
-                    proj->selectedEntity = entity.get();
-                }
-                ImGui::PopID();
-            }
-            ImGui::TreePop();
+            ImGui::PopID();
         }
     }
     ImGui::End();

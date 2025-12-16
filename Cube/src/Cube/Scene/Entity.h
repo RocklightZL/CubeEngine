@@ -37,20 +37,23 @@ namespace Cube {
         }
 
 		// TODO: Lazy deletion may be considered later.
+		void removeComponent(TypeID typeID) {
+			auto it = componentsMap.find(typeID);
+			if(it == componentsMap.end()) {
+				CB_CORE_ERROR("Entity::removeComponent<T>(): component of type '{}' not found", ClassRegistry::get().getClass(typeID)->getName());
+				return;
+			}
+			Component* compPtr = it->second;
+			componentsMap.erase(it);
+			components.erase(std::remove_if(components.begin(), components.end(), [compPtr](const std::unique_ptr<Component>& c) {
+				return c.get() == compPtr;
+			}), components.end());
+		}
+
 		template<typename T>
 		void removeComponent() {
 			static_assert(std::is_base_of_v<Component, T>);
-            TypeID typeID = getTypeID<T>();
-            auto it = componentsMap.find(typeID);
-			if(it == componentsMap.end()) {
-				CB_CORE_ERROR("Entity::removeComponent<T>(): component of type '{}' not found", ClassRegistry::get().getClass<T>()->getName());
-				return;
-            }
-            Component* compPtr = it->second;
-			componentsMap.erase(it);
-			components.erase(std::remove_if(components.begin(), components.end(), [compPtr](const std::unique_ptr<Component>& c) {
-			    return c.get() == compPtr;
-			}), components.end());
+            removeComponent(getTypeID<T>());
 		}
 
 		template<typename T>

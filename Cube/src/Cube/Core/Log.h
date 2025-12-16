@@ -49,13 +49,11 @@ namespace Cube {
     #define CB_CORE_ERROR(...)
     #define CB_CORE_CRITICAL(...)
 
-    // 客户端日志
     #define CB_TRACE(...)
     #define CB_INFO(...)
     #define CB_WARN(...)
     #define CB_ERROR(...)
     #define CB_CRITICAL(...)
 
-    // 断言
     #define CB_ASSERT(...)
 #endif

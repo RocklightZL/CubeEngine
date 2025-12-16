@@ -46,7 +46,7 @@ Project::Project(const std::string& configFilePath) {
     config.assetsDirectory = config.rootPath + "/Assets";
     config.sceneDirectory = config.rootPath + "/Scenes";
     load();
-    importAssets();
+    updateAssetMetaCache();
 }
 
 Project::~Project() {
@@ -150,7 +150,8 @@ void Project::load() {
     resFile.close();
 }
 
-void Project::importAssets() {
+void Project::updateAssetMetaCache() {
+    assetMetaCache.clear();
     for(const auto& entry : std::filesystem::recursive_directory_iterator(config.assetsDirectory)) {
         if(entry.is_regular_file() && entry.path().extension() == ".meta") {
             AssetMeta* assetMeta = ResourceManager::get().registerAssetMeta(std::filesystem::absolute(entry.path()).string());

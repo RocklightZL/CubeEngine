@@ -8,7 +8,7 @@ AllowShortIfStatementsOnASingleLine: false
 IndentCaseLabels: false
 ColumnLimit: 200
 AccessModifierOffset: -4
-AllowShortFunctionsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: true
 SpaceBeforeParens: Never
 NamespaceIndentation: All
 # SortIncludes: false

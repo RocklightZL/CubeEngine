@@ -14,6 +14,7 @@ namespace Cube {
 
         Entity* createEntity(const std::string& name);
         void destroyEntity(const std::string& name);
+        void destroyEntity(Entity* entity);
 
         const std::vector<std::unique_ptr<Entity>>& getAllEntities() const;
         Entity* getEntity(const std::string& name) const;
