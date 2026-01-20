@@ -6,7 +6,7 @@
 #include "Cube/Core/Log.h"
 #include "Cube/Resource/ResourceManager.h"
 #include "Cube/Scene/Camera2D.h"
-#include "Cube/Scene/Sprite.h"
+#include "Cube/Scene/SpriteRender.h"
 #include "SceneView.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -180,8 +180,8 @@ void EntityPropertyPanel::render(float deltaTime) {
             ImGui::OpenPopup("addComponent");
         }
         if(ImGui::BeginPopup("addComponent")) {
-            if(ImGui::MenuItem("Sprite")) {
-                proj->selectedEntity->addComponent<Sprite>();
+            if(ImGui::MenuItem("SpriteRender")) {
+                proj->selectedEntity->addComponent<SpriteRender>();
                 updateCache();
             }
             if(ImGui::MenuItem("Camera2D")) {

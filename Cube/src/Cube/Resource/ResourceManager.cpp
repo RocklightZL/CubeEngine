@@ -1,5 +1,9 @@
 #include "pch.h"
+
 #include "ResourceManager.h"
+
+#include "ResPtr.h"
+#include "Sprite.h"
 
 #include <fstream>
 
@@ -11,43 +15,32 @@ namespace Cube {
         return Renderer2D::currentContext->getResourceManager();
     }
 
-    AssetMeta* ResourceManager::registerAssetMeta(const AssetMeta& meta) {
-        assetMetaRegistry[meta.ruid] = meta;
-        return &assetMetaRegistry[meta.ruid];
+    void ResourceManager::init(const std::string& pathMapFilePath) {
+        std::ifstream file(pathMapFilePath);
+        if(!file.is_open()) {
+            CB_CORE_ERROR("Failed to open resource path map file: {}", pathMapFilePath);
+        }
+        nlohmann::json jsonData;
+        file >> jsonData;
+        file.close();
+        get().pathMap = jsonData.get<std::unordered_map<std::string, nlohmann::json>>();
     }
 
-    AssetMeta* ResourceManager::registerAssetMeta(const std::string& metaFilePath) {
-        std::ifstream metaFile(metaFilePath);
-        if(!metaFile.is_open()) {
-            CB_CORE_ERROR("Failed to open meta file: {}", metaFilePath);
-            return nullptr;
-        }
-        nlohmann::json j;
-        metaFile >> j;
-        metaFile.close();
-        AssetMeta meta;
-        meta.fromJson(j);
-        return registerAssetMeta(meta);
-    }
-
-    AssetMeta* ResourceManager::getAssetMeta(RUID ruid) {
-        auto it = assetMetaRegistry.find(ruid);
-        if(it != assetMetaRegistry.end()) {
-            return &it->second;
-        }
-        return nullptr;
+    void ResourceManager::init(const std::unordered_map<std::string, nlohmann::json>& pathMap) {
+        get().pathMap = pathMap;                        
     }
 
     void ResourceManager::release(ResourceBase* resource) {
-        if(!resource) return;
+        if(!resource)
+            return;
         resource->refCount--;
         if(resource->refCount == 0) {
-            resourcesCache.erase(resource->ruid);
+            resourcesCache.erase(resource->identifier);
         }
     }
 
-    void ResourceManager::release(RUID ruid) {
-        auto it = resourcesCache.find(ruid);
+    void ResourceManager::release(const std::string& identifier) {
+        auto it = resourcesCache.find(identifier);
         if(it != resourcesCache.end()) {
             if((--it->second->refCount) == 0) {
                 resourcesCache.erase(it);
@@ -57,5 +50,26 @@ namespace Cube {
 
     void ResourceManager::releaseAll() {
         resourcesCache.clear();
+    }
+
+    Texture2D* ResourceManager::loadTexture2D(const nlohmann::json& path) {
+        return new Texture2D(path.get<std::string>());
+    }
+
+    Sprite* ResourceManager::loadSprite(const std::string& identifier) {
+        size_t pos1 = identifier.find(':');
+        size_t pos2 = identifier.find('#');
+        if(!(pos1 != std::string::npos && pos2 != std::string::npos && pos2 > pos1)) {
+            CB_CORE_ERROR("Invalid sprite identifier: {}", identifier);
+            return nullptr;
+        }
+        ResPtr<Atlas> atlas(identifier.substr(pos1 + 1, pos2 - pos1 - 1));
+        Sprite* sprite = new Sprite(atlas->getSprite(identifier.substr(pos2 + 1)));
+        sprite->setAtlas(atlas);
+        return sprite;
+    }
+
+    Atlas* ResourceManager::loadAtlas(const nlohmann::json& path) {
+        return new Atlas(path.get<std::string>());
     }
 }  // namespace Cube

@@ -8,10 +8,10 @@
 
 namespace Cube {
     // .anim
-    AnimationClip::AnimationClip(const AssetMeta& assetMeta) : ResourceBase(assetMeta) {
-        std::ifstream file(assetMeta.sourcePath);
+    AnimationClip::AnimationClip(const std::string& animFilePath) {
+        std::ifstream file(animFilePath);
         if(!file.is_open()) {
-            CB_CORE_ERROR("Failed to open animation file {}", assetMeta.sourcePath);
+            CB_CORE_ERROR("Failed to open animation file {}", animFilePath);
             return;
         }
         nlohmann::json animData;
@@ -21,33 +21,28 @@ namespace Cube {
         looping = animData["looping"];
         speed = animData["speed"];
         duration = animData["duration"];
-        texture = ResPtr<Texture2D>(animData["texture"]);
         for(auto& f : animData["frames"]) {
             AnimationFrame af;
-            af.textureRegion = {
-                {f["textureRegion"]["uvMin"]["x"], f["textureRegion"]["uvMin"]["y"]},
-                {f["textureRegion"]["uvMax"]["x"], f["textureRegion"]["uvMax"]["y"]}
-            };
+            af.frame = ResPtr<Sprite>(f["frame"]);
             af.duration = f["duration"];
             frames.push_back(af);
         }
     }
 
-    TextureRegion AnimationClip::getFrameAtTime(float time) const {
+    Sprite* AnimationClip::getFrameAtTime(float time) const {
         float accumulateTime = 0.0f;
         for(auto& frame : frames) {
             accumulateTime += frame.duration;
             if(accumulateTime >= time) {
-                return frame.textureRegion;
+                return frame.frame.get();
             }
         }
-        return frames.back().textureRegion;
+        return frames.back().frame.get();
     }
 
     const std::string& AnimationClip::getName() const { return name; }
     bool AnimationClip::isLooping() const { return looping; }
     float AnimationClip::getSpeed() const { return speed; }
     float AnimationClip::getDuration() const { return duration; }
-    const ResPtr<Texture2D>& AnimationClip::getTexture() const { return texture; }
 
 }  // namespace Cube

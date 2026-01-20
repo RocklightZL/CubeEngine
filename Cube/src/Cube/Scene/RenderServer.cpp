@@ -2,9 +2,9 @@
 #include "RenderServer.h"
 
 #include "Camera2D.h"
-#include "Scene.h"
-#include "Sprite.h"
 #include "Cube/Renderer/Renderer.h"
+#include "Scene.h"
+#include "SpriteRender.h"
 
 namespace Cube {
 
@@ -21,10 +21,10 @@ namespace Cube {
             CB_CORE_ERROR("RenderServer::renderScene(): no available Camera2D found in the scene");
             return;
         }
-        auto entities = scene->getEntitiesWith<Sprite>();
+        auto entities = scene->getEntitiesWith<SpriteRender>();
         std::sort(entities.begin(), entities.end(), [](const Entity* a, const Entity* b) {
-            Sprite* spriteA = a->getComponent<Sprite>();
-            Sprite* spriteB = b->getComponent<Sprite>();
+            SpriteRender* spriteA = a->getComponent<SpriteRender>();
+            SpriteRender* spriteB = b->getComponent<SpriteRender>();
             if(spriteA->order != spriteB->order) {
                 return spriteA < spriteB;
             }
@@ -32,7 +32,7 @@ namespace Cube {
         });
         Renderer2D::beginFrame(camera->getPVMatrix());
         for(auto& entity : entities) {
-            Sprite* sprite = entity->getComponent<Sprite>();
+            SpriteRender* sprite = entity->getComponent<SpriteRender>();
             Renderer2D::drawQuad(entity->getTransform().getWorldMatrix(), sprite->tintColor, sprite->texture.get(), sprite->texRegion.getUVCoord());
         }
         Renderer2D::endFrame();

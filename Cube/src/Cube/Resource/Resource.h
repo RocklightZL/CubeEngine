@@ -2,27 +2,19 @@
 
 #include <string>
 
-#include "AssetMeta.h"
-#include "RUID.h"
-
 namespace Cube {
 
     class ResourceBase {
     public:
         friend class ResourceManager;
 
-        // Derived classes must implement a constructor with a AssetMeta type parameter.
-        explicit ResourceBase(const AssetMeta& metadata) : ruid(metadata.ruid){}
         ResourceBase() = default;
         virtual ~ResourceBase() = default;
 
-        RUID getRuid() const { return ruid; }
-        ResourceType getType() const {
-            return getResourceType(ruid);
-        }
+        std::string getIdentifier() const { return identifier; }
 
     protected:
-        RUID ruid = 0;
+        std::string identifier;
 
     private:
         int refCount = 0;

@@ -7,67 +7,6 @@
 
 namespace Cube {
 
-    Texture2D::Texture2D(const AssetMeta& assetMeta) : ResourceBase(assetMeta) {
-        std::string filePath = assetMeta.sourcePath;
-
-        // TODO: use metaData
-        if(!assetMeta.metaData.empty()){}
-
-        stbi_set_flip_vertically_on_load(1);
-        int channels;
-        uint8_t* originalData = stbi_load(filePath.c_str(), &width, &height, &channels, 0);
-        if(!originalData) {
-            CB_CORE_ERROR("Failed to load image: {}", filePath);
-            CB_ASSERT(0);
-        }
-        GLenum internalFormat = 0, dataFormat = 0;
-        int pixelSize = 3;
-        switch(channels) {
-        case 3:
-            internalFormat = GL_RGB8;
-            dataFormat = GL_RGB;
-            pixelSize = 3;
-            break;
-        case 4:
-            internalFormat = GL_RGBA8;
-            dataFormat = GL_RGBA;
-            pixelSize = 4;
-            break;
-        default:
-            CB_CORE_ERROR("Unsupported image format");
-            CB_ASSERT(true);
-        }
-
-        // alignment
-        int rowSize = width * pixelSize;
-        int alignedSize = (rowSize + 3) / 4 * 4;
-        uint8_t* data = originalData;
-        if(rowSize != alignedSize) {
-            data = new uint8_t[(size_t)(alignedSize * height)];
-            for(int i = 0; i < height; i++) {
-                memcpy(data + i * alignedSize, originalData + i * rowSize, rowSize);
-                memset(data + i * alignedSize + rowSize, 0, alignedSize - rowSize);
-            }
-        }
-
-        glGenTextures(1, &id);
-        bind();
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(originalData);
-        if(rowSize != alignedSize) {
-            delete[] data;
-        }
-    }
-
     Texture2D::Texture2D(const std::string& filePath){
         stbi_set_flip_vertically_on_load(1);
         int channels;

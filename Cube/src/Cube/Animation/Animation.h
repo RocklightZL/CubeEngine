@@ -8,7 +8,7 @@
 #include "Cube/Scene/Component.h"
 
 namespace Cube {
-    class Sprite;
+    class SpriteRender;
     
     // Frame animation controller for sprites
     class Animation : public Component{
@@ -20,9 +20,9 @@ namespace Cube {
 
         void start() override;
         void update(float deltaTime) override;
-        TextureRegion getCurrentFrame();
+        Sprite* getCurrentFrame();
 
-        void addClip(RUID animClipRuid);
+        void addClip(const std::string& animClip);
 
         void play(const std::string& clipName);
         void stop();
@@ -31,7 +31,7 @@ namespace Cube {
         AnimationClip* currentClip = nullptr;
         bool playing = false;
         float currentTime = 0.0f;
-        Sprite* sprite = nullptr;
+        SpriteRender* spriteRender = nullptr;
     };
 
 }  // namespace Cube

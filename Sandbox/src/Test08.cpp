@@ -7,7 +7,7 @@
 #include "Cube/Core/Engine.h"
 #include "Cube/Core/Input.h"
 #include "Cube/Scene/Camera2D.h"
-#include "Cube/Scene/Sprite.h"
+#include "Cube/Scene/SpriteRender.h"
 
 using namespace Cube;
 
@@ -50,7 +50,7 @@ int main() {
         auto a = scene->createEntity("a");
         Transform& tr = a->getTransform();
         tr.setPosition({400.0f, 300.0f});
-        auto sc = a->addComponent<Sprite>();
+        auto sc = a->addComponent<SpriteRender>();
         auto ac = a->addComponent<Animation>();
         ac->addClip("assets/texture/flower.anim");
         a->addComponent<Controller>();

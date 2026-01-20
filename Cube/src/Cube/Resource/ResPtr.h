@@ -10,12 +10,12 @@ namespace Cube {
     public:
         ResPtr() = default;
         ResPtr(std::nullptr_t) : resource(nullptr){}
-        explicit ResPtr(RUID ruid) {
-            resource = ResourceManager::get().load<T>(ruid);
+        explicit ResPtr(const std::string& identifier) {
+            resource = ResourceManager::get().load<T>(identifier);
         }
         ResPtr(const ResPtr& other) : resource(nullptr){
             if(other.resource) {
-                resource = ResourceManager::get().load<T>(static_cast<ResourceBase*>(other.get())->getRuid());
+                resource = ResourceManager::get().load<T>(static_cast<ResourceBase*>(other.get())->getIdentifier());
             }
         }
         ResPtr(ResPtr&& other) noexcept : resource(other.resource){
@@ -32,7 +32,7 @@ namespace Cube {
             if(resource) {
                 ResourceManager::get().release(resource);
             }
-            resource = ResourceManager::get().load<T>(static_cast<ResourceBase*>(other.get())->getRuid());
+            resource = ResourceManager::get().load<T>(static_cast<ResourceBase*>(other.get())->getIdentifier());
             return *this;
         }
         ResPtr& operator=(ResPtr&& other) noexcept {
@@ -68,9 +68,16 @@ namespace Cube {
                 resource = nullptr;
             }
         }
-        void reset(RUID ruid) {
+        void reset(const std::string& identifier) {
             reset();
-            resource = ResourceManager::get().load<T>(ruid);
+            resource = ResourceManager::get().load<T>(identifier);
+        }
+        void reset(const T* rawResPtr) {
+            if(rawResPtr) {
+                reset(static_cast<ResourceBase*>(rawResPtr)->getIdentifier());
+            }else {
+                reset();
+            }
         }
 
         T* get() const {

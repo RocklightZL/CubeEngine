@@ -1,14 +1,14 @@
-#include "pch.h"
 #include "TypeRegister.h"
 
 #include <glm/glm.hpp>
 
 #include "Cube/Animation/Animation.h"
 #include "Cube/Reflection/ClassBuilder.h"
+#include "Cube/Renderer/Font.h"
 #include "Cube/Scene/Camera2D.h"
 #include "Cube/Scene/Component.h"
-#include "Cube/Scene/Sprite.h"
-#include "Cube/Renderer/Font.h"
+#include "Cube/Scene/SpriteRender.h"
+#include "pch.h"
 
 namespace Cube {
 
@@ -49,12 +49,12 @@ namespace Cube {
 
 		// Component
 	    ClassBuilder<Component>("Component").serializer();
-		ClassBuilder<Sprite>("Sprite")
+		ClassBuilder<SpriteRender>("SpriteRender")
 			.base<Component>()
-			.property("texture", &Sprite::texture)
-			.property("texRegion", &Sprite::texRegion)
-			.property("tintColor", &Sprite::tintColor)
-			.property("order", &Sprite::order)
+			.property("texture", &SpriteRender::texture)
+			.property("texRegion", &SpriteRender::texRegion)
+			.property("tintColor", &SpriteRender::tintColor)
+			.property("order", &SpriteRender::order)
 			.serializer();
 		ClassBuilder<Camera2D>("Camera2D")
 			.base<Component>()

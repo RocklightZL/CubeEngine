@@ -13,7 +13,7 @@
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Scene/Camera2D.h"
-#include "Cube/Scene/Sprite.h"
+#include "Cube/Scene/SpriteRender.h"
 #include "Cube/Utils/Utils.h"
 
 using namespace Cube;
@@ -86,7 +86,7 @@ void SceneView::render(float deltaTime) {
                 if(getResourceType(ruid) == ResourceType::Texture) {
                     auto e = proj->selectedScene->scene->createEntity(std::filesystem::path(ResourceManager::get().getAssetMeta(ruid)->sourcePath).filename().string());
                     e->getTransform().setPosition(pos);
-                    auto sprite = e->addComponent<Sprite>();
+                    auto sprite = e->addComponent<SpriteRender>();
                     sprite->texture = ResPtr<Texture2D>(ruid);
                 }
             }
@@ -151,9 +151,9 @@ void SceneView::render(float deltaTime) {
                 glm::vec2 mousePos = {io.MousePos.x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (io.MousePos.y - ImGui::GetWindowPos().y)};
                 mousePos += editorCamera.position / editorCamera.zoom;
                 Entity* selected = nullptr;
-                for(auto& e : proj->selectedScene->scene->getEntitiesWith<Sprite>()) {
+                for(auto& e : proj->selectedScene->scene->getEntitiesWith<SpriteRender>()) {
                     Transform& tc = e->getTransform();
-                    Sprite* sprite = e->getComponent<Sprite>();
+                    SpriteRender* sprite = e->getComponent<SpriteRender>();
                     glm::vec2 position = tc.getWorldPos();
                     glm::vec2 scale = sprite->getSize() * tc.getWorldScale();
                     glm::vec2 min = {position.x, position.y};
@@ -161,7 +161,7 @@ void SceneView::render(float deltaTime) {
                     glm::vec4 tMin = glm::inverse(editorCamera.getTransformMatrix()) * glm::vec4(min, 0, 0);
                     glm::vec4 tMax = glm::inverse(editorCamera.getTransformMatrix()) * glm::vec4(max, 0, 0);
                     if(mousePos.x >= tMin.x && mousePos.x <= tMax.x && mousePos.y >= tMin.y && mousePos.y <= tMax.y) {
-                        if(!selected || sprite->order > selected->getComponent<Sprite>()->order) {
+                        if(!selected || sprite->order > selected->getComponent<SpriteRender>()->order) {
                             selected = e;
                         }
                     }
@@ -284,10 +284,10 @@ SubTexture* SceneView::selectSubTexturePopup(TextureData& data, bool* open) {
 
 void SceneView::sceneRender(float deltaTime) {
     Scene* scene = proj->selectedScene->scene;
-    auto sprites = scene->getEntitiesWith<Sprite>();
+    auto sprites = scene->getEntitiesWith<SpriteRender>();
     std::sort(sprites.begin(), sprites.end(), [](const Entity* a, const Entity* b) {
-        Sprite* spriteA = a->getComponent<Sprite>();
-        Sprite* spriteB = b->getComponent<Sprite>();
+        SpriteRender* spriteA = a->getComponent<SpriteRender>();
+        SpriteRender* spriteB = b->getComponent<SpriteRender>();
         if(spriteA->order != spriteB->order) {
             return spriteA->order < spriteB->order;
         }
@@ -316,14 +316,14 @@ void SceneView::sceneRender(float deltaTime) {
     }
 
     for(auto& e : sprites) {
-        auto* sc = e->getComponent<Sprite>();
+        auto* sc = e->getComponent<SpriteRender>();
         Renderer2D::drawQuad(e->getTransform().getWorldMatrix(), sc->tintColor, sc->texture.get(), sc->texRegion.getUVCoord());
     }
 
     // the outline of selected entity
-    if(proj->selectedEntity && proj->selectedEntity->hasComponent<Sprite>()) {
+    if(proj->selectedEntity && proj->selectedEntity->hasComponent<SpriteRender>()) {
         auto* selectEntityTC = &proj->selectedEntity->getTransform();
-        glm::vec2 spriteSize = proj->selectedEntity->getComponent<Sprite>()->getSize();
+        glm::vec2 spriteSize = proj->selectedEntity->getComponent<SpriteRender>()->getSize();
         Renderer2D::drawQuad(selectEntityTC->getWorldPos(), glm::vec2(selectEntityTC->getWorldScale().x * spriteSize.x, 1) * glm::vec2(1, editorCamera.zoom), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
         Renderer2D::drawQuad(selectEntityTC->getWorldPos() + glm::vec2(0, selectEntityTC->getWorldScale().y * spriteSize.y), glm::vec2(selectEntityTC->getWorldScale().x * spriteSize.x, 1) * glm::vec2(1, editorCamera.zoom), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
         Renderer2D::drawQuad(selectEntityTC->getWorldPos(), glm::vec2(1, selectEntityTC->getWorldScale().y * spriteSize.y) * glm::vec2(editorCamera.zoom, 1), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
