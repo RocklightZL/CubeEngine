@@ -4,6 +4,8 @@
 
 #include "ResPtr.h"
 #include "Sprite.h"
+#include "Cube/Animation/AnimationClip.h"
+#include "Cube/Renderer/Font.h"
 
 #include <fstream>
 
@@ -71,5 +73,13 @@ namespace Cube {
 
     Atlas* ResourceManager::loadAtlas(const nlohmann::json& path) {
         return new Atlas(path.get<std::string>());
+    }
+
+    AnimationClip* ResourceManager::loadAnimationClip(const nlohmann::json& path) {
+        return new AnimationClip(path.get<std::string>());
+    }
+
+    Font* ResourceManager::loadFont(const nlohmann::json& path) {
+        return new Font(path["fontFilePath"].get<std::string>(), path.value("fontSize", 16));
     }
 }  // namespace Cube

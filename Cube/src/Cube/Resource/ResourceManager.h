@@ -10,6 +10,8 @@ namespace Cube {
     class Texture2D;
     class Context;
     class Sprite;
+    class AnimationClip;
+    class Font;
 
     class ResourceManager {
     public:
@@ -43,14 +45,19 @@ namespace Cube {
             }
             ResourceBase* newRes = nullptr;
             if constexpr (std::is_same_v<Sprite, T>) {
-                
-            }
-            if constexpr (std::is_same_v<Texture2D, T>) {
-                newRes = loadTexture2D(it2->second);
-            }else if constexpr (std::is_same_v<Atlas, T>) {
-                newRes = loadAtlas(it2->second);
-            }else {
-                static_assert(0);
+                newRes = loadSprite(identifier);
+            } else {
+                if constexpr (std::is_same_v<Texture2D, T>) {
+                    newRes = loadTexture2D(it2->second);
+                }else if constexpr (std::is_same_v<Atlas, T>) {
+                    newRes = loadAtlas(it2->second);
+                }else if constexpr (std::is_same_v<AnimationClip, T>) {
+                    newRes = loadAnimationClip(it2->second);
+                }else if constexpr (std::is_same_v<Font, T>) {
+                    newRes = loadFont(it2->second);
+                }else {
+                    static_assert(false);
+                }
             }
             CB_ASSERT(newRes);
             newRes->refCount = 1;
@@ -74,5 +81,7 @@ namespace Cube {
         Texture2D* loadTexture2D(const nlohmann::json& path);
         Sprite* loadSprite(const std::string& identifier);
         Atlas* loadAtlas(const nlohmann::json& path);
+        AnimationClip* loadAnimationClip(const nlohmann::json& path);
+        Font* loadFont(const nlohmann::json& path);
     };
 }  // namespace Cube

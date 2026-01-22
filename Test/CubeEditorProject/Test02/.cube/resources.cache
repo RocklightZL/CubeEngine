@@ -1,0 +1,16 @@
+{
+    "children": [
+        {
+            "children": [],
+            "isGroup": false,
+            "name": "tex:b1428f3b754f70fe08d2461ef988504436aff576_raw.jpg"
+        },
+        {
+            "children": [],
+            "isGroup": false,
+            "name": "tex:icon.png"
+        }
+    ],
+    "isGroup": true,
+    "name": "root"
+}

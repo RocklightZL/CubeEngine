@@ -151,16 +151,16 @@ void EntityPropertyPanel::render(float deltaTime) {
                         }else {
                             ImGui::Text("None");
                         }
-                        if(ImGui::BeginDragDropTarget()) {
-                            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("AssetRUID")) {
-                                RUID ruid = *(RUID*)payload->Data;
-                                if(getResourceType(ruid) == ResourceType::Texture) {
-                                    proj->selectedScene->isSaved = false;
-                                    property->setValue(c, ResPtr<Texture2D>(ruid));
-                                }
-                            }
-                            ImGui::EndDragDropTarget();
-                        }
+                        // if(ImGui::BeginDragDropTarget()) {
+                        //     if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("AssetRUID")) {
+                        //         RUID ruid = *(RUID*)payload->Data;
+                        //         if(getResourceType(ruid) == ResourceType::Texture) {
+                        //             proj->selectedScene->isSaved = false;
+                        //             property->setValue(c, ResPtr<Texture2D>(ruid));
+                        //         }
+                        //     }
+                        //     ImGui::EndDragDropTarget();
+                        // }
                     } else {
                         ImGui::Text("Failed to display");
                     }

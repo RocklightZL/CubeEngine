@@ -115,18 +115,21 @@ void importTexture(const std::filesystem::path& texturePath) {
     std::filesystem::path path = std::filesystem::canonical(texturePath);
     std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
     proj->assetPathMap["tex:" + relPath.generic_string()] = path.generic_string();
+    proj->assetExplorer.addNode(new AssetNode{"tex:" + relPath.generic_string()});
 }
 
 void importAnimClip(const std::filesystem::path& animPath) {
     std::filesystem::path path = std::filesystem::canonical(animPath);
     std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
     proj->assetPathMap["anim:" + relPath.generic_string()] = path.generic_string();
+    proj->assetExplorer.addNode(new AssetNode{"anim:" + relPath.generic_string()});
 }
 
 void importAtlas(const std::filesystem::path& atlasPath) {
     std::filesystem::path path = std::filesystem::canonical(atlasPath);
     std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
     proj->assetPathMap["atlas:" + relPath.generic_string()] = path.generic_string();
+    proj->assetExplorer.addNode(new AssetNode{"anim:" + relPath.generic_string()});
 }
 
 void importRes(const std::filesystem::path& source, const std::filesystem::path& target) {
@@ -163,5 +166,6 @@ void importRes(const std::filesystem::path& source, const std::filesystem::path&
 void ResourcesPanel::importResource(const std::string& path) {
     std::filesystem::path filepath(path);
     std::filesystem::path targetFile = proj->getConfig().assetsDirectory;
+    targetFile /= filepath.filename();
     importRes(path, targetFile);
 }

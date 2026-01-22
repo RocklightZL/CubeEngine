@@ -8,7 +8,6 @@
 #include "Cube/Scene/Scene.h"
 #include "Scene/EditorCamera.h"
 #include "Views/AssetExplorer.h"
-#include "Views/Node.h"
 #include "Views/SceneSelectPanel.h"
 #include "imgui/imgui.h"
 

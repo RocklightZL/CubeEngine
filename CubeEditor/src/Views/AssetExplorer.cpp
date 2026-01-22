@@ -50,3 +50,7 @@ void AssetExplorer::back() {
         currentPath = currentPath.substr(0, pos + 1);
     }
 }
+
+void AssetExplorer::addNode(AssetNode* node) {
+    getCurrentNode()->children.push_back(std::unique_ptr<AssetNode>(node));
+}

@@ -9,7 +9,6 @@
 #include "Cube/Utils/Utils.h"
 
 #include <fstream>
-#include <iostream>
 #include <json.hpp>
 
 namespace Cube {
@@ -22,19 +21,6 @@ namespace Cube {
             if(lib) FT_Done_FreeType(lib);
         }
     };
-
-    /*
-     * {
-     *      "fontFilePath": "C:/Font/font.ttf",
-     *      "FontSize": 24
-     * }
-     *
-     */
-    Font::Font(const AssetMeta& assetMeta) : ResourceBase(assetMeta) {
-        fontFilePath = assetMeta.sourcePath;
-        fontSize = assetMeta.metaData.value("fontSize", 24);
-        loadFontFile();
-    }
 
     Font::Font(const std::string& fontFilePath, int fontSize) : fontFilePath(fontFilePath), fontSize(fontSize){
         loadFontFile();

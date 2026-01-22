@@ -74,7 +74,7 @@ namespace Cube {
         }
         void reset(const T* rawResPtr) {
             if(rawResPtr) {
-                reset(static_cast<ResourceBase*>(rawResPtr)->getIdentifier());
+                reset(static_cast<const ResourceBase*>(rawResPtr)->getIdentifier());
             }else {
                 reset();
             }

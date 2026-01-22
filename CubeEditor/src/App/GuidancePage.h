@@ -3,6 +3,8 @@
 #include "Cube/Renderer/Texture.h"
 #include "Page.h"
 
+#include <memory>
+
 class GuidancePage : public Page {
 public:
 	GuidancePage() = default;

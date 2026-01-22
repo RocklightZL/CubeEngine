@@ -27,7 +27,7 @@ struct AssetNode {
         for(auto& c : json["children"]) {
             std::unique_ptr<AssetNode> n = std::make_unique<AssetNode>();
             n->fromJson(c);
-            children.push_back(n);
+            children.push_back(std::move(n));
         }
     }
 };
@@ -43,6 +43,8 @@ public:
     AssetNode* getCurrentNode() const;
     void enterNode(AssetNode* node);
     void back();
+    void addNode(AssetNode* node);
+
     const std::string& getCurrentPath() const { return currentPath; }
 
 private:

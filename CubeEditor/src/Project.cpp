@@ -20,6 +20,7 @@ Project::Project(const std::string& name, const std::string& rootPath) {
     std::filesystem::create_directories(config.projectDataDirectory);
     std::filesystem::create_directories(config.sceneDirectory);
     std::filesystem::create_directories(config.assetsDirectory);
+    assetExplorer.normalInit();
     saveAssetPathMap();
     writeToConfigFile(rootPath + "/" + name + ".cbproj");
 }

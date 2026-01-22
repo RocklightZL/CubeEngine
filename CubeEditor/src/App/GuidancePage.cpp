@@ -62,8 +62,7 @@ void GuidancePage::render(float deltaTime) {
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Button, toImColor({70, 77, 88, 255}));
         if(ImGui::Button("...")) {
-            std::string pathStr = FileDialog::selectDir(app->getWindow()->getWin32Window());
-            strcpy_s(path, pathStr.append("/").append(name).c_str());
+            strcpy_s(path, FileDialog::selectDir(app->getWindow()->getWin32Window()).c_str());
         }
         ImGui::PopStyleColor();
     }, [&switchPage] {
