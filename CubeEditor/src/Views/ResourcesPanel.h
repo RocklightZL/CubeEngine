@@ -4,7 +4,7 @@
 #include "Cube/Renderer/Texture.h"
 #include "View.h"
 
-struct Node;
+struct AssetNode;
 
 class ResourcesPanel : public View {
 public:

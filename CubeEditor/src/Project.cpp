@@ -5,7 +5,6 @@
 #include <json.hpp>
 
 #include "Cube/Core/Log.h"
-#include "Cube/Resource/ResourceManager.h"
 #include "Cube/Utils/Utils.h"
 
 using namespace Cube;
@@ -16,17 +15,13 @@ Project::Project(const std::string& name, const std::string& rootPath) {
     config.projectDataDirectory = rootPath + "/.cube";
     config.assetsDirectory = rootPath + "/Assets";
     config.sceneDirectory = rootPath + "/Scenes";
+    config.assetPathMapFilePath = config.rootPath + "/AssetMap.json";
 
     std::filesystem::create_directories(config.projectDataDirectory);
     std::filesystem::create_directories(config.sceneDirectory);
     std::filesystem::create_directories(config.assetsDirectory);
-
+    saveAssetPathMap();
     writeToConfigFile(rootPath + "/" + name + ".cbproj");
-
-    resRoot = std::make_shared<Node>();
-    resRoot->name = "root";
-    resRoot->isGroup = true;
-    resStack.push_back(resRoot);
 }
 
 Project::Project(const std::string& configFilePath) {
@@ -45,8 +40,8 @@ Project::Project(const std::string& configFilePath) {
     config.projectDataDirectory = config.rootPath + "/.cube";
     config.assetsDirectory = config.rootPath + "/Assets";
     config.sceneDirectory = config.rootPath + "/Scenes";
+    config.assetPathMapFilePath = config.rootPath + "/AssetMap.json";
     load();
-    updateAssetMetaCache();
 }
 
 Project::~Project() {
@@ -73,7 +68,30 @@ const ProjectConfig& Project::getConfig() const {
     return config;
 }
 
+void Project::saveAssetPathMap() {
+    std::ofstream file(config.assetPathMapFilePath);
+    if(!file.is_open()) {
+        CB_EDITOR_ERROR("Failed to open AssetPathMapFile {}", config.assetPathMapFilePath);
+        return;
+    }
+    file << assetPathMap.dump(4);
+    file.close();
+}
+
+nlohmann::json& Project::loadAssetPathMap() {
+    std::ifstream file(config.assetPathMapFilePath);
+    if(!file.is_open()) {
+        CB_EDITOR_ERROR("Failed to open AssetPathMapFile {}", config.assetPathMapFilePath);
+        return assetPathMap;
+    }
+    file >> assetPathMap;
+    file.close();
+    return assetPathMap;
+}
+
 void Project::save() {
+    saveAssetPathMap();
+
     nlohmann::json data;
     data["scenes"] = nlohmann::json::array();
     for(auto& s : scenes) {
@@ -90,14 +108,7 @@ void Project::save() {
     file << data.dump(4);
     file.close();
 
-    std::ofstream resFile(config.projectDataDirectory + "/resources.cache");
-    if(!resFile.is_open()) {
-        CB_ERROR("Project::save: failed to open file: {}", config.projectDataDirectory + "/resources.cache");
-        CB_ASSERT(false);
-        return;
-    }
-    resFile << resRoot->toJson().dump(4);
-    resFile.close();
+    assetExplorer.saveToFile(config.projectDataDirectory + "/resources.cache");
 }
 
 void Project::writeToConfigFile(const std::string& configFilePath) const {
@@ -114,6 +125,8 @@ void Project::writeToConfigFile(const std::string& configFilePath) const {
 }
 
 void Project::load() {
+    loadAssetPathMap();
+
     // scenes.cache
     std::ifstream file(config.projectDataDirectory + "/scenes.cache");
     if(!file.is_open()) {
@@ -136,26 +149,5 @@ void Project::load() {
     file.close();
 
     // resources.cache
-    std::ifstream resFile(config.projectDataDirectory + "/resources.cache");
-    if(!resFile.is_open()) {
-        CB_ERROR("Project::load: failed to open file: {}", config.projectDataDirectory + "/resources.cache");
-        CB_ASSERT(false);
-        return;
-    }
-    nlohmann::json resData;
-    resFile >> resData;
-    resRoot = std::make_shared<Node>();
-    resRoot->fromJson(resData, resRoot);
-    resStack.push_back(resRoot);
-    resFile.close();
-}
-
-void Project::updateAssetMetaCache() {
-    assetMetaCache.clear();
-    for(const auto& entry : std::filesystem::recursive_directory_iterator(config.assetsDirectory)) {
-        if(entry.is_regular_file() && entry.path().extension() == ".meta") {
-            AssetMeta* assetMeta = ResourceManager::get().registerAssetMeta(std::filesystem::absolute(entry.path()).string());
-            assetMetaCache[entry.path()] = assetMeta->ruid;
-        }
-    }
+    assetExplorer.loadFromFile(config.projectDataDirectory + "/resources.cache");
 }

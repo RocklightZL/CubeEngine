@@ -28,12 +28,12 @@ namespace Cube {
             if(spriteA->order != spriteB->order) {
                 return spriteA < spriteB;
             }
-            return (spriteA->texture.get() ? spriteA->texture->getId() : -1) < (spriteB->texture.get() ? spriteB->texture->getId() : -1);
+            return (spriteA->sprite->getTexture() ? spriteA->sprite->getTexture()->getId() : -1) < (spriteB->sprite->getTexture() ? spriteB->sprite->getTexture()->getId() : -1);
         });
         Renderer2D::beginFrame(camera->getPVMatrix());
         for(auto& entity : entities) {
             SpriteRender* sprite = entity->getComponent<SpriteRender>();
-            Renderer2D::drawQuad(entity->getTransform().getWorldMatrix(), sprite->tintColor, sprite->texture.get(), sprite->texRegion.getUVCoord());
+            Renderer2D::drawQuad(entity->getTransform().getWorldMatrix(), sprite->tintColor, sprite->sprite->getTexture(), sprite->sprite->getTexRegion().getUVCoord());
         }
         Renderer2D::endFrame();
     }

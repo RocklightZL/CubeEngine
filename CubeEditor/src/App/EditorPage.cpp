@@ -36,7 +36,6 @@ EditorPage::EditorPage() {
         for(int i = 0; i < path_count; ++i) {
             ResourcesPanel::importResource(paths[i]);
         }
-        proj->updateAssetMetaCache();
     });
 }
 

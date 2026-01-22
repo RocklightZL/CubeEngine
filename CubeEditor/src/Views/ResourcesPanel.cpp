@@ -7,13 +7,10 @@
 
 #include "../App/EditorApp.h"
 #include "../Project.h"
-#include "../Scene/TextureMetadata.h"
 #include "../Utils/ImGuiExternal.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
-#include "Cube/Resource/ResourceManager.h"
 #include "Cube/UI/FileDialog.h"
-#include "Cube/Utils/Utils.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 
@@ -30,14 +27,13 @@ void ResourcesPanel::render(float deltaTime) {
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
     static const fs::path ASSETS_DIR(proj->getConfig().assetsDirectory);
-    fs::path& path = proj->currentAssetsDir;
-    const std::string topText = "Assets: " + path.string();
+    const std::string topText = proj->assetExplorer.getCurrentPath();
     float topHeight = ImGui::CalcTextSize(topText.c_str()).y;
 
     ImGui::BeginChild("TopBar", ImVec2(ImGui::GetContentRegionAvail().x, topHeight));
     topHeight -= ImGui::GetStyle().FramePadding.x * 2;
     if(ImGui::ImageButton("back", back_png->getId(), ImVec2(topHeight, topHeight), {0, 1}, {1, 0})) {
-        path = path.parent_path();
+        proj->assetExplorer.back();
     }
     ImGui::SameLine();
     ImGui::Text(topText.c_str());
@@ -56,55 +52,40 @@ void ResourcesPanel::render(float deltaTime) {
 
     ImGui::BeginChild("Content", ImGui::GetContentRegionAvail());
     constexpr float imageSize = 128.0f;
-    static fs::path selectedEntry;
+    static AssetNode* selectedEntry;
     if(showMode == 0){
-        for(const auto& entry : fs::directory_iterator(ASSETS_DIR / path)) {
+        for(const auto& entry : proj->assetExplorer.getCurrentNode()->children) {
             ImGui::SameLine();
             if(ImGui::GetContentRegionAvail().x < imageSize) {
                 ImGui::NewLine();
             }
-            if(entry.is_directory()){
-                iconTextButton(directory_png.get(), entry.path().filename().string(), selectedEntry == entry.path(), ImVec2(imageSize, imageSize));
+            if(entry->isGroup){
+                iconTextButton(directory_png.get(), entry->name, selectedEntry == entry.get(), ImVec2(imageSize, imageSize));
                 if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                    path = path / entry.path().filename();
-                }
-            }else if(entry.is_regular_file() && entry.path().extension() == ".meta"){
-                RUID ruid = proj->assetMetaCache[entry.path()];
-                iconTextButton(file_png.get(), entry.path().filename().string(), selectedEntry == entry.path(), ImVec2(imageSize, imageSize));
-                if(ImGui::BeginDragDropSource()) {
-                    ImGui::Text(std::to_string(ruid).c_str());
-                    ImGui::SetDragDropPayload("AssetRUID", &ruid, sizeof(ruid));
-                    ImGui::EndDragDropSource();
+                    proj->assetExplorer.enterNode(entry.get());
                 }
             }else {
-                goto end;
+                iconTextButton(file_png.get(), entry->name, selectedEntry == entry.get(), ImVec2(imageSize, imageSize));
             }
             if(ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                selectedEntry = entry.path();
+                selectedEntry = entry.get();
             }
             if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
                 ImGui::OpenPopup("NodeRightButtonMenu");
             }
-            end:;
         }
     } else if(showMode == 1){
-        for(const auto& entry : fs::directory_iterator(ASSETS_DIR / path)) {
-            if(entry.is_directory()){
-                iconTextButtonH(directory_png.get(), entry.path().filename().string(), selectedEntry == entry.path());
+        for(const auto& entry : proj->assetExplorer.getCurrentNode()->children) {
+            if(entry->isGroup){
+                iconTextButtonH(directory_png.get(), entry->name, selectedEntry == entry.get());
                 if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                    path = path / entry.path().filename();
+                    proj->assetExplorer.enterNode(entry.get());
                 }
             }else {
-                iconTextButtonH(file_png.get(), entry.path().filename().string(), selectedEntry == entry.path());
-                // if(ImGui::BeginDragDropSource()) {
-                //     RUID ruid = proj->assetMetaCache[path];
-                //     ImGui::Text(std::to_string(ruid).c_str());
-                //     ImGui::SetDragDropPayload("AssetRUID", &ruid, sizeof(ruid));
-                //     ImGui::EndDragDropSource();
-                // }
+                iconTextButtonH(file_png.get(), entry->name, selectedEntry == entry.get());
             }
             if(ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                selectedEntry = entry.path();
+                selectedEntry = entry.get();
             }
             if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
                 ImGui::OpenPopup("NodeRightButtonMenu");
@@ -112,7 +93,7 @@ void ResourcesPanel::render(float deltaTime) {
         }
     }
     if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered()) {
-        selectedEntry = "";
+        selectedEntry = nullptr;
     }
     ImGui::EndChild();
 
@@ -128,7 +109,24 @@ void ResourcesPanel::importFromFileDialog() {
     for(auto& path : FileDialog::openMultiFiles("Resources(.png.jpg)\0*.png;*.jpg\0All(.*)\0*.*\0", app->getWindow()->getWin32Window())) {
         importResource(path);
     }
-    proj->updateAssetMetaCache();
+}
+
+void importTexture(const std::filesystem::path& texturePath) {
+    std::filesystem::path path = std::filesystem::canonical(texturePath);
+    std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
+    proj->assetPathMap["tex:" + relPath.generic_string()] = path.generic_string();
+}
+
+void importAnimClip(const std::filesystem::path& animPath) {
+    std::filesystem::path path = std::filesystem::canonical(animPath);
+    std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
+    proj->assetPathMap["anim:" + relPath.generic_string()] = path.generic_string();
+}
+
+void importAtlas(const std::filesystem::path& atlasPath) {
+    std::filesystem::path path = std::filesystem::canonical(atlasPath);
+    std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
+    proj->assetPathMap["atlas:" + relPath.generic_string()] = path.generic_string();
 }
 
 void importRes(const std::filesystem::path& source, const std::filesystem::path& target) {
@@ -140,10 +138,6 @@ void importRes(const std::filesystem::path& source, const std::filesystem::path&
             importRes(entry.path(), target / entry.path().filename());
         }
     }else {
-        if(std::filesystem::exists(target.string() + ".meta")) {
-            CB_EDITOR_WARN("Asset {} is already imported", target.string());
-            return;
-        }
         if(target != source) {
             std::error_code ec;
             std::filesystem::copy_file(source, target, std::filesystem::copy_options::none, ec);
@@ -152,23 +146,22 @@ void importRes(const std::filesystem::path& source, const std::filesystem::path&
                 return;
             }
         }
-        AssetMeta assetMeta;
         if(target.extension() == ".png" || target.extension() == ".jpg") {
-            assetMeta.ruid = RUIDGenerator::gen(ResourceType::Texture);
+            importTexture(target);
         } else if(target.extension() == ".anim") {
-            assetMeta.ruid = RUIDGenerator::gen(ResourceType::AnimationClip);
+            importAnimClip(target);
+        } else if(target.extension() == ".atlas") {
+            importAtlas(target);
         }
         else {
             CB_EDITOR_ERROR("Unknown assets format: {}", source.extension().string());
             return;
         }
-        assetMeta.sourcePath = std::filesystem::canonical(target).string();
-        assetMeta.writeToFile(target.string() + ".meta");
     }
 }
 
 void ResourcesPanel::importResource(const std::string& path) {
     std::filesystem::path filepath(path);
-    std::filesystem::path targetFile = proj->getConfig().assetsDirectory / proj->currentAssetsDir / filepath.filename();
+    std::filesystem::path targetFile = proj->getConfig().assetsDirectory;
     importRes(path, targetFile);
 }

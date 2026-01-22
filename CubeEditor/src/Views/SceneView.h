@@ -6,6 +6,8 @@
 #include "Cube/Renderer/Texture.h"
 #include "imgui/imgui.h"
 
+#include <memory>
+
 class SceneView : public View {
 public:
     SceneView();

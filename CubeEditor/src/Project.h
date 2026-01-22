@@ -4,10 +4,10 @@
 #include <string>
 
 #include "App/EditorPage.h"
-#include "Cube/Resource/RUID.h"
 #include "Cube/Scene/Entity.h"
 #include "Cube/Scene/Scene.h"
 #include "Scene/EditorCamera.h"
+#include "Views/AssetExplorer.h"
 #include "Views/Node.h"
 #include "Views/SceneSelectPanel.h"
 #include "imgui/imgui.h"
@@ -20,6 +20,7 @@ struct ProjectConfig {
 	std::string projectDataDirectory;
 	std::string assetsDirectory;
 	std::string sceneDirectory;
+	std::string assetPathMapFilePath;
 };
 
 struct SceneData {
@@ -42,16 +43,15 @@ public:
 
 	const ProjectConfig& getConfig() const;
 
-	void updateAssetMetaCache();
+	void saveAssetPathMap();
+	nlohmann::json& loadAssetPathMap();
 
 	// global data
 	SceneData* selectedScene = nullptr;
     Cube::Entity* selectedEntity = nullptr;
-    std::shared_ptr<Node> resRoot;  // TODO: Unique_ptr
-	std::deque<std::shared_ptr<Node>> resStack;
 	EditorCamera editorCamera;
-	std::unordered_map<std::filesystem::path, Cube::RUID> assetMetaCache;
-	std::filesystem::path currentAssetsDir = "";
+	nlohmann::json assetPathMap;
+    AssetExplorer assetExplorer;
 
 private:
 	void writeToConfigFile(const std::string& configFilePath) const;
