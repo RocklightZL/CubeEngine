@@ -5,6 +5,7 @@
 #include <json.hpp>
 
 #include "Cube/Core/Log.h"
+#include "Cube/Resource/ResourceManager.h"
 #include "Cube/Utils/Utils.h"
 
 using namespace Cube;
@@ -87,7 +88,12 @@ nlohmann::json& Project::loadAssetPathMap() {
     }
     file >> assetPathMap;
     file.close();
+    refreshResourceManager();
     return assetPathMap;
+}
+
+void Project::refreshResourceManager() {
+    ResourceManager::get().init(assetPathMap.get<std::unordered_map<std::string, nlohmann::json>>());
 }
 
 void Project::save() {

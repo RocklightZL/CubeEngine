@@ -21,6 +21,7 @@ project "CubeEditor"
         "%{wks.location}/Cube/external/glad/include",
         "%{wks.location}/Cube/external/glm",
         "%{wks.location}/Cube/external/nlohmann-json",
+        "%{wks.location}/Cube/external/stb_image",
         "external/imgui"
     }
 

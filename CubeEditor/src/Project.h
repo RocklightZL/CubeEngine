@@ -44,6 +44,7 @@ public:
 
 	void saveAssetPathMap();
 	nlohmann::json& loadAssetPathMap();
+	void refreshResourceManager();
 
 	// global data
 	SceneData* selectedScene = nullptr;

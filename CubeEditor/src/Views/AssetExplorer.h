@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Cube/Resource/ResourceType.h"
+#include "Cube/Resource/ResourceType.h"
+
 #include <json.hpp>
 #include <stack>
 #include <string>
@@ -7,6 +10,8 @@
 
 struct AssetNode {
     std::string name = "AssetNode";
+    std::string identifier;
+    Cube::ResourceType type = Cube::ResourceType::Unknown;
     bool isGroup = false;
     std::vector<std::unique_ptr<AssetNode>> children;
 
@@ -24,6 +29,10 @@ struct AssetNode {
     void fromJson(const nlohmann::json& json) {
         name = json["name"];
         isGroup = json["isGroup"];
+        if(!isGroup) {
+            type = Cube::getResType(name);
+            identifier = name;
+        }
         for(auto& c : json["children"]) {
             std::unique_ptr<AssetNode> n = std::make_unique<AssetNode>();
             n->fromJson(c);

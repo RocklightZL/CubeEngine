@@ -1,4 +1,6 @@
 #pragma once
+#include "ThumbnailManager.h"
+
 #include <memory>
 
 #include "Cube/Renderer/Texture.h"
@@ -22,4 +24,6 @@ private:
     std::unique_ptr<Cube::Texture2D> list_mode_png   = std::make_unique<Cube::Texture2D>("assets/icons/list_mode.png");
     std::unique_ptr<Cube::Texture2D> directory_png   = std::make_unique<Cube::Texture2D>("assets/icons/directory.png");
     std::unique_ptr<Cube::Texture2D> file_png        = std::make_unique<Cube::Texture2D>("assets/icons/file.png");
+
+    ThumbnailManager thumbnailManager;
 };
