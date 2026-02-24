@@ -57,9 +57,10 @@ public:
     void enterNode(AssetNode* node);
     void back();
     void addNode(AssetNode* node);
-    void createGroup(const std::string& name);
+    AssetNode* createGroup(const std::string& name);
     void createResource(const std::string& identifier, const nlohmann::json& content);
     void removeNode(AssetNode* node);
+    void move(const AssetNode* src, AssetNode* dst);
 
     const std::string& getCurrentPath() const { return currentPath; }
     const std::unordered_map<std::string, nlohmann::json>& getAssetPathMap() const { return assetPathMap; }

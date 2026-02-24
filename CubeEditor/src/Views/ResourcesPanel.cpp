@@ -53,6 +53,10 @@ void ResourcesPanel::render(float deltaTime) {
     ImGui::BeginChild("Content", ImGui::GetContentRegionAvail());
     constexpr float imageSize = 128.0f;
     static AssetNode* selectedEntry;
+    struct {
+        AssetNode* src = nullptr;
+        AssetNode* dst = nullptr;
+    } move;
     if(showMode == 0){
         for(const auto& entry : proj->assetExplorer.getCurrentNode()->children) {
             ImGui::SameLine();
@@ -63,6 +67,13 @@ void ResourcesPanel::render(float deltaTime) {
                 iconTextButton(directory_png.get(), entry->name, selectedEntry == entry.get(), ImVec2(imageSize, imageSize));
                 if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                     proj->assetExplorer.enterNode(entry.get());
+                }
+                if(ImGui::BeginDragDropTarget()) {
+                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Asset")) {
+                        move.src = *(AssetNode**)payload->Data;
+                        move.dst = entry.get();
+                    }
+                    ImGui::EndDragDropTarget();
                 }
             }else {
                 switch(entry->type) {
@@ -82,6 +93,11 @@ void ResourcesPanel::render(float deltaTime) {
                     default:
                         iconTextButton(file_png.get(), entry->name, selectedEntry == entry.get(), ImVec2(imageSize, imageSize));
                         break;
+                }
+                if(ImGui::BeginDragDropSource()) {
+                    AssetNode* src = entry.get();
+                    ImGui::SetDragDropPayload("Asset", &src, sizeof(src));
+                    ImGui::EndDragDropSource();
                 }
             }
             if(ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
@@ -120,23 +136,39 @@ void ResourcesPanel::render(float deltaTime) {
         }
     }
 
+    // delay move
+    if(move.src && move.dst) {
+        proj->assetExplorer.move(move.src, move.dst);
+    }
+
+    static char inputBuf[50] = {};
+    static std::unique_ptr<ModalPopup> renamePopup = std::make_unique<ModalPopup>("Rename", [] {
+        ImGui::Text("Name:");
+        ImGui::SetKeyboardFocusHere();
+        ImGui::InputText("##rename", inputBuf, IM_ARRAYSIZE(inputBuf), ImGuiInputTextFlags_AutoSelectAll);
+    }, [] {
+        selectedEntry->name = inputBuf;
+        renamePopup->close();
+    }, [] {});
+
     if(ImGui::BeginPopup("NodeRightMenu")) {
         if(selectedEntry->isGroup) {
             if(ImGui::MenuItem("Rename")) {
-                
+                strcpy_s(inputBuf, selectedEntry->name.c_str());
+                renamePopup->open();
             }
         }
         if(ImGui::MenuItem("Delete")) {
-            if(selectedEntry->isGroup) {
-                proj->assetExplorer.removeNode(selectedEntry);
-                selectedEntry = nullptr;
-            }
+            proj->assetExplorer.removeNode(selectedEntry);
+            selectedEntry = nullptr;
         }
         ImGui::EndPopup();
     }
     if(ImGui::BeginPopup("BlankRightMenu")) {
         if(ImGui::MenuItem("New Group")) {
-            proj->assetExplorer.createGroup("Group");
+            selectedEntry = proj->assetExplorer.createGroup("Group");
+            strcpy_s(inputBuf, selectedEntry->name.c_str());
+            renamePopup->open();
         }
         ImGui::EndPopup();
     }
@@ -144,6 +176,9 @@ void ResourcesPanel::render(float deltaTime) {
     ImGui::EndChild();
 
     ImGui::PopStyleColor();
+
+    renamePopup->render();
+
     ImGui::End();
 
     // ImGui::Begin("ResourcesPreview");

@@ -81,8 +81,10 @@ void AssetExplorer::addNode(AssetNode* node) {
     getCurrentNode()->children.push_back(std::unique_ptr<AssetNode>(node));
 }
 
-void AssetExplorer::createGroup(const std::string& name) {
-    addNode(new AssetNode{name, "", Cube::ResourceType::Unknown, true, {}});
+AssetNode* AssetExplorer::createGroup(const std::string& name) {
+    AssetNode* node = new AssetNode{name, "", Cube::ResourceType::Unknown, true, {}};
+    addNode(node);
+    return node;
 }
 
 void AssetExplorer::createResource(const std::string& identifier, const nlohmann::json& content) {
@@ -94,6 +96,15 @@ void AssetExplorer::createResource(const std::string& identifier, const nlohmann
 void AssetExplorer::removeNode(AssetNode* node) {
     removeNode(node);
     resetResourceManager();
+}
+
+void AssetExplorer::move(const AssetNode* src, AssetNode* dst) {
+    if(!(!src->isGroup && dst->isGroup)) return;
+    auto& vec = getCurrentNode()->children;
+    auto it = std::find_if(vec.begin(), vec.end(), [src](const std::unique_ptr<AssetNode>& n){ return n.get() == src; });
+    if(it == vec.end()) return;
+    dst->children.push_back(std::move(*it));
+    vec.erase(it);
 }
 
 void AssetExplorer::_removeNode(AssetNode* node) {
