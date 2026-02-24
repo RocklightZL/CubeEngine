@@ -39,6 +39,8 @@ bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_
 bool iconTextButton(const Cube::Texture2D* icon, std::string_view label, bool isSelected = false, const ImVec2& size = {0, 0}, const Cube::TextureRegion& texUV = {{0, 0}, {1, 1}});
 bool iconTextButtonH(const Cube::Texture2D* icon, std::string_view label, bool isSelected = false, const Cube::TextureRegion& texUV = {{0, 0}, {1, 1}});
 
+bool editableLabel(const char* id, std::string& text, bool triggerEdit = false);
+
 inline ImVec4 toImColor(const Cube::Color& color) {
     return {color.r, color.g, color.b, color.a};
 }

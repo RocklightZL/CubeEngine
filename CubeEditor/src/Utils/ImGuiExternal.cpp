@@ -286,3 +286,74 @@ bool iconTextButtonH(const Cube::Texture2D* icon, std::string_view label, bool i
 
     return isClicked;
 }
+
+bool editableLabel(const char* id, std::string& text, bool triggerEdit) {
+    // 用 id 作为 key 存储每个 label 的独立状态
+    struct EditState {
+        bool  isEditing = false;
+        char  buf[256]  = {};
+        bool  needFocus = false;
+    };
+
+    static std::unordered_map<std::string, EditState> s_states;
+
+    EditState& state = s_states[id];
+    bool committed = false;
+
+    if (!state.isEditing) {
+        // ---- Label 模式 ----
+        ImGui::TextUnformatted(text.c_str());
+
+        // 触发进入编辑模式：外部 triggerEdit 信号
+        if (triggerEdit)
+        {
+            state.isEditing = true;
+            state.needFocus = true;
+            // 将当前文本拷贝到缓冲区
+            strncpy(state.buf, text.c_str(), sizeof(state.buf) - 1);
+            state.buf[sizeof(state.buf) - 1] = '\0';
+        }
+    } else {
+        // ---- 编辑模式 ----
+        // 给 InputText 一个不带 ## 的唯一 PushID，避免冲突
+        ImGui::PushID(id);
+
+        // 让输入框与 Label 宽度保持一致（可选：固定宽度或自适应）
+        float textWidth = ImGui::CalcTextSize(state.buf).x + ImGui::GetStyle().FramePadding.x * 2.0f;
+        float minWidth  = 80.0f;
+        ImGui::SetNextItemWidth(std::max(textWidth, minWidth));
+
+        // 首次进入编辑模式时自动聚焦
+        if (state.needFocus)
+        {
+            ImGui::SetKeyboardFocusHere();
+            state.needFocus = false;
+        }
+
+        ImGuiInputTextFlags flags =
+            ImGuiInputTextFlags_EnterReturnsTrue |   // Enter 提交
+            ImGuiInputTextFlags_AutoSelectAll;        // 自动全选
+
+        bool enterPressed = ImGui::InputText("##edit", state.buf, sizeof(state.buf), flags);
+
+        bool lostFocus = !ImGui::IsItemActive() && !state.needFocus;
+        bool escPressed = ImGui::IsKeyPressed(ImGuiKey_Escape);
+
+        if (enterPressed || lostFocus)
+        {
+            // 提交新文本
+            text = state.buf;
+            state.isEditing = false;
+            committed = true;
+        }
+        else if (escPressed)
+        {
+            // 取消，恢复原文本
+            state.isEditing = false;
+        }
+
+        ImGui::PopID();
+    }
+
+    return committed;
+}

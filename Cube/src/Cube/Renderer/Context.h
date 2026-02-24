@@ -5,7 +5,6 @@
 #include "Shader.h"
 #include "VertexArray.h"
 #include "Texture.h"
-#include "Cube/Resource/ResourceManager.h"
 
 #include <glm/glm.hpp>
 
@@ -19,7 +18,7 @@ namespace Cube {
 		glm::vec4 textureCoord;
 	};
 
-	// each Window owns a Context object, and each Context object owns a ResourceManager instance.
+	// each Window owns a Context object
 	class Context {
 	public:
 		friend class Renderer2D;
@@ -27,9 +26,7 @@ namespace Cube {
 		Context();
 		~Context();
 
-		ResourceManager& getResourceManager();
 	private:
-		ResourceManager resourceManager;
 		std::shared_ptr<VertexArray> vao;
 		std::shared_ptr<VertexBuffer> vbo; // TODO: use raw ptr
 		std::vector<QuadData> batchData;

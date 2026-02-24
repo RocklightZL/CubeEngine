@@ -22,7 +22,6 @@ Project::Project(const std::string& name, const std::string& rootPath) {
     std::filesystem::create_directories(config.sceneDirectory);
     std::filesystem::create_directories(config.assetsDirectory);
     assetExplorer.normalInit();
-    saveAssetPathMap();
     writeToConfigFile(rootPath + "/" + name + ".cbproj");
 }
 
@@ -70,34 +69,7 @@ const ProjectConfig& Project::getConfig() const {
     return config;
 }
 
-void Project::saveAssetPathMap() {
-    std::ofstream file(config.assetPathMapFilePath);
-    if(!file.is_open()) {
-        CB_EDITOR_ERROR("Failed to open AssetPathMapFile {}", config.assetPathMapFilePath);
-        return;
-    }
-    file << assetPathMap.dump(4);
-    file.close();
-}
-
-nlohmann::json& Project::loadAssetPathMap() {
-    std::ifstream file(config.assetPathMapFilePath);
-    if(!file.is_open()) {
-        CB_EDITOR_ERROR("Failed to open AssetPathMapFile {}", config.assetPathMapFilePath);
-        return assetPathMap;
-    }
-    file >> assetPathMap;
-    file.close();
-    refreshResourceManager();
-    return assetPathMap;
-}
-
-void Project::refreshResourceManager() {
-    ResourceManager::get().init(assetPathMap.get<std::unordered_map<std::string, nlohmann::json>>());
-}
-
 void Project::save() {
-    saveAssetPathMap();
 
     nlohmann::json data;
     data["scenes"] = nlohmann::json::array();
@@ -115,7 +87,7 @@ void Project::save() {
     file << data.dump(4);
     file.close();
 
-    assetExplorer.saveToFile(config.projectDataDirectory + "/resources.cache");
+    assetExplorer.saveToFile(config.projectDataDirectory + "/resources.cache", config.assetPathMapFilePath);
 }
 
 void Project::writeToConfigFile(const std::string& configFilePath) const {
@@ -132,7 +104,8 @@ void Project::writeToConfigFile(const std::string& configFilePath) const {
 }
 
 void Project::load() {
-    loadAssetPathMap();
+    // resources.cache
+    assetExplorer.loadFromFile(config.projectDataDirectory + "/resources.cache", config.assetPathMapFilePath);
 
     // scenes.cache
     std::ifstream file(config.projectDataDirectory + "/scenes.cache");
@@ -154,7 +127,4 @@ void Project::load() {
         }
     }
     file.close();
-
-    // resources.cache
-    assetExplorer.loadFromFile(config.projectDataDirectory + "/resources.cache");
 }

@@ -1,6 +1,7 @@
 #include "AssetExplorer.h"
 
 #include "Cube/Core/Log.h"
+#include "Cube/Resource/ResourceManager.h"
 
 #include <fstream>
 
@@ -10,7 +11,8 @@ void AssetExplorer::normalInit() {
     rootNode->isGroup = true;
 }
 
-void AssetExplorer::loadFromFile(const std::string& path) {
+void AssetExplorer::loadFromFile(const std::string& path, const std::string& assetMapFilePath) {
+    // Asset structure
     std::ifstream file(path);
     if(!file.is_open()) {
         CB_EDITOR_ERROR("Failed to open file {}", path);
@@ -21,15 +23,39 @@ void AssetExplorer::loadFromFile(const std::string& path) {
     file.close();
     rootNode = std::make_unique<AssetNode>();
     rootNode->fromJson(data);
+
+    // AssetPathMap
+    std::ifstream file2(assetMapFilePath);
+    if(!file2.is_open()) {
+        CB_EDITOR_ERROR("Failed to open AssetPathMapFile {}", assetMapFilePath);
+        return;
+    }
+    nlohmann::json mapData;
+    file2 >> mapData;
+    assetPathMap = mapData;
+    file2.close();
+    resetResourceManager();
 }
 
-void AssetExplorer::saveToFile(const std::string& path) const {
+void AssetExplorer::saveToFile(const std::string& path, const std::string& assetMapFilePath) const {
+    // Asset structure
     std::ofstream file(path);
     if(!file.is_open()) {
         CB_EDITOR_ERROR("Failed to open file {}", path);
         return;
     }
     file << rootNode->toJson().dump(4);
+    file.close();
+
+    // AssetPathMap
+    std::ofstream file2(assetMapFilePath);
+    if(!file2.is_open()) {
+        CB_EDITOR_ERROR("Failed to open AssetPathMapFile {}", assetMapFilePath);
+        return;
+    }
+    nlohmann::json mapData = assetPathMap;
+    file2 << mapData.dump(4);
+    file2.close();
 }
 
 AssetNode* AssetExplorer::getCurrentNode() const {
@@ -53,4 +79,40 @@ void AssetExplorer::back() {
 
 void AssetExplorer::addNode(AssetNode* node) {
     getCurrentNode()->children.push_back(std::unique_ptr<AssetNode>(node));
+}
+
+void AssetExplorer::createGroup(const std::string& name) {
+    addNode(new AssetNode{name, "", Cube::ResourceType::Unknown, true, {}});
+}
+
+void AssetExplorer::createResource(const std::string& identifier, const nlohmann::json& content) {
+    addNode(new AssetNode{identifier, identifier, Cube::getResType(identifier), false, {}});
+    assetPathMap[identifier] = content;
+    resetResourceManager();
+}
+
+void AssetExplorer::removeNode(AssetNode* node) {
+    removeNode(node);
+    resetResourceManager();
+}
+
+void AssetExplorer::_removeNode(AssetNode* node) {
+    if(node->isGroup) {
+        enterNode(node);
+        for(auto& c : node->children) {
+            removeNode(c.get());
+        }
+        back();
+    }else {
+        assetPathMap.erase(node->identifier);
+    }
+    auto& vec = getCurrentNode()->children;
+    auto it = std::find_if(vec.begin(), vec.end(), [node](const std::unique_ptr<AssetNode>& n) { return n.get() == node; });
+    if(it != vec.end()){
+        vec.erase(it);
+    }
+}
+
+void AssetExplorer::resetResourceManager() {
+    Cube::ResourceManager::get().reset(assetPathMap);
 }

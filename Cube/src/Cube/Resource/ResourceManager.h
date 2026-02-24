@@ -17,7 +17,7 @@ namespace Cube {
     public:
         friend Context;
 
-        // not a singleton pattern
+        // thread-local singleton
         static ResourceManager& get();
         static void init(const std::string& pathMapFilePath);
         static void init(const std::unordered_map<std::string, nlohmann::json>& pathMap);
@@ -69,6 +69,9 @@ namespace Cube {
         void release(ResourceBase* resource);
         void release(const std::string& identifier);
         void releaseAll();
+
+        // for CubeEditor
+        void reset(const std::unordered_map<std::string, nlohmann::json>& pathMap);
 
     protected:
         ResourceManager() = default;

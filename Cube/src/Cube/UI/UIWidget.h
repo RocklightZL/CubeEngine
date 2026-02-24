@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "Cube/Renderer/Font.h"
+#include "Cube/Resource/ResourceManager.h"
 
 namespace Cube {
     struct UIStyle {

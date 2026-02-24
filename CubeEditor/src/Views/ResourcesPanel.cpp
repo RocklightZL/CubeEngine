@@ -68,7 +68,7 @@ void ResourcesPanel::render(float deltaTime) {
                 switch(entry->type) {
                     case ResourceType::Texture:
                         {
-                            Texture2D* tex = thumbnailManager.request(proj->assetPathMap.value(entry->identifier, ""));
+                            Texture2D* tex = thumbnailManager.request(proj->assetExplorer.getAssetPathMap().at(entry->identifier).get<std::string>());
                             if(!tex) tex = file_png.get();
                             iconTextButton(tex, entry->name, selectedEntry == entry.get(), ImVec2(imageSize, imageSize));
                         }
@@ -83,13 +83,13 @@ void ResourcesPanel::render(float deltaTime) {
                         iconTextButton(file_png.get(), entry->name, selectedEntry == entry.get(), ImVec2(imageSize, imageSize));
                         break;
                 }
-                // iconTextButton(file_png.get(), entry->name, selectedEntry == entry.get(), ImVec2(imageSize, imageSize));
             }
-            if(ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            if(ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
                 selectedEntry = entry.get();
             }
             if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
-                ImGui::OpenPopup("NodeRightButtonMenu");
+                selectedEntry = entry.get();
+                ImGui::OpenPopup("NodeRightMenu");
             }
         }
     } else if(showMode == 1){
@@ -110,17 +110,45 @@ void ResourcesPanel::render(float deltaTime) {
             }
         }
     }
-    if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemHovered()) {
-        selectedEntry = nullptr;
+    if(ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) {
+        if(ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+            selectedEntry = nullptr;
+        }
+        if(ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
+            selectedEntry = nullptr;
+            ImGui::OpenPopup("BlankRightMenu");
+        }
     }
+
+    if(ImGui::BeginPopup("NodeRightMenu")) {
+        if(selectedEntry->isGroup) {
+            if(ImGui::MenuItem("Rename")) {
+                
+            }
+        }
+        if(ImGui::MenuItem("Delete")) {
+            if(selectedEntry->isGroup) {
+                proj->assetExplorer.removeNode(selectedEntry);
+                selectedEntry = nullptr;
+            }
+        }
+        ImGui::EndPopup();
+    }
+    if(ImGui::BeginPopup("BlankRightMenu")) {
+        if(ImGui::MenuItem("New Group")) {
+            proj->assetExplorer.createGroup("Group");
+        }
+        ImGui::EndPopup();
+    }
+
     ImGui::EndChild();
 
     ImGui::PopStyleColor();
     ImGui::End();
 
-    ImGui::Begin("ResourcesPreview");
-
-    ImGui::End();
+    // ImGui::Begin("ResourcesPreview");
+    //
+    // ImGui::End();
 
     thumbnailManager.tick();
 }
@@ -134,22 +162,19 @@ void ResourcesPanel::importFromFileDialog() {
 void importTexture(const std::filesystem::path& texturePath) {
     std::filesystem::path path = std::filesystem::canonical(texturePath);
     std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
-    proj->assetPathMap["tex:" + relPath.generic_string()] = path.generic_string();
-    proj->assetExplorer.addNode(new AssetNode{path.filename().string(), "tex:" + relPath.generic_string(), ResourceType::Texture});
+    proj->assetExplorer.createResource("tex:" + relPath.generic_string(), path.generic_string());
 }
 
 void importAnimClip(const std::filesystem::path& animPath) {
     std::filesystem::path path = std::filesystem::canonical(animPath);
     std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
-    proj->assetPathMap["anim:" + relPath.generic_string()] = path.generic_string();
-    proj->assetExplorer.addNode(new AssetNode{path.filename().string(),"anim:" + relPath.generic_string(), ResourceType::AnimationClip});
+    proj->assetExplorer.createResource("anim:" + relPath.generic_string(), path.generic_string());
 }
 
 void importAtlas(const std::filesystem::path& atlasPath) {
     std::filesystem::path path = std::filesystem::canonical(atlasPath);
     std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
-    proj->assetPathMap["atlas:" + relPath.generic_string()] = path.generic_string();
-    proj->assetExplorer.addNode(new AssetNode{path.filename().string(),"atlas:" + relPath.generic_string(), ResourceType::Atlas});
+    proj->assetExplorer.createResource("atlas:" + relPath.generic_string(), path.generic_string());
 }
 
 void importRes(const std::filesystem::path& source, const std::filesystem::path& target) {
@@ -188,5 +213,4 @@ void ResourcesPanel::importResource(const std::string& path) {
     std::filesystem::path targetFile = proj->getConfig().assetsDirectory;
     targetFile /= filepath.filename();
     importRes(path, targetFile);
-    proj->refreshResourceManager();
 }

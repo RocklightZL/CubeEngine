@@ -12,7 +12,4 @@ namespace Cube {
         delete whiteTex;
     }
 
-    ResourceManager& Context::getResourceManager() {
-        return resourceManager;
-    }
 }  // namespace Cube

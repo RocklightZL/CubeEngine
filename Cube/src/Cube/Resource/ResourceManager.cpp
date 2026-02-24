@@ -14,7 +14,8 @@
 namespace Cube {
 
     ResourceManager& ResourceManager::get() {
-        return Renderer2D::currentContext->getResourceManager();
+        static thread_local ResourceManager instance;
+        return instance;
     }
 
     void ResourceManager::init(const std::string& pathMapFilePath) {
@@ -52,6 +53,10 @@ namespace Cube {
 
     void ResourceManager::releaseAll() {
         resourcesCache.clear();
+    }
+
+    void ResourceManager::reset(const std::unordered_map<std::string, nlohmann::json>& pathMap) {
+        this->pathMap = pathMap;
     }
 
     Texture2D* ResourceManager::loadTexture2D(const nlohmann::json& path) {

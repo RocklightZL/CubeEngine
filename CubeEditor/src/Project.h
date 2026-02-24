@@ -42,15 +42,10 @@ public:
 
 	const ProjectConfig& getConfig() const;
 
-	void saveAssetPathMap();
-	nlohmann::json& loadAssetPathMap();
-	void refreshResourceManager();
-
 	// global data
 	SceneData* selectedScene = nullptr;
     Cube::Entity* selectedEntity = nullptr;
 	EditorCamera editorCamera;
-	nlohmann::json assetPathMap;
     AssetExplorer assetExplorer;
 
 private:
