@@ -66,14 +66,19 @@ namespace Cube {
     Sprite* ResourceManager::loadSprite(const std::string& identifier) {
         size_t pos1 = identifier.find(':');
         size_t pos2 = identifier.find('#');
-        if(!(pos1 != std::string::npos && pos2 != std::string::npos && pos2 > pos1)) {
-            CB_CORE_ERROR("Invalid sprite identifier: {}", identifier);
-            return nullptr;
+        if(pos2 == std::string::npos) {
+            // spr:tex:abc.png
+            nlohmann::json data;
+            data["texture"] = identifier.substr(pos1 + 1);
+            data["texRegion"] = {0.0f, 0.0f, 1.0f, 1.0f};
+            return new Sprite(data);
+        }else {
+            // spr:atlas:123#a
+            ResPtr<Atlas> atlas(identifier.substr(pos1 + 1, pos2 - pos1 - 1));
+            Sprite* sprite = new Sprite(atlas->getSprite(identifier.substr(pos2 + 1)));
+            sprite->setAtlas(atlas);
+            return sprite;
         }
-        ResPtr<Atlas> atlas(identifier.substr(pos1 + 1, pos2 - pos1 - 1));
-        Sprite* sprite = new Sprite(atlas->getSprite(identifier.substr(pos2 + 1)));
-        sprite->setAtlas(atlas);
-        return sprite;
     }
 
     Atlas* ResourceManager::loadAtlas(const nlohmann::json& path) {

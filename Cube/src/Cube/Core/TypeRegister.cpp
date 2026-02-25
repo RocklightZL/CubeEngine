@@ -70,6 +70,7 @@ namespace Cube {
 		// register serializer
 		registerBasicSerializers();
 		registerSerializer<std::unordered_map<std::string, ResPtr<AnimationClip>>>();
+		registerResPtrSerializer<Sprite>();
 		registerResPtrSerializer<Texture2D>();
 		registerResPtrSerializer<AnimationClip>();
 		registerResPtrSerializer<Font>();

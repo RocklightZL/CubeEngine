@@ -82,12 +82,13 @@ void SceneView::render(float deltaTime) {
             if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Asset")) {
                 AssetNode* asset = *(AssetNode**)payload->Data;
                 glm::vec2 pos = glm::vec2(ImGui::GetMousePos().x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (ImGui::GetMousePos().y - ImGui::GetWindowPos().y));
-                pos += proj->editorCamera.position / proj->editorCamera.zoom;
+                pos *= proj->editorCamera.zoom;
+                pos += proj->editorCamera.position;
                 if(asset->type == ResourceType::Texture) {
                     auto e = proj->selectedScene->scene->createEntity(asset->identifier);
                     e->getTransform().setPosition(pos);
                     auto spriteRender = e->addComponent<SpriteRender>();
-                    // spriteRender->sprite = ResPtr<Texture2D>(ruid);
+                    spriteRender->sprite = ResPtr<Sprite>("spr:" + asset->identifier);
                 }
             }
             ImGui::EndDragDropTarget();

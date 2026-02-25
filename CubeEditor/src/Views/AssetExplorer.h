@@ -13,6 +13,7 @@ struct AssetNode {
     Cube::ResourceType type = Cube::ResourceType::Unknown;
     bool isGroup = false;
     std::vector<std::unique_ptr<AssetNode>> children;
+    AssetNode* parent = nullptr;
 
     nlohmann::json toJson() const {
         nlohmann::json json;
@@ -36,6 +37,7 @@ struct AssetNode {
             for(auto& c : json["children"]) {
                 std::unique_ptr<AssetNode> n = std::make_unique<AssetNode>();
                 n->fromJson(c);
+                n->parent = this;
                 children.push_back(std::move(n));
             }
         }else {

@@ -1,30 +1,14 @@
 {
     "children": [
         {
-            "children": [
-                {
-                    "identifier": "tex:b1428f3b754f70fe08d2461ef988504436aff576_raw.jpg",
-                    "isGroup": false,
-                    "name": "tex:b1428f3b754f70fe08d2461ef988504436aff576_raw.jpg"
-                },
-                {
-                    "identifier": "tex:icon.png",
-                    "isGroup": false,
-                    "name": "tex:icon.png"
-                }
-            ],
-            "isGroup": true,
-            "name": "1"
+            "identifier": "tex:icon.png",
+            "isGroup": false,
+            "name": "tex:icon.png"
         },
         {
-            "children": [],
-            "isGroup": true,
-            "name": "222"
-        },
-        {
-            "children": [],
-            "isGroup": true,
-            "name": "2"
+            "identifier": "tex:b1428f3b754f70fe08d2461ef988504436aff576_raw.jpg",
+            "isGroup": false,
+            "name": "tex:b1428f3b754f70fe08d2461ef988504436aff576_raw.jpg"
         }
     ],
     "isGroup": true,

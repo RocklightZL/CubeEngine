@@ -78,6 +78,7 @@ void AssetExplorer::back() {
 }
 
 void AssetExplorer::addNode(AssetNode* node) {
+    node->parent = getCurrentNode();
     getCurrentNode()->children.push_back(std::unique_ptr<AssetNode>(node));
 }
 
@@ -94,13 +95,13 @@ void AssetExplorer::createResource(const std::string& identifier, const nlohmann
 }
 
 void AssetExplorer::removeNode(AssetNode* node) {
-    removeNode(node);
+    _removeNode(node);
     resetResourceManager();
 }
 
 void AssetExplorer::move(const AssetNode* src, AssetNode* dst) {
-    if(!(!src->isGroup && dst->isGroup)) return;
-    auto& vec = getCurrentNode()->children;
+    if(!dst->isGroup) return;
+    auto& vec = src->parent->children;
     auto it = std::find_if(vec.begin(), vec.end(), [src](const std::unique_ptr<AssetNode>& n){ return n.get() == src; });
     if(it == vec.end()) return;
     dst->children.push_back(std::move(*it));

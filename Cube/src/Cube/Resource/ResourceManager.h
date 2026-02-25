@@ -38,15 +38,15 @@ namespace Cube {
                 resource->refCount++;
                 return static_cast<T*>(resource);
             }
-            auto it2 = pathMap.find(identifier);
-            if(it2 == pathMap.end()) {
-                CB_CORE_ERROR("Resource path not found: {}", identifier);
-                return nullptr;
-            }
             ResourceBase* newRes = nullptr;
             if constexpr (std::is_same_v<Sprite, T>) {
                 newRes = loadSprite(identifier);
             } else {
+                auto it2 = pathMap.find(identifier);
+                if(it2 == pathMap.end()) {
+                    CB_CORE_ERROR("Resource path not found: {}", identifier);
+                    return nullptr;
+                }
                 if constexpr (std::is_same_v<Texture2D, T>) {
                     newRes = loadTexture2D(it2->second);
                 }else if constexpr (std::is_same_v<Atlas, T>) {
