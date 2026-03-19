@@ -9,7 +9,6 @@ namespace Cube {
         Unknown = 0x0,
         Texture,
         Sprite,
-        Atlas,
         AnimationClip,
         Font
     };
@@ -20,7 +19,6 @@ namespace Cube {
         if(type == "tex") return ResourceType::Texture;
         if(type == "spr") return ResourceType::Sprite;
         if(type == "anim") return ResourceType::AnimationClip;
-        if(type == "atlas") return ResourceType::Atlas;
         if(type == "font") return ResourceType::Font;
         return ResourceType::Unknown;
     }

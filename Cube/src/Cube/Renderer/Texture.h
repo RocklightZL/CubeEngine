@@ -35,20 +35,4 @@ namespace Cube {
         glm::vec2 size;
     };
 
-    class TextureAtlas : public Texture2D{
-    public:
-        TextureAtlas(const std::string& filePath);
-        TextureAtlas(const std::string& filePath, const std::string& metaDataPath);
-        ~TextureAtlas() = default;
-
-        void addSubTexture(const std::string& name, const SubTexture& subTexture);
-        const SubTexture& getSubTexture(const std::string& name);
-        const std::string& getFilePath() const;
-        const std::string& getMetaDataPath() const;
-
-    private:
-        std::string filePath;
-        std::string metaDataPath;
-        std::unordered_map<std::string, SubTexture> subTextures;
-    };
 }

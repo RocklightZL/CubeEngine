@@ -256,19 +256,17 @@ void ResourcesPanel::importFromFileDialog() {
 void importTexture(const std::filesystem::path& texturePath) {
     std::filesystem::path path = std::filesystem::canonical(texturePath);
     std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
-    proj->assetExplorer.createResource("tex:" + relPath.generic_string(), path.generic_string());
+    nlohmann::json importConfig;
+    importConfig["path"] = path.generic_string();
+    proj->assetExplorer.createResource("tex:" + relPath.generic_string(), importConfig);
 }
 
 void importAnimClip(const std::filesystem::path& animPath) {
     std::filesystem::path path = std::filesystem::canonical(animPath);
     std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
-    proj->assetExplorer.createResource("anim:" + relPath.generic_string(), path.generic_string());
-}
-
-void importAtlas(const std::filesystem::path& atlasPath) {
-    std::filesystem::path path = std::filesystem::canonical(atlasPath);
-    std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
-    proj->assetExplorer.createResource("atlas:" + relPath.generic_string(), path.generic_string());
+    nlohmann::json importConfig;
+    importConfig["path"] = path.generic_string();
+    proj->assetExplorer.createResource("anim:" + relPath.generic_string(), importConfig);
 }
 
 void importRes(const std::filesystem::path& source, const std::filesystem::path& target) {
@@ -292,8 +290,6 @@ void importRes(const std::filesystem::path& source, const std::filesystem::path&
             importTexture(target);
         } else if(target.extension() == ".anim") {
             importAnimClip(target);
-        } else if(target.extension() == ".atlas") {
-            importAtlas(target);
         }
         else {
             CB_EDITOR_ERROR("Unknown assets format: {}", source.extension().string());

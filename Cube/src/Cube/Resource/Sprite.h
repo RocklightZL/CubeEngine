@@ -22,11 +22,9 @@ namespace Cube {
 
         Texture2D* getTexture() const { return texture.get(); }
         const TextureRegion& getTexRegion() const { return texRegion; }
-        void setAtlas(const ResPtr<Atlas>& atlas) { this->atlas = atlas; }
 
     private:
         ResPtr<Texture2D> texture = nullptr;
-        ResPtr<Atlas> atlas = nullptr; // ensure the atlas is in the cache
         TextureRegion texRegion = {{0.0f, 0.0f}, {1.0f, 1.0f}};
     };
 

@@ -73,20 +73,18 @@ namespace Cube {
             data["texRegion"] = {0.0f, 0.0f, 1.0f, 1.0f};
             return new Sprite(data);
         }else {
-            // spr:atlas:123#a
-            ResPtr<Atlas> atlas(identifier.substr(pos1 + 1, pos2 - pos1 - 1));
-            Sprite* sprite = new Sprite(atlas->getSprite(identifier.substr(pos2 + 1)));
-            sprite->setAtlas(atlas);
-            return sprite;
+            // spr:tex:123#a
+            nlohmann::json data;
+            data["texture"] = identifier.substr(pos1 + 1, pos2 - pos1 - 1);
+            auto it = pathMap.find(identifier.substr(pos1 + 1, pos2 - pos1 - 1));
+            CB_ASSERT(it != pathMap.end());
+            data["texRegion"] = it->second["sprites"][identifier.substr(pos2 + 1)];
+            return new Sprite(data);
         }
     }
 
-    Atlas* ResourceManager::loadAtlas(const nlohmann::json& path) {
-        return new Atlas(path.get<std::string>());
-    }
-
     AnimationClip* ResourceManager::loadAnimationClip(const nlohmann::json& path) {
-        return new AnimationClip(path.get<std::string>());
+        return new AnimationClip(path["path"].get<std::string>());
     }
 
     Font* ResourceManager::loadFont(const nlohmann::json& path) {

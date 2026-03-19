@@ -49,8 +49,6 @@ namespace Cube {
                 }
                 if constexpr (std::is_same_v<Texture2D, T>) {
                     newRes = loadTexture2D(it2->second);
-                }else if constexpr (std::is_same_v<Atlas, T>) {
-                    newRes = loadAtlas(it2->second);
                 }else if constexpr (std::is_same_v<AnimationClip, T>) {
                     newRes = loadAnimationClip(it2->second);
                 }else if constexpr (std::is_same_v<Font, T>) {
@@ -83,7 +81,6 @@ namespace Cube {
     private:
         Texture2D* loadTexture2D(const nlohmann::json& path);
         Sprite* loadSprite(const std::string& identifier);
-        Atlas* loadAtlas(const nlohmann::json& path);
         AnimationClip* loadAnimationClip(const nlohmann::json& path);
         Font* loadFont(const nlohmann::json& path);
     };
