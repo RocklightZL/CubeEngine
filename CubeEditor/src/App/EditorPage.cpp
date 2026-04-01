@@ -19,6 +19,7 @@
 #include "Cube/UI/FileDialog.h"
 #include "Cube/Utils/Utils.h"
 #include "EditorApp.h"
+#include "../Views/AssetInspector.h"
 #include "imgui/imgui_internal.h"
 
 using namespace Cube;
@@ -29,6 +30,7 @@ EditorPage::EditorPage(Project* project) : project(project) {
     views.push_back(std::make_unique<EntityPropertyPanel>(*this));
     views.push_back(std::make_unique<SceneSelectPanel>(*this));
     views.push_back(std::make_unique<ResourcesPanel>(*this));
+    views.push_back(std::make_unique<AssetInspector>(*this));
 
     const std::string resourcesCache = project->getConfig().projectDataDirectory + "/resources.cache";
     if(std::filesystem::exists(resourcesCache)) {

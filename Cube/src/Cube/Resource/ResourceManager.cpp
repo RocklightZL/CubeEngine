@@ -60,7 +60,7 @@ namespace Cube {
     }
 
     Texture2D* ResourceManager::loadTexture2D(const nlohmann::json& path) {
-        return new Texture2D(path.get<std::string>());
+        return new Texture2D(path["path"].get<std::string>());
     }
 
     Sprite* ResourceManager::loadSprite(const std::string& identifier) {

@@ -30,6 +30,7 @@ public:
     // Editor state
     SceneData* selectedScene = nullptr;
     Cube::Entity* selectedEntity = nullptr;
+    AssetNode* selectedAssetNode = nullptr;
     EditorCamera editorCamera;
 
 private:

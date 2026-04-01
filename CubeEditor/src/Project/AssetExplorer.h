@@ -63,9 +63,9 @@ public:
     void createResource(const std::string& identifier, const nlohmann::json& content);
     void removeNode(AssetNode* node);
     void move(const AssetNode* src, AssetNode* dst);
-    void importResource(const std::string& path);
 
     const std::string& getCurrentPath() const { return currentPath; }
+    const nlohmann::json& getAssetImporter(const std::string& identifier) const { return assetPathMap.at(identifier); }
     const std::unordered_map<std::string, nlohmann::json>& getAssetPathMap() const { return assetPathMap; }
 
 private:

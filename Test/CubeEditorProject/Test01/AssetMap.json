@@ -1,1 +1,11 @@
-null
+{
+    "tex:b1428f3b754f70fe08d2461ef988504436aff576_raw.jpg": {
+        "path": "D:/mycode/vsProject/CubeEngine/Test/CubeEditorProject/Test01/Assets/b1428f3b754f70fe08d2461ef988504436aff576_raw.jpg"
+    },
+    "tex:icon.png": {
+        "path": "D:/mycode/vsProject/CubeEngine/Test/CubeEditorProject/Test01/Assets/icon.png"
+    },
+    "tex:test.png": {
+        "path": "D:/mycode/vsProject/CubeEngine/Test/CubeEditorProject/Test01/Assets/test.png"
+    }
+}

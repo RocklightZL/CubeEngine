@@ -1,35 +1,19 @@
 {
     "children": [
         {
-            "children": [
-                {
-                    "children": [],
-                    "isGroup": false,
-                    "name": "Directory.png"
-                },
-                {
-                    "children": [],
-                    "isGroup": false,
-                    "name": "File.png"
-                },
-                {
-                    "children": [],
-                    "isGroup": false,
-                    "name": "test.png"
-                }
-            ],
-            "isGroup": true,
-            "name": "Texture"
+            "identifier": "tex:b1428f3b754f70fe08d2461ef988504436aff576_raw.jpg",
+            "isGroup": false,
+            "name": "tex:b1428f3b754f70fe08d2461ef988504436aff576_raw.jpg"
         },
         {
-            "children": [],
-            "isGroup": true,
-            "name": "Shaders"
+            "identifier": "tex:icon.png",
+            "isGroup": false,
+            "name": "tex:icon.png"
         },
         {
-            "children": [],
-            "isGroup": true,
-            "name": "Test"
+            "identifier": "tex:test.png",
+            "isGroup": false,
+            "name": "tex:test.png"
         }
     ],
     "isGroup": true,
