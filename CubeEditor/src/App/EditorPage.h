@@ -4,14 +4,35 @@
 
 #include "../Views/View.h"
 #include "Page.h"
+#include "Cube/Scene/Entity.h"
+#include "../Scene/EditorCamera.h"
+#include "../Project/AssetExplorer.h"
+
+namespace Cube {
+    class Scene;
+}
+struct SceneData;
+class Project;
+class EditorApp;
 
 class EditorPage : public Page {
 public:
-    EditorPage();
-    ~EditorPage() override = default;
+    EditorPage(Project* project);
+    ~EditorPage() override;
 
     void render(float deltaTime) override;
+    Page::Type getType() const override { return Page::Type::Editor; }
+
+    void importFromFileDialog();
+
+    Project* getProject() const { return project.get(); }
+
+    // Editor state
+    SceneData* selectedScene = nullptr;
+    Cube::Entity* selectedEntity = nullptr;
+    EditorCamera editorCamera;
 
 private:
     std::vector<std::unique_ptr<View>> views;
+    std::unique_ptr<Project> project;
 };

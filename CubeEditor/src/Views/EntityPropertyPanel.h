@@ -4,7 +4,7 @@
 
 class EntityPropertyPanel : public View{
 public:
-	EntityPropertyPanel() = default;
+    EntityPropertyPanel(EditorPage& editorPage) : View(editorPage) {}
 	~EntityPropertyPanel() override = default;
 
 	void render(float deltaTime) override;

@@ -5,8 +5,9 @@
 #include <memory>
 #include <stack>
 
+#include "../App/EditorPage.h"
 #include "../App/EditorApp.h"
-#include "../Project.h"
+#include "../Project/Project.h"
 #include "../Utils/ImGuiExternal.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
@@ -17,9 +18,6 @@
 using namespace Cube;
 
 namespace fs = std::filesystem;
-
-extern Project* proj;
-extern EditorApp* app;
 
 struct SelectedManager {
     std::unordered_set<AssetNode*> nodes;
@@ -51,18 +49,20 @@ struct SelectedManager {
 };
 
 void ResourcesPanel::render(float deltaTime) {
+    Project* project = editorPage.getProject();
+    AssetExplorer& assetExplorer = project->getAssetExplorer();
     static int showMode = 0; // 0: icon mode 1: list mode
     ImGui::Begin("Resources Panel");
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
-    static const fs::path ASSETS_DIR(proj->getConfig().assetsDirectory);
-    const std::string topText = proj->assetExplorer.getCurrentPath();
+    static const fs::path ASSETS_DIR(project->getConfig().assetsDirectory);
+    const std::string topText = assetExplorer.getCurrentPath();
     float topHeight = ImGui::CalcTextSize(topText.c_str()).y;
 
     ImGui::BeginChild("TopBar", ImVec2(ImGui::GetContentRegionAvail().x, topHeight));
     topHeight -= ImGui::GetStyle().FramePadding.x * 2;
     if(ImGui::ImageButton("back", back_png->getId(), ImVec2(topHeight, topHeight), {0, 1}, {1, 0})) {
-        proj->assetExplorer.back();
+        assetExplorer.back();
     }
     ImGui::SameLine();
     ImGui::Text(topText.c_str());
@@ -87,7 +87,7 @@ void ResourcesPanel::render(float deltaTime) {
         AssetNode* dst = nullptr;
     } move;
     if(showMode == 0){
-        for(const auto& entry : proj->assetExplorer.getCurrentNode()->children) {
+        for(const auto& entry : assetExplorer.getCurrentNode()->children) {
             ImGui::SameLine();
             if(ImGui::GetContentRegionAvail().x < imageSize) {
                 ImGui::NewLine();
@@ -105,15 +105,12 @@ void ResourcesPanel::render(float deltaTime) {
                 switch(entry->type) {
                     case ResourceType::Texture:
                         {
-                            Texture2D* tex = thumbnailManager.request(proj->assetExplorer.getAssetPathMap().at(entry->identifier).get<std::string>());
+                            Texture2D* tex = thumbnailManager.request(assetExplorer.getAssetPathMap().at(entry->identifier).get<std::string>());
                             if(!tex) tex = file_png.get();
                             iconTextButton(tex, entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
                         }
                         break;
                     case ResourceType::AnimationClip:
-                        iconTextButton(file_png.get(), entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
-                        break;
-                    case ResourceType::Atlas:
                         iconTextButton(file_png.get(), entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
                         break;
                     default:
@@ -125,7 +122,7 @@ void ResourcesPanel::render(float deltaTime) {
                 if(ImGui::BeginDragDropSource()) {
                     AssetNode* src = entry.get();
                     ImGui::SetDragDropPayload("Asset", &src, sizeof(src));
-                    Texture2D* tex = thumbnailManager.request(proj->assetExplorer.getAssetPathMap().at(src->identifier).get<std::string>());
+                    Texture2D* tex = thumbnailManager.request(assetExplorer.getAssetPathMap().at(src->identifier).get<std::string>());
                     ImGui::Image(tex ? tex->getId() : file_png->getId(), {64, 64}, {0, 1}, {1, 0});
                     ImGui::EndDragDropSource();
                 }
@@ -133,7 +130,7 @@ void ResourcesPanel::render(float deltaTime) {
                 ImGui::PopStyleColor();
             }
             if(entry->isGroup && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-                proj->assetExplorer.enterNode(entry.get());
+                assetExplorer.enterNode(entry.get());
                 selectedManager.cancel();
             }else{
                 if(ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
@@ -189,7 +186,7 @@ void ResourcesPanel::render(float deltaTime) {
         // Ctrl+V - paste
         if(ImGui::IsKeyPressed(ImGuiKey_V)) {
             for(auto& n : cutNodes) {
-                proj->assetExplorer.move(n, proj->assetExplorer.getCurrentNode());
+                assetExplorer.move(n, assetExplorer.getCurrentNode());
             }
             cutNodes.clear();
         }
@@ -197,7 +194,7 @@ void ResourcesPanel::render(float deltaTime) {
 
     // delay move
     if(move.src && move.dst) {
-        proj->assetExplorer.move(move.src, move.dst);
+        assetExplorer.move(move.src, move.dst);
     }
 
     static char inputBuf[50] = {};
@@ -218,14 +215,14 @@ void ResourcesPanel::render(float deltaTime) {
             }
         }
         if(ImGui::MenuItem("Delete")) {
-            proj->assetExplorer.removeNode(selectedManager.getSingleNode());
+            assetExplorer.removeNode(selectedManager.getSingleNode());
             selectedManager.cancel();
         }
         ImGui::EndPopup();
     }
     if(ImGui::BeginPopup("BlankRightMenu")) {
         if(ImGui::MenuItem("New Group")) {
-            selectedManager.singleSelect(proj->assetExplorer.createGroup("Group"));
+            selectedManager.singleSelect(assetExplorer.createGroup("Group"));
             strcpy_s(inputBuf, selectedManager.getSingleNode()->name.c_str());
             renamePopup->open();
         }
@@ -247,60 +244,3 @@ void ResourcesPanel::render(float deltaTime) {
     thumbnailManager.tick();
 }
 
-void ResourcesPanel::importFromFileDialog() {
-    for(auto& path : FileDialog::openMultiFiles("Resources(.png.jpg)\0*.png;*.jpg\0All(.*)\0*.*\0", app->getWindow()->getWin32Window())) {
-        importResource(path);
-    }
-}
-
-void importTexture(const std::filesystem::path& texturePath) {
-    std::filesystem::path path = std::filesystem::canonical(texturePath);
-    std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
-    nlohmann::json importConfig;
-    importConfig["path"] = path.generic_string();
-    proj->assetExplorer.createResource("tex:" + relPath.generic_string(), importConfig);
-}
-
-void importAnimClip(const std::filesystem::path& animPath) {
-    std::filesystem::path path = std::filesystem::canonical(animPath);
-    std::filesystem::path relPath = std::filesystem::relative(path, proj->getConfig().assetsDirectory);
-    nlohmann::json importConfig;
-    importConfig["path"] = path.generic_string();
-    proj->assetExplorer.createResource("anim:" + relPath.generic_string(), importConfig);
-}
-
-void importRes(const std::filesystem::path& source, const std::filesystem::path& target) {
-    if(std::filesystem::is_directory(source)) {
-        if(!std::filesystem::exists(target)) {
-            std::filesystem::create_directories(target);
-        }
-        for(auto& entry : std::filesystem::directory_iterator(source)) {
-            importRes(entry.path(), target / entry.path().filename());
-        }
-    }else {
-        if(target != source) {
-            std::error_code ec;
-            std::filesystem::copy_file(source, target, std::filesystem::copy_options::none, ec);
-            if(ec) {
-                CB_EDITOR_ERROR("Failed to copy file from {} to {}. Error Code: {}", source.string(), target.string(), ec.message());
-                return;
-            }
-        }
-        if(target.extension() == ".png" || target.extension() == ".jpg") {
-            importTexture(target);
-        } else if(target.extension() == ".anim") {
-            importAnimClip(target);
-        }
-        else {
-            CB_EDITOR_ERROR("Unknown assets format: {}", source.extension().string());
-            return;
-        }
-    }
-}
-
-void ResourcesPanel::importResource(const std::string& path) {
-    std::filesystem::path filepath(path);
-    std::filesystem::path targetFile = proj->getConfig().assetsDirectory;
-    targetFile /= filepath.filename();
-    importRes(path, targetFile);
-}

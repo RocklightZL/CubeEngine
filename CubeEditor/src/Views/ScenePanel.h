@@ -4,7 +4,7 @@
 
 class ScenePanel : public View {
 public:
-    ScenePanel() = default;
+    ScenePanel(EditorPage& editorPage) : View(editorPage) {}
     ~ScenePanel() override = default;
 
     void render(float deltaTime) override;

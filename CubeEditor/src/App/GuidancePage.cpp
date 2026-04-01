@@ -4,7 +4,7 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
-#include "../Project.h"
+#include "../Project/Project.h"
 #include "../Utils/ImGuiExternal.h"
 #include "../Utils/misc.h"
 #include "Cube/Core/Log.h"
@@ -15,10 +15,8 @@
 
 using namespace Cube;
 
-extern Project* proj;
-extern EditorApp* app;
-
 void GuidancePage::render(float deltaTime) {
+    static Project* proj = nullptr;
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -29,7 +27,7 @@ void GuidancePage::render(float deltaTime) {
 
     ImGui::BeginGroup();
     bool switchPage = false;
-    for(auto& p : app->projectsPathCache) {
+    for(auto& p : EditorApp::get().projectsPathCache) {
         if(ImGui::Button(p.c_str())) {
             proj = new Project(p);
             switchPage = true;
@@ -62,7 +60,7 @@ void GuidancePage::render(float deltaTime) {
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Button, toImColor({70, 77, 88, 255}));
         if(ImGui::Button("...")) {
-            strcpy_s(path, FileDialog::selectDir(app->getWindow()->getWin32Window()).c_str());
+            strcpy_s(path, FileDialog::selectDir(EditorApp::get().getWindow()->getWin32Window()).c_str());
         }
         ImGui::PopStyleColor();
     }, [&switchPage] {
@@ -70,7 +68,7 @@ void GuidancePage::render(float deltaTime) {
         isPathValid = std::filesystem::exists(path);
         if(isNameValid && isPathValid){
             delete proj;
-            app->projectsPathCache.push_back(std::string(path) + "/" + name + ".cbproj");
+            EditorApp::get().projectsPathCache.push_back(std::string(path) + "/" + name + ".cbproj");
             proj = new Project(name, path);
             newProject->close();
             ImGui::CloseCurrentPopup();
@@ -78,7 +76,6 @@ void GuidancePage::render(float deltaTime) {
             switchPage = true;
         }
     }, [] {
-
         isNameValid = true;
         isPathValid = true;
         memset(name, '\0', sizeof(name));
@@ -103,10 +100,10 @@ void GuidancePage::render(float deltaTime) {
     ImGui::BeginGroup();
     if(ImGui::ImageButton("Open Project##1", open_project_png->getId(), buttonSize, {0, 1}, {1, 0})) {
         delete proj;
-        std::string path = FileDialog::openFile("Cube Project File(.cbproj)\0*.cbproj\0", app->getWindow()->getWin32Window());
+        std::string path = FileDialog::openFile("Cube Project File(.cbproj)\0*.cbproj\0", EditorApp::get().getWindow()->getWin32Window());
         if(!path.empty()) {
-            if(std::find(app->projectsPathCache.begin(), app->projectsPathCache.end(), path) == app->projectsPathCache.end()) {
-                app->projectsPathCache.push_back(path);
+            if(std::find(EditorApp::get().projectsPathCache.begin(), EditorApp::get().projectsPathCache.end(), path) == EditorApp::get().projectsPathCache.end()) {
+                EditorApp::get().projectsPathCache.push_back(path);
             }
             proj = new Project(path);
             switchPage = true;
@@ -127,6 +124,6 @@ void GuidancePage::render(float deltaTime) {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     if(switchPage) {
-        app->switchPage(new EditorPage);
+        EditorApp::get().switchPage(new EditorPage(proj));
     }
 }

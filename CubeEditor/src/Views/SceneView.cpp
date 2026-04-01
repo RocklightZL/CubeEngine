@@ -5,9 +5,10 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <thread>
 
+#include "../App/EditorPage.h"
 #include "../App/EditorApp.h"
 #include "../Game.h"
-#include "../Project.h"
+#include "../Project/Project.h"
 #include "../Utils/ImGuiExternal.h"
 #include "../Utils/misc.h"
 #include "Cube/Core/Log.h"
@@ -18,10 +19,7 @@
 
 using namespace Cube;
 
-extern Project* proj;
-extern EditorApp* app;
-
-SceneView::SceneView() {
+SceneView::SceneView(EditorPage& editorPage) : View(editorPage) {
     frameBuffer = new FrameBuffer();
     frameBuffer->bindAttachment((int)sceneViewSize.x, (int)sceneViewSize.y);
 }
@@ -36,35 +34,40 @@ void SceneView::render(float deltaTime) {
     ImGui::BeginChild("ToolBar", {ImGui::GetWindowWidth(), 45});
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
     ImVec2 toolButtonSize(37, 37);
+    EditorApp* app = &EditorApp::get();
     static bool isGameOver = true;
     if(ImGui::ImageButton("play", play_png->getId(), toolButtonSize, ImVec2(0, 1), ImVec2(1, 0)) && isGameOver) {
         isGameOver = false;
         if(app->gameThread.joinable()) {
             app->gameThread.join();
         }
-        app->gameThread = std::thread(gameThreadFunction, &isGameOver);
+        app->gameThread = std::thread(gameThreadFunction,
+            app,
+            editorPage.selectedScene->scene,
+            editorPage.getProject()->getConfig().sceneDirectory,
+            &isGameOver);
     }
     ImGui::SameLine();
     if(ImGui::Button("Reset")) {
-        proj->editorCamera.position = {0, 0};
-        proj->editorCamera.zoom = 1.0f;
-        proj->editorCamera.viewport = toGlmVec2(sceneViewSize);
+        editorPage.editorCamera.position = {0, 0};
+        editorPage.editorCamera.zoom = 1.0f;
+        editorPage.editorCamera.viewport = toGlmVec2(sceneViewSize);
     }
     ImGui::PopStyleColor();
     ImGui::EndChild();
     
     ImGui::BeginChild("Scene");
-    if(proj->selectedScene) {
+    if(editorPage.selectedScene) {
         ImVec2 currentSize = ImGui::GetContentRegionAvail();
         if(currentSize.x <= 0) currentSize.x = 1;
         if(currentSize.y <= 0) currentSize.y = 1;
         if((int)currentSize.x != (int)sceneViewSize.x || (int)currentSize.y != (int)sceneViewSize.y) {
             sceneViewSize = currentSize;
-            proj->editorCamera.viewport = {sceneViewSize.x, sceneViewSize.y};
+            editorPage.editorCamera.viewport = {sceneViewSize.x, sceneViewSize.y};
             frameBuffer->resize((int)sceneViewSize.x, (int)sceneViewSize.y);
         }
 
-        proj->selectedScene->scene->update(deltaTime);
+        editorPage.selectedScene->scene->update(deltaTime);
     
         frameBuffer->bind();
         Renderer2D::setViewport((int)sceneViewSize.x, (int)sceneViewSize.y);
@@ -82,10 +85,10 @@ void SceneView::render(float deltaTime) {
             if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Asset")) {
                 AssetNode* asset = *(AssetNode**)payload->Data;
                 glm::vec2 pos = glm::vec2(ImGui::GetMousePos().x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (ImGui::GetMousePos().y - ImGui::GetWindowPos().y));
-                pos *= proj->editorCamera.zoom;
-                pos += proj->editorCamera.position;
+                pos *= editorPage.editorCamera.zoom;
+                pos += editorPage.editorCamera.position;
                 if(asset->type == ResourceType::Texture) {
-                    auto e = proj->selectedScene->scene->createEntity(asset->identifier);
+                    auto e = editorPage.selectedScene->scene->createEntity(asset->identifier);
                     e->getTransform().setPosition(pos);
                     auto spriteRender = e->addComponent<SpriteRender>();
                     spriteRender->sprite = ResPtr<Sprite>("spr:" + asset->identifier);
@@ -109,7 +112,7 @@ void SceneView::render(float deltaTime) {
         // }
     
         if(ImGui::IsWindowFocused() && ImGui::IsWindowHovered()) {
-            EditorCamera& editorCamera = proj->editorCamera;
+            EditorCamera& editorCamera = editorPage.editorCamera;
             if(ImGui::IsKeyDown(ImGuiKey_LeftArrow)) {
                 editorCamera.position.x -= deltaTime * 500;
             }
@@ -152,7 +155,7 @@ void SceneView::render(float deltaTime) {
                 glm::vec2 mousePos = {io.MousePos.x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (io.MousePos.y - ImGui::GetWindowPos().y)};
                 mousePos += editorCamera.position / editorCamera.zoom;
                 Entity* selected = nullptr;
-                for(auto& e : proj->selectedScene->scene->getEntitiesWith<SpriteRender>()) {
+                for(auto& e : editorPage.selectedScene->scene->getEntitiesWith<SpriteRender>()) {
                     Transform& tc = e->getTransform();
                     SpriteRender* sprite = e->getComponent<SpriteRender>();
                     glm::vec2 position = tc.getWorldPos();
@@ -168,21 +171,21 @@ void SceneView::render(float deltaTime) {
                     }
                 }
                 if(selected) {
-                    if(proj->selectedEntity == selected) {
+                    if(editorPage.selectedEntity == selected) {
                         isDragging = true;
                     }
-                    proj->selectedEntity = selected;
+                    editorPage.selectedEntity = selected;
                     choose = true;
                 }
-                if(!choose) proj->selectedEntity = nullptr;
+                if(!choose) editorPage.selectedEntity = nullptr;
             }
             if(isDragging) {
                 ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
                 glm::vec2 delta = {io.MouseDelta.x * editorCamera.zoom, -io.MouseDelta.y * editorCamera.zoom};
-                if(proj->selectedEntity) {
-                    Transform& tc = proj->selectedEntity->getTransform();
+                if(editorPage.selectedEntity) {
+                    Transform& tc = editorPage.selectedEntity->getTransform();
                     tc.setPosition(tc.getPosition() + delta);
-                    proj->selectedScene->isSaved = false;
+                    editorPage.selectedScene->isSaved = false;
                 }
                 if(!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
                     isDragging = false;
@@ -270,7 +273,7 @@ SubTexture* SceneView::selectSubTexturePopup(TextureData& data, bool* open) {
     //         ImVec2 size = ImGui::GetWindowSize();
     //         if(!(mousePos.x >= winPos.x && mousePos.y >= winPos.y && mousePos.x <= winPos.x + size.x && mousePos.y <= winPos.y + size.y)) {
     //             borderColor = highLightColor;
-    //             MessageBeep(MB_ICONASTERISK);  // TODO: ¿çÆ½Ì¨ÊÊÅä
+    //             MessageBeep(MB_ICONASTERISK);  // TODO: ï¿½ï¿½Æ½Ì¨ï¿½ï¿½ï¿½ï¿½
     //         } else {
     //             borderColor = originalBorderColor;
     //         }
@@ -284,7 +287,7 @@ SubTexture* SceneView::selectSubTexturePopup(TextureData& data, bool* open) {
 }
 
 void SceneView::sceneRender(float deltaTime) {
-    Scene* scene = proj->selectedScene->scene;
+    Scene* scene = editorPage.selectedScene->scene;
     auto sprites = scene->getEntitiesWith<SpriteRender>();
     std::sort(sprites.begin(), sprites.end(), [](const Entity* a, const Entity* b) {
         SpriteRender* spriteA = a->getComponent<SpriteRender>();
@@ -296,7 +299,7 @@ void SceneView::sceneRender(float deltaTime) {
     });
     auto cameras = scene->getEntitiesWith<Camera2D>();
     
-    const EditorCamera& editorCamera = proj->editorCamera;
+    const EditorCamera& editorCamera = editorPage.editorCamera;
     Renderer2D::beginFrame(editorCamera.getPVMatrix());
     // the axis lines
     Renderer2D::drawQuad({0, -15000}, glm::vec2(1, 30000) * editorCamera.zoom, nullptr, {1.0f, 0.0f, 0.0f, 1.0f});
@@ -322,9 +325,9 @@ void SceneView::sceneRender(float deltaTime) {
     }
 
     // the outline of selected entity
-    if(proj->selectedEntity && proj->selectedEntity->hasComponent<SpriteRender>()) {
-        auto* selectEntityTC = &proj->selectedEntity->getTransform();
-        glm::vec2 spriteSize = proj->selectedEntity->getComponent<SpriteRender>()->sprite->getSize();
+    if(editorPage.selectedEntity && editorPage.selectedEntity->hasComponent<SpriteRender>()) {
+        auto* selectEntityTC = &editorPage.selectedEntity->getTransform();
+        glm::vec2 spriteSize = editorPage.selectedEntity->getComponent<SpriteRender>()->sprite->getSize();
         Renderer2D::drawQuad(selectEntityTC->getWorldPos(), glm::vec2(selectEntityTC->getWorldScale().x * spriteSize.x, 1) * glm::vec2(1, editorCamera.zoom), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
         Renderer2D::drawQuad(selectEntityTC->getWorldPos() + glm::vec2(0, selectEntityTC->getWorldScale().y * spriteSize.y), glm::vec2(selectEntityTC->getWorldScale().x * spriteSize.x, 1) * glm::vec2(1, editorCamera.zoom), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});
         Renderer2D::drawQuad(selectEntityTC->getWorldPos(), glm::vec2(1, selectEntityTC->getWorldScale().y * spriteSize.y) * glm::vec2(editorCamera.zoom, 1), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});

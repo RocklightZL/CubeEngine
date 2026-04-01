@@ -6,7 +6,7 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
-#include "../Project.h"
+#include "../Project/Project.h"
 #include "../Utils/misc.h"
 #include "Cube/Core/Application.h"
 #include "Cube/Core/Log.h"
@@ -31,6 +31,15 @@ EditorApp::EditorApp(const WindowPros& windowPros) {
     eventDispatcher.subscribe<WindowCloseEvent>(std::bind(&EditorApp::onWindowClose, this, std::placeholders::_1));
     imGuiInit();
     loadConfig();
+
+    glfwSetDropCallback(mainWindow->getNativeWindow(), [](GLFWwindow* window, int path_count, const char* paths[]) {
+        Page* curPage = EditorApp::get().currentPage.get();
+        if(curPage && curPage->getType() == Page::Type::Editor) {
+            for(int i = 0; i < path_count; ++i) {
+                static_cast<EditorPage*>(curPage)->getProject()->importResource(paths[i]);
+            }
+        }
+    });
 }
 
 EditorApp::~EditorApp() {
@@ -45,6 +54,11 @@ EditorApp::~EditorApp() {
     ImGui_ImplGlfw_Shutdown();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
+}
+
+EditorApp& EditorApp::get() {
+    static EditorApp instance({1920, 1080, "Cube Editor"});
+    return instance;
 }
 
 void EditorApp::switchPage(Page* page) {

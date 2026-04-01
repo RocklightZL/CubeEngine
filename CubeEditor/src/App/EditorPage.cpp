@@ -4,9 +4,10 @@
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 
+#include <filesystem>
 #include <glm/ext/matrix_clip_space.hpp>
 
-#include "../Project.h"
+#include "../Project/Project.h"
 #include "../Views/EntityPropertyPanel.h"
 #include "../Views/ResourcesPanel.h"
 #include "../Views/ScenePanel.h"
@@ -22,21 +23,31 @@
 
 using namespace Cube;
 
-extern EditorApp* app;
-extern Project* proj;
+EditorPage::EditorPage(Project* project) : project(project) {
+    views.push_back(std::make_unique<ScenePanel>(*this));
+    views.push_back(std::make_unique<SceneView>(*this));
+    views.push_back(std::make_unique<EntityPropertyPanel>(*this));
+    views.push_back(std::make_unique<SceneSelectPanel>(*this));
+    views.push_back(std::make_unique<ResourcesPanel>(*this));
 
-EditorPage::EditorPage() {
-    views.push_back(std::make_unique<ScenePanel>());
-    views.push_back(std::make_unique<SceneView>());
-    views.push_back(std::make_unique<EntityPropertyPanel>());
-    views.push_back(std::make_unique<SceneSelectPanel>());
-    views.push_back(std::make_unique<ResourcesPanel>());
+    const std::string resourcesCache = project->getConfig().projectDataDirectory + "/resources.cache";
+    if(std::filesystem::exists(resourcesCache)) {
+        project->getAssetExplorer().loadFromFile(resourcesCache, project->getConfig().assetPathMapFilePath);
+    } else {
+        project->getAssetExplorer().normalInit();
+    }
 
-    glfwSetDropCallback(app->getWindow()->getNativeWindow(), [](GLFWwindow* window, int path_count, const char* paths[]) {
-        for(int i = 0; i < path_count; ++i) {
-            ResourcesPanel::importResource(paths[i]);
-        }
-    });
+    auto& scenes = project->getScenes();
+    if(!scenes.empty()) {
+        selectedScene = &scenes.front();
+    }
+
+}
+
+EditorPage::~EditorPage() {
+    if(project) {
+        project->getAssetExplorer().saveToFile(project->getConfig().projectDataDirectory + "/resources.cache", project->getConfig().assetPathMapFilePath);
+    }
 }
 
 void EditorPage::render(float deltaTime) {
@@ -64,14 +75,15 @@ void EditorPage::render(float deltaTime) {
             }
 
             if(ImGui::MenuItem("Load Scene")) {
-                std::string filePath = FileDialog::openFile("Scene File(.scene)\0*.scene\0" ,app->getWindow()->getWin32Window());
+                std::string filePath = FileDialog::openFile("Scene File(.scene)\0*.scene\0" ,EditorApp::get().getWindow()->getWin32Window());
                 if(!filePath.empty()) {
                     Scene* scene = new Scene(filePath);
                     if(Utils::getFileName(filePath) == scene->getName()){
-                        if(!proj->hasScene(scene->getName())){
-                            proj->addScene(scene);
-                            if(!Utils::isFileInDirectory(filePath, proj->getConfig().sceneDirectory)) {
-                                Utils::copyFile(filePath, proj->getConfig().sceneDirectory + "/" + scene->getName() + ".scene");
+                        if(!project->hasScene(scene->getName())){
+                            project->addScene(scene);
+                            selectedScene = &project->getScenes().back();
+                            if(!Utils::isFileInDirectory(filePath, project->getConfig().sceneDirectory)) {
+                                Utils::copyFile(filePath, project->getConfig().sceneDirectory + "/" + scene->getName() + ".scene");
                             }
                         }else {
                             delete scene;
@@ -83,16 +95,16 @@ void EditorPage::render(float deltaTime) {
                     }
                 }
             }
-            if(ImGui::MenuItem("Save Scene") && proj->selectedScene) {
-                if(!proj->selectedScene->isSaved){
-                    proj->selectedScene->scene->serialize(proj->getConfig().sceneDirectory + "/" + proj->selectedScene->scene->getName() + ".scene");
-                    proj->selectedScene->isSaved = true;
+            if(ImGui::MenuItem("Save Scene") && this->selectedScene) {
+                if(!this->selectedScene->isSaved){
+                    this->selectedScene->scene->serialize(project->getConfig().sceneDirectory + "/" + this->selectedScene->scene->getName() + ".scene");
+                    this->selectedScene->isSaved = true;
                 }
             }
             if(ImGui::MenuItem("Save All Scene")) {
-                for(auto& scene : proj->scenes){
+                for(auto& scene : project->getScenes()){
                     if(!scene.isSaved){
-                        scene.scene->serialize(proj->getConfig().sceneDirectory + "/" + scene.scene->getName() + ".scene");
+                        scene.scene->serialize(project->getConfig().sceneDirectory + "/" + scene.scene->getName() + ".scene");
                         scene.isSaved = true;
                     }
                 }
@@ -110,8 +122,9 @@ void EditorPage::render(float deltaTime) {
             if(showTip) ImGui::Text("This scene has existed!");
 
             if(ImGui::Button("Add##3")) {
-                if(!proj->hasScene(name)){
-                    proj->addScene(new Scene(name, true));
+                if(!project->hasScene(name)){
+                    project->addScene(new Scene(name, true));
+                    selectedScene = &project->getScenes().back();
                     memset(name, '\0', sizeof(name));
                     showAddNewScene = false;
                     showTip = false;
@@ -132,7 +145,7 @@ void EditorPage::render(float deltaTime) {
 
         if(ImGui::BeginMenu("Resources")) {
             if(ImGui::MenuItem("Import Resources##1")) {
-                ResourcesPanel::importFromFileDialog();
+                importFromFileDialog();
             }
             ImGui::EndMenu();
         }
@@ -145,4 +158,10 @@ void EditorPage::render(float deltaTime) {
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void EditorPage::importFromFileDialog() {
+    for(auto& path : FileDialog::openMultiFiles("Resources(.png.jpg)\0*.png;*.jpg\0All(.*)\0*.*\0", EditorApp::get().getWindow()->getWin32Window())) {
+        project->importResource(path);
+    }
 }

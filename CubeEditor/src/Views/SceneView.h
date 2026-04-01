@@ -10,7 +10,7 @@
 
 class SceneView : public View {
 public:
-    SceneView();
+    SceneView(EditorPage& editorPage);
     ~SceneView() override;
 
     void render(float deltaTime) override;

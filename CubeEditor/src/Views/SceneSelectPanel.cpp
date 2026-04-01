@@ -1,23 +1,24 @@
 #include "SceneSelectPanel.h"
 
-#include "../Project.h"
+#include "../App/EditorPage.h"
+#include "../Project/Project.h"
 #include "Cube/Scene/Scene.h"
 
 #include <imgui/imgui.h>
 
-extern Project* proj;
-
 void SceneSelectPanel::render(float deltaTime) {
+    Project* project = editorPage.getProject();
     ImGui::Begin("Scene Select Panel");
 
-    for(SceneData& scene : proj->scenes) {
+    for(SceneData& scene : project->getScenes()) {
         ImGui::PushID(scene.scene);
         bool flag = false;
-        if(proj->selectedScene == &scene) {
+        if(editorPage.selectedScene == &scene) {
             flag = true;
         }
         if(ImGui::Selectable(std::string(scene.scene->getName() + (scene.isSaved ? "" : "*")).c_str(), &flag)) {
-            proj->selectedScene = &scene;
+            editorPage.selectedScene = &scene;
+            editorPage.selectedEntity = nullptr;
         }
         ImGui::PopID();
     }

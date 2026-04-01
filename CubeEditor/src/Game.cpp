@@ -3,21 +3,19 @@
 #include "App/EditorApp.h"
 #include "Cube/Core/Application.h"
 #include "Cube/Core/Log.h"
-#include "Project.h"
+#include "Cube/Scene/Scene.h"
 
 using namespace Cube;
 
-extern EditorApp* app;
-extern Project* proj;
-
-void gameThreadFunction(bool* isGameOver) {
+void gameThreadFunction(EditorApp* app, Scene* scene, const std::string& sceneDirectory, bool* isGameOver) {
 	CB_EDITOR_TRACE("gameThread begin");
-    Scene* s = proj->selectedScene->scene;
-    Application game({1280, 720, s->getName()});  // TODO: viewport size
+    Application game({1280, 720, scene->getName()});  // TODO: viewport size
     app->game = &game;
-    game.getSceneManager().registerScene(s->getName(), proj->getConfig().sceneDirectory + "/" + s->getName() + ".scene");  // TODO: scene file path
-    game.getSceneManager().load(s->getName());
-    game.getSceneManager().setActive(s->getName());
+
+    const std::string sceneName = scene->getName();
+    game.getSceneManager().registerScene(sceneName, sceneDirectory + "/" + sceneName + ".scene");  // TODO: scene file path
+    game.getSceneManager().load(sceneName);
+    game.getSceneManager().setActive(sceneName);
 	game.run();
 	CB_EDITOR_TRACE("gameThread exit");
     *isGameOver = true;

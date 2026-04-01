@@ -10,10 +10,9 @@ namespace Cube {
 
 class EditorApp{
 public:
-    static const std::string userConfigDir;
+    static EditorApp& get();
 
-    EditorApp(const Cube::WindowPros& windowPros);
-    ~EditorApp();
+    static const std::string userConfigDir;
 
     void switchPage(Page* page);
     void run();
@@ -30,6 +29,9 @@ private:
     std::unique_ptr<Page> currentPage;
     bool running;
     Cube::EventDispatcher eventDispatcher;
+
+    EditorApp(const Cube::WindowPros& windowPros);
+    ~EditorApp();
 
     void imGuiInit();
     void loadConfig();

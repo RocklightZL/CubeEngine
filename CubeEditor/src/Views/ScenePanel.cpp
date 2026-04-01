@@ -1,6 +1,7 @@
 ﻿#include "ScenePanel.h"
 
-#include "../Project.h"
+#include "../App/EditorPage.h"
+#include "../Project/Project.h"
 #include "../Utils/ImGuiExternal.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Scene/Entity.h"
@@ -9,18 +10,16 @@
 
 using namespace Cube;
 
-extern Project* proj;
-
 void ScenePanel::render(float deltaTime) {
     ImGui::Begin("Entity Panel"); 
-    if(proj->selectedScene){
+    if(editorPage.selectedScene){
         static char name[50] = {};
         static std::unique_ptr<ModalPopup> addEntityPopup = std::make_unique<ModalPopup>("Add Entity", [] {
             ImGui::Text("Name:");
             ImGui::InputText("##input", name, IM_ARRAYSIZE(name));
-        }, [] {
-            auto* entity = proj->selectedScene->scene->createEntity(name);
-            proj->selectedScene->isSaved = false;
+        }, [this] {
+            auto* entity = editorPage.selectedScene->scene->createEntity(name);
+            editorPage.selectedScene->isSaved = false;
             addEntityPopup->close();
         }, [] {
             memset(name, '\0', sizeof(name));
@@ -33,23 +32,23 @@ void ScenePanel::render(float deltaTime) {
             }
             ImGui::EndPopup();
         }
-        for(auto& entity : proj->selectedScene->scene->getAllEntities()) {
+        for(auto& entity : editorPage.selectedScene->scene->getAllEntities()) {
             ImGui::PushID(entity.get());
             bool f = false;
-            if(proj->selectedEntity == entity.get()) {
+            if(editorPage.selectedEntity == entity.get()) {
                 f = true;
             }
             if(ImGui::Selectable(entity->getName().c_str(), &f)) {
-                proj->selectedEntity = entity.get();
+                editorPage.selectedEntity = entity.get();
             }
             if(ImGui::BeginPopupContextItem()) {
                 if(ImGui::MenuItem("Delete")) {
                     // TODO: add confirm dialog
-                    if(entity.get() == proj->selectedEntity) {
-                        proj->selectedEntity = nullptr;
+                    if(entity.get() == editorPage.selectedEntity) {
+                        editorPage.selectedEntity = nullptr;
                     }
-                    proj->selectedScene->scene->destroyEntity(entity.get());
-                    proj->selectedScene->isSaved = false;
+                    editorPage.selectedScene->scene->destroyEntity(entity.get());
+                    editorPage.selectedScene->isSaved = false;
                 }
                 ImGui::EndPopup();
             }

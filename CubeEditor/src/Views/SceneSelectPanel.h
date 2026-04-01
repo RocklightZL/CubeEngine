@@ -3,7 +3,7 @@
 
 class SceneSelectPanel : public View {
 public:
-    SceneSelectPanel() = default;
+    SceneSelectPanel(EditorPage& editorPage) : View(editorPage) {}
     ~SceneSelectPanel() override = default;
 
     void render(float deltaTime) override;

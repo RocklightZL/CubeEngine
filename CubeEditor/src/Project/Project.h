@@ -1,14 +1,10 @@
 #pragma once
-#include <memory>
-#include <stack>
+
 #include <string>
 
-#include "App/EditorPage.h"
-#include "Cube/Scene/Entity.h"
+#include "AssetExplorer.h"
 #include "Cube/Scene/Scene.h"
-#include "Scene/EditorCamera.h"
-#include "Views/AssetExplorer.h"
-#include "Views/SceneSelectPanel.h"
+#include "../Views/SceneSelectPanel.h"
 #include "imgui/imgui.h"
 
 constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnDoubleClick;
@@ -37,16 +33,14 @@ public:
 	virtual ~Project();
 
 	const std::vector<SceneData>& getScenes() const;
+	std::vector<SceneData>& getScenes();
 	void addScene(Cube::Scene* scene);
 	bool hasScene(const std::string& sceneName) const;
 
-	const ProjectConfig& getConfig() const;
+	void importResource(const std::string& path);
 
-	// global data
-	SceneData* selectedScene = nullptr;
-    Cube::Entity* selectedEntity = nullptr;
-	EditorCamera editorCamera;
-    AssetExplorer assetExplorer;
+	const ProjectConfig& getConfig() const;
+    AssetExplorer& getAssetExplorer() { return assetExplorer; }
 
 private:
 	void writeToConfigFile(const std::string& configFilePath) const;
@@ -55,4 +49,5 @@ private:
 
 	ProjectConfig config;
     std::vector<SceneData> scenes;
+	AssetExplorer assetExplorer;
 };

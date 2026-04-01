@@ -21,7 +21,6 @@ Project::Project(const std::string& name, const std::string& rootPath) {
     std::filesystem::create_directories(config.projectDataDirectory);
     std::filesystem::create_directories(config.sceneDirectory);
     std::filesystem::create_directories(config.assetsDirectory);
-    assetExplorer.normalInit();
     writeToConfigFile(rootPath + "/" + name + ".cbproj");
 }
 
@@ -55,14 +54,68 @@ Project::~Project() {
 
 const std::vector<SceneData>& Project::getScenes() const { return scenes; }
 
+std::vector<SceneData>& Project::getScenes() { return scenes; }
+
 void Project::addScene(Scene* scene) {
     scenes.push_back({scene, false});
-    selectedScene = &scenes.back();
 }
 
 bool Project::hasScene(const std::string& sceneName) const {
     auto it = std::find_if(scenes.begin(), scenes.end(), [sceneName](SceneData s) { return s.scene->getName() == sceneName; });
     return it != scenes.end();
+}
+
+
+void importTexture(const std::filesystem::path& texturePath, Project* project, AssetExplorer& assetExplorer) {
+    std::filesystem::path path = std::filesystem::canonical(texturePath);
+    std::filesystem::path relPath = std::filesystem::relative(path, project->getConfig().assetsDirectory);
+    nlohmann::json importConfig;
+    importConfig["path"] = path.generic_string();
+    assetExplorer.createResource("tex:" + relPath.generic_string(), importConfig);
+}
+
+void importAnimClip(const std::filesystem::path& animPath, Project* project, AssetExplorer& assetExplorer) {
+    std::filesystem::path path = std::filesystem::canonical(animPath);
+    std::filesystem::path relPath = std::filesystem::relative(path, project->getConfig().assetsDirectory);
+    nlohmann::json importConfig;
+    importConfig["path"] = path.generic_string();
+    assetExplorer.createResource("anim:" + relPath.generic_string(), importConfig);
+}
+
+void importRes(const std::filesystem::path& source, const std::filesystem::path& target, Project* project, AssetExplorer& assetExplorer) {
+    if(std::filesystem::is_directory(source)) {
+        if(!std::filesystem::exists(target)) {
+            std::filesystem::create_directories(target);
+        }
+        for(auto& entry : std::filesystem::directory_iterator(source)) {
+            importRes(entry.path(), target / entry.path().filename(), project, assetExplorer);
+        }
+    }else {
+        if(target != source) {
+            std::error_code ec;
+            std::filesystem::copy_file(source, target, std::filesystem::copy_options::none, ec);
+            if(ec) {
+                CB_EDITOR_ERROR("Failed to copy file from {} to {}. Error Code: {}", source.string(), target.string(), ec.message());
+                return;
+            }
+        }
+        if(target.extension() == ".png" || target.extension() == ".jpg") {
+            importTexture(target, project, assetExplorer);
+        } else if(target.extension() == ".anim") {
+            importAnimClip(target, project, assetExplorer);
+        }
+        else {
+            CB_EDITOR_ERROR("Unknown assets format: {}", source.extension().string());
+            return;
+        }
+    }
+}
+
+void Project::importResource(const std::string& path) {
+    std::filesystem::path filepath(path);
+    std::filesystem::path targetFile = config.assetsDirectory;
+    targetFile /= filepath.filename();
+    importRes(path, targetFile, this, assetExplorer);
 }
 
 const ProjectConfig& Project::getConfig() const {
@@ -76,7 +129,6 @@ void Project::save() {
     for(auto& s : scenes) {
         data["scenes"].push_back(s.scene->getName());
     }
-    data["selectedScene"] = selectedScene ? selectedScene->scene->getName() : "";
 
     std::ofstream file(config.projectDataDirectory + "/scenes.cache");
     if(!file.is_open()) {
@@ -119,12 +171,6 @@ void Project::load() {
     for(auto& s : data["scenes"]) {
         Scene* scene = new Scene(config.sceneDirectory + "/" + s.get<std::string>() + ".scene");
         scenes.push_back({scene, true});
-    }
-    std::string t(data["selectedScene"]);
-    for(auto& s : scenes) {
-        if(t == s.scene->getName()) {
-            selectedScene = &s;
-        }
     }
     file.close();
 }
