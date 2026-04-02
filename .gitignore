@@ -9,4 +9,5 @@
 bin/
 bin-obj/
 ai/
-Test/**/Assets/
+Test/CubeEditorProject/
+SandBox/assets/
