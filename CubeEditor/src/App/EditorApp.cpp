@@ -1,4 +1,4 @@
-﻿#include "EditorApp.h"
+#include "EditorApp.h"
 
 #include <fstream>
 
@@ -94,7 +94,7 @@ void EditorApp::imGuiInit() {
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
     io.Fonts->AddFontFromFileTTF("assets/fonts/SourceHanSansSC/SourceHanSansSC-Normal.otf", 30.0f);
-
+    // TODO: 提供一个ImGui预设布局，当没有imgui.ini时加载这个预设布局
     setDarkTheme();
 
     ImGui_ImplGlfw_InitForOpenGL(mainWindow->getNativeWindow(), true);

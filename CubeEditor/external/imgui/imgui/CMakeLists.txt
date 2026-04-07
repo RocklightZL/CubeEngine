@@ -5,6 +5,7 @@ add_library(imgui STATIC
     imgui_widgets.cpp
     imgui_impl_glfw.cpp
     imgui_impl_opengl3.cpp
+    imgui_demo.cpp
 )
 
 target_include_directories(imgui

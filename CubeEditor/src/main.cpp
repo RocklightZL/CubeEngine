@@ -10,6 +10,5 @@ int main() {
     EditorApp& app = EditorApp::get();
     app.switchPage(new GuidancePage);
     app.run();
-
     return 0;
 }

@@ -71,14 +71,13 @@ namespace Cube {
         // for CubeEditor
         void reset(const std::unordered_map<std::string, nlohmann::json>& pathMap);
 
-    protected:
+    private:
         ResourceManager() = default;
-        virtual ~ResourceManager() = default;
+        ~ResourceManager() = default;
 
         std::unordered_map<std::string, std::unique_ptr<ResourceBase>> resourcesCache;
         std::unordered_map<std::string, nlohmann::json> pathMap;
 
-    private:
         Texture2D* loadTexture2D(const nlohmann::json& path);
         Sprite* loadSprite(const std::string& identifier);
         AnimationClip* loadAnimationClip(const nlohmann::json& path);

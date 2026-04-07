@@ -1,4 +1,0 @@
-{
-    "fontFilePath": "D:/mycode/vsProject/CubeEngine/CubeEditor/assets/fonts/SourceHanSansSC/SourceHanSansSC-Normal.otf",
-    "fontSize": 24
-}

@@ -60,7 +60,7 @@ void ModalPopup::render() {
             ImVec2 size = ImGui::GetWindowSize();
             if(!(mousePos.x >= winPos.x && mousePos.y >= winPos.y && mousePos.x <= winPos.x + size.x && mousePos.y <= winPos.y + size.y)) {
                 borderColor = highLightColor;
-                MessageBeep(MB_ICONASTERISK);  // TODO: ¿çÆ½Ì¨ÊÊÅä
+                MessageBeep(MB_ICONASTERISK);  // TODO: è·¨å¹³å°é€‚é…
             } else {
                 borderColor = originalBorderColor;
             }
@@ -76,47 +76,47 @@ bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_si
     if(window->SkipItems) return false;
 
     float averageWidth = ImGui::CalcTextSize("0").x;
-    // ¼ÆËãÎÄ±¾³ß´ç
+    // è®¡ç®—æ–‡æœ¬å°ºå¯¸
     ImVec2 text_size = ImGui::CalcTextSize(label);
     float padding = ImGui::GetStyle().FramePadding.y;
 
-    // ¼ÆËãÕûÌå´óĞ¡£¨Í¼±ê¸ß¶È + ÎÄ×Ö¸ß¶È + ¼ä¾à£©
+    // è®¡ç®—æ•´ä½“å¤§å°ï¼ˆå›¾æ ‡é«˜åº¦ + æ–‡å­—é«˜åº¦ + é—´è·ï¼‰
     ImVec2 total_size = ImVec2(ImMax(icon_size.x, text_size.x) + padding * 2, icon_size.y + text_size.y + padding * 3);
 
-    // ´´½¨Í¸Ã÷°´Å¥×÷Îªµã»÷ÇøÓò
+    // åˆ›å»ºé€æ˜æŒ‰é’®ä½œä¸ºç‚¹å‡»åŒºåŸŸ
     ImGui::InvisibleButton(label, total_size, flags);
 
-    // »ñÈ¡½»»¥×´Ì¬
+    // è·å–äº¤äº’çŠ¶æ€
     bool is_hovered = ImGui::IsItemHovered();
     bool is_active = ImGui::IsItemActive();
     bool is_clicked = ImGui::IsItemClicked();
 
-    // »æÖÆ°´Å¥±³¾°
+    // ç»˜åˆ¶æŒ‰é’®èƒŒæ™¯
     ImU32 bg_color = ImGui::GetColorU32(is_active ? ImGuiCol_ButtonActive : is_hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 
     ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), bg_color, rounding);
 
-    // Ìí¼Ó±ß¿òĞ§¹û
+    // æ·»åŠ è¾¹æ¡†æ•ˆæœ
     if(is_hovered || is_active) {
         ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImGui::GetColorU32(ImGuiCol_Border), rounding, 0, 1.5f);
     }
 
-    // ¼ÆËãÍ¼±êÎ»ÖÃ£¨Ë®Æ½¾ÓÖĞ£¬¶¥²¿Áô±ß¾à£©
+    // è®¡ç®—å›¾æ ‡ä½ç½®ï¼ˆæ°´å¹³å±…ä¸­ï¼Œé¡¶éƒ¨ç•™è¾¹è·ï¼‰
     ImVec2 icon_pos = ImVec2(ImGui::GetItemRectMin().x + (total_size.x - icon_size.x) * 0.5f, ImGui::GetItemRectMin().y + padding);
 
-    // »æÖÆÍ¼±ê£¨Ê¹ÓÃÎÆÀí£©
+    // ç»˜åˆ¶å›¾æ ‡ï¼ˆä½¿ç”¨çº¹ç†ï¼‰
     ImGui::GetWindowDrawList()->AddImage(tex_id, icon_pos, ImVec2(icon_pos.x + icon_size.x, icon_pos.y + icon_size.y), uv_min, uv_max);
 
-    // ¼ÆËãÎÄ±¾Î»ÖÃ£¨Ë®Æ½¾ÓÖĞ£¬ÔÚÍ¼±êÏÂ·½£©
+    // è®¡ç®—æ–‡æœ¬ä½ç½®ï¼ˆæ°´å¹³å±…ä¸­ï¼Œåœ¨å›¾æ ‡ä¸‹æ–¹ï¼‰
     ImVec2 text_pos = ImVec2(ImGui::GetItemRectMin().x + (total_size.x - text_size.x) * 0.5f, icon_pos.y + icon_size.y + padding);
 
-    // »æÖÆÎÄ±¾
+    // ç»˜åˆ¶æ–‡æœ¬
     ImGui::GetWindowDrawList()->AddText(text_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
 
     return is_clicked;
 }
 
-// ×ó²àÍ¼±êÓÒ²àÎÄ×Ö°´Å¥
+// å·¦ä¾§å›¾æ ‡å³ä¾§æ–‡å­—æŒ‰é’®
 bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_min, const ImVec2& uv_max, const ImVec2& button_size, const ImVec2& icon_size) {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     if(window->SkipItems)
@@ -124,11 +124,11 @@ bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_
 
     const ImGuiStyle& style = ImGui::GetStyle();
 
-    // ¼ÆËãÎÄ±¾³ß´ç
+    // è®¡ç®—æ–‡æœ¬å°ºå¯¸
     ImVec2 text_size = ImGui::CalcTextSize(label);
 
-    // ¼ÆËãÕûÌå°´Å¥´óĞ¡
-    float icon_text_spacing = 8.0f;  // Í¼±êºÍÎÄ×ÖÖ®¼äµÄ¼ä¾à
+    // è®¡ç®—æ•´ä½“æŒ‰é’®å¤§å°
+    float icon_text_spacing = 8.0f;  // å›¾æ ‡å’Œæ–‡å­—ä¹‹é—´çš„é—´è·
     ImVec2 button_padding = style.FramePadding;
     float rounding = style.FrameRounding;
     ImVec2 button_size_min(icon_size.x + icon_text_spacing + text_size.x + button_padding.x * 2, ImMax(icon_size.y, text_size.y) + button_padding.y * 2);
@@ -136,33 +136,33 @@ bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_
 
     ImGui::InvisibleButton(label, real_button_size);
 
-    // »ñÈ¡½»»¥×´Ì¬
+    // è·å–äº¤äº’çŠ¶æ€
     bool is_hovered = ImGui::IsItemHovered();
     bool is_active = ImGui::IsItemActive();
     bool is_clicked = ImGui::IsItemClicked();
 
-    // »æÖÆ°´Å¥±³¾°
+    // ç»˜åˆ¶æŒ‰é’®èƒŒæ™¯
     ImU32 bg_color = ImGui::GetColorU32(is_active ? ImGuiCol_ButtonActive : is_hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 
     ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), bg_color, rounding);
 
-    // Ìí¼Ó±ß¿òĞ§¹û
+    // æ·»åŠ è¾¹æ¡†æ•ˆæœ
     if(is_hovered || is_active) {
         ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImGui::GetColorU32(ImGuiCol_Border), rounding, 0, 1.5f);
     }
 
     ImVec2 pos = ImGui::GetItemRectMin();
 
-    // ¼ÆËãÍ¼±êºÍÎÄ×ÖÎ»ÖÃ£¨´¹Ö±¾ÓÖĞ£©
+    // è®¡ç®—å›¾æ ‡å’Œæ–‡å­—ä½ç½®ï¼ˆå‚ç›´å±…ä¸­ï¼‰
     float icon_y = pos.y + (real_button_size.y - icon_size.y) * 0.5f;
     float text_y = pos.y + (real_button_size.y - text_size.y) * 0.5f;
 
-    // »æÖÆÍ¼±ê
+    // ç»˜åˆ¶å›¾æ ‡
     ImVec2 icon_min(pos.x + button_padding.x, icon_y);
     ImVec2 icon_max(icon_min.x + icon_size.x, icon_min.y + icon_size.y);
     window->DrawList->AddImage(tex_id, icon_min, icon_max, uv_min, uv_max);
 
-    // »æÖÆÎÄ±¾
+    // ç»˜åˆ¶æ–‡æœ¬
     ImVec2 text_pos(pos.x + button_padding.x + icon_size.x + icon_text_spacing, text_y);
     window->DrawList->AddText(text_pos, ImGui::GetColorU32(ImGuiCol_Text), label);
 
@@ -288,7 +288,7 @@ bool iconTextButtonH(const Cube::Texture2D* icon, std::string_view label, bool i
 }
 
 bool editableLabel(const char* id, std::string& text, bool triggerEdit) {
-    // ÓÃ id ×÷Îª key ´æ´¢Ã¿¸ö label µÄ¶ÀÁ¢×´Ì¬
+    // ç”¨ id ä½œä¸º key å­˜å‚¨æ¯ä¸ª label çš„ç‹¬ç«‹çŠ¶æ€
     struct EditState {
         bool  isEditing = false;
         char  buf[256]  = {};
@@ -301,29 +301,29 @@ bool editableLabel(const char* id, std::string& text, bool triggerEdit) {
     bool committed = false;
 
     if (!state.isEditing) {
-        // ---- Label Ä£Ê½ ----
+        // ---- Label æ¨¡å¼ ----
         ImGui::TextUnformatted(text.c_str());
 
-        // ´¥·¢½øÈë±à¼­Ä£Ê½£ºÍâ²¿ triggerEdit ĞÅºÅ
+        // è§¦å‘è¿›å…¥ç¼–è¾‘æ¨¡å¼ï¼šå¤–éƒ¨ triggerEdit ä¿¡å·
         if (triggerEdit)
         {
             state.isEditing = true;
             state.needFocus = true;
-            // ½«µ±Ç°ÎÄ±¾¿½±´µ½»º³åÇø
+            // å°†å½“å‰æ–‡æœ¬æ‹·è´åˆ°ç¼“å†²åŒº
             strncpy(state.buf, text.c_str(), sizeof(state.buf) - 1);
             state.buf[sizeof(state.buf) - 1] = '\0';
         }
     } else {
-        // ---- ±à¼­Ä£Ê½ ----
-        // ¸ø InputText Ò»¸ö²»´ø ## µÄÎ¨Ò» PushID£¬±ÜÃâ³åÍ»
+        // ---- ç¼–è¾‘æ¨¡å¼ ----
+        // ç»™ InputText ä¸€ä¸ªä¸å¸¦ ## çš„å”¯ä¸€ PushIDï¼Œé¿å…å†²çª
         ImGui::PushID(id);
 
-        // ÈÃÊäÈë¿òÓë Label ¿í¶È±£³ÖÒ»ÖÂ£¨¿ÉÑ¡£º¹Ì¶¨¿í¶È»ò×ÔÊÊÓ¦£©
+        // è®©è¾“å…¥æ¡†ä¸ Label å®½åº¦ä¿æŒä¸€è‡´ï¼ˆå¯é€‰ï¼šå›ºå®šå®½åº¦æˆ–è‡ªé€‚åº”ï¼‰
         float textWidth = ImGui::CalcTextSize(state.buf).x + ImGui::GetStyle().FramePadding.x * 2.0f;
         float minWidth  = 80.0f;
         ImGui::SetNextItemWidth(std::max(textWidth, minWidth));
 
-        // Ê×´Î½øÈë±à¼­Ä£Ê½Ê±×Ô¶¯¾Û½¹
+        // é¦–æ¬¡è¿›å…¥ç¼–è¾‘æ¨¡å¼æ—¶è‡ªåŠ¨èšç„¦
         if (state.needFocus)
         {
             ImGui::SetKeyboardFocusHere();
@@ -331,8 +331,8 @@ bool editableLabel(const char* id, std::string& text, bool triggerEdit) {
         }
 
         ImGuiInputTextFlags flags =
-            ImGuiInputTextFlags_EnterReturnsTrue |   // Enter Ìá½»
-            ImGuiInputTextFlags_AutoSelectAll;        // ×Ô¶¯È«Ñ¡
+            ImGuiInputTextFlags_EnterReturnsTrue |   // Enter æäº¤
+            ImGuiInputTextFlags_AutoSelectAll;        // è‡ªåŠ¨å…¨é€‰
 
         bool enterPressed = ImGui::InputText("##edit", state.buf, sizeof(state.buf), flags);
 
@@ -341,14 +341,14 @@ bool editableLabel(const char* id, std::string& text, bool triggerEdit) {
 
         if (enterPressed || lostFocus)
         {
-            // Ìá½»ĞÂÎÄ±¾
+            // æäº¤æ–°æ–‡æœ¬
             text = state.buf;
             state.isEditing = false;
             committed = true;
         }
         else if (escPressed)
         {
-            // È¡Ïû£¬»Ö¸´Ô­ÎÄ±¾
+            // å–æ¶ˆï¼Œæ¢å¤åŸæ–‡æœ¬
             state.isEditing = false;
         }
 
