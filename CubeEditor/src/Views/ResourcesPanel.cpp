@@ -119,6 +119,22 @@ void ResourcesPanel::render(float deltaTime) {
                             if(!textureThumbnail) textureThumbnail = file_png.get();
                             textureHasSprites = textureImporter->contains("sprites") && (*textureImporter)["sprites"].is_object() && !(*textureImporter)["sprites"].empty();
                             iconTextButton(textureThumbnail, entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
+
+                            if(textureHasSprites) {
+                                const bool expanded = expandedTextureNodes.count(entry->identifier);
+                                const ImVec2 rectMin = ImGui::GetItemRectMin();
+                                const ImVec2 rectMax = ImGui::GetItemRectMax();
+                                const float cx = rectMax.x - 12.0f;
+                                const float cy = rectMin.y + 12.0f;
+                                const float s = 4.5f;
+                                ImDrawList* drawList = ImGui::GetWindowDrawList();
+                                ImU32 triColor = ImGui::GetColorU32(ImGuiCol_Text);
+                                if(expanded) {
+                                    drawList->AddTriangleFilled({cx - s, cy - s * 0.5f}, {cx + s, cy - s * 0.5f}, {cx, cy + s}, triColor);
+                                } else {
+                                    drawList->AddTriangleFilled({cx - s * 0.5f, cy - s}, {cx - s * 0.5f, cy + s}, {cx + s, cy}, triColor);
+                                }
+                            }
                         }
                         break;
                     case ResourceType::AnimationClip:
@@ -142,7 +158,8 @@ void ResourcesPanel::render(float deltaTime) {
             }
 
             const bool leftClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
-            if(entry->isGroup && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+            const bool leftDoubleClicked = ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left);
+            if(entry->isGroup && leftDoubleClicked) {
                 assetExplorer.enterNode(entry.get());
                 selectedManager.cancel();
             }else{
@@ -159,7 +176,7 @@ void ResourcesPanel::render(float deltaTime) {
                 ImGui::OpenPopup("NodeRightMenu");
             }
 
-            if(isTexture && textureHasSprites && leftClicked) {
+            if(isTexture && textureHasSprites && leftDoubleClicked) {
                 if(expandedTextureNodes.count(entry->identifier)) {
                     expandedTextureNodes.erase(entry->identifier);
                 } else {
@@ -182,6 +199,7 @@ void ResourcesPanel::render(float deltaTime) {
                 }
 
                 const float spriteItemSize = imageSize * 0.8f;
+                const float spriteVerticalPadding = (imageSize - spriteItemSize) * 0.5f;
                 for(const auto& spriteEntry : sprites.items()) {
                     ImGui::SameLine();
                     if(ImGui::GetContentRegionAvail().x < spriteItemSize) {
@@ -196,6 +214,8 @@ void ResourcesPanel::render(float deltaTime) {
                         };
                     }
 
+                    ImGui::BeginGroup();
+                    ImGui::Dummy(ImVec2(0.0f, spriteVerticalPadding));
                     iconTextButton(spritePreviewTexture, spriteEntry.key(), false, ImVec2(spriteItemSize, spriteItemSize), region);
                     if(ImGui::BeginDragDropSource()) {
                         std::string payloadStr = entry->identifier + ":" + spriteEntry.key();
@@ -203,6 +223,8 @@ void ResourcesPanel::render(float deltaTime) {
                         ImGui::Image((spritePreviewTexture ? spritePreviewTexture : file_png.get())->getId(), {64, 64}, toImVec2(region.uvMin), toImVec2(region.uvMax));
                         ImGui::EndDragDropSource();
                     }
+                    ImGui::Dummy(ImVec2(0.0f, spriteVerticalPadding));
+                    ImGui::EndGroup();
                 }
             }
         }

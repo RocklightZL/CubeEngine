@@ -18,7 +18,7 @@ namespace Utils{
 		if(dir.empty()) {
 			CB_EDITOR_ERROR("getUserConfigDir: Failed to get environment variable \"HOME\"");
 		}
-		return dir + "/Liabrary/Application Support";
+		return dir + "/Library/Application Support";
 	#elif __Linux__
 		std::string dir = std::string(std::getenv("XDG_CONFIG_HOME"));
 		if(!dir.empty()) {
@@ -82,7 +82,7 @@ namespace Utils{
 
 			const std::string name = frame["filename"].get<std::string>();
 			const float x = rect["x"].get<float>();
-			const float y = rect["y"].get<float>();
+			const float y = atlasH - rect["y"].get<float>() - rect["h"].get<float>();
 			const float w = rect["w"].get<float>();
 			const float h = rect["h"].get<float>();
 

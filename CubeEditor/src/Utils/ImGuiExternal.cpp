@@ -176,22 +176,21 @@ bool iconTextButton(const Cube::Texture2D* icon, std::string_view label, bool is
     if(window->SkipItems) return false;
 
     ImVec2 iconSize = ImVec2(icon->getWidth(), icon->getHeight()) * toImVec2(texUV.uvMax - texUV.uvMin);
+    const float sampledAspectRatio = iconSize.x > 0.0f ? (iconSize.y / iconSize.x) : 1.0f;
     ImVec2 textSize = ImGui::CalcTextSize(label.data());
     ImVec2 itemSize = ImVec2(ImMax(iconSize.x, textSize.x) + padding * 2, iconSize.y + textSize.y + padding * 3);
     if(size.x > 0) {
         itemSize.x = size.x;
         if(iconSize.x > size.x - padding * 2) {
             iconSize.x = size.x - padding * 2;
-            float aspectRatio = static_cast<float>(icon->getHeight()) / static_cast<float>(icon->getWidth());
-            iconSize.y = iconSize.x * aspectRatio;
+            iconSize.y = iconSize.x * sampledAspectRatio;
         }
     }
     if(size.y > 0) {
         itemSize.y = size.y;
         if(iconSize.y > size.y - textSize.y - padding * 3) {
             iconSize.y = size.y - textSize.y - padding * 3;
-            float aspectRatio = static_cast<float>(icon->getWidth()) / static_cast<float>(icon->getHeight());
-            iconSize.x = iconSize.y * aspectRatio;
+            iconSize.x = iconSize.y / sampledAspectRatio;
         }
     }
 
@@ -249,14 +248,14 @@ bool iconTextButtonH(const Cube::Texture2D* icon, std::string_view label, bool i
 
     ImVec2 textSize = ImGui::CalcTextSize(label.data());
     ImVec2 iconSize = ImVec2(icon->getWidth(), icon->getHeight()) * toImVec2(texUV.uvMax - texUV.uvMin);
+    const float sampledAspectRatio = iconSize.x > 0.0f ? (iconSize.y / iconSize.x) : 1.0f;
     if(iconSize.x > textSize.y || iconSize.y > textSize.y) {
-        float aspectRatio = static_cast<float>(icon->getHeight()) / static_cast<float>(icon->getWidth());
-        if(aspectRatio < 1.0f) {
+        if(sampledAspectRatio < 1.0f) {
             iconSize.x = textSize.y;
-            iconSize.y = iconSize.x * aspectRatio;
+            iconSize.y = iconSize.x * sampledAspectRatio;
         } else {
             iconSize.y = textSize.y;
-            iconSize.x = iconSize.y / aspectRatio;
+            iconSize.x = iconSize.y / sampledAspectRatio;
         }
     }
     float iconTextSpacing = 8.0f;
