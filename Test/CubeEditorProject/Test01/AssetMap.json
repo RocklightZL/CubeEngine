@@ -6,6 +6,56 @@
         "path": "D:/mycode/vsProject/CubeEngine/Test/CubeEditorProject/Test01/Assets/icon.png"
     },
     "tex:test.png": {
-        "path": "D:/mycode/vsProject/CubeEngine/Test/CubeEditorProject/Test01/Assets/test.png"
+        "path": "D:/mycode/vsProject/CubeEngine/Test/CubeEditorProject/Test01/Assets/test.png",
+        "sprites": {
+            "action_meatify.png": [
+                0.7890625,
+                0.31298828125,
+                0.908203125,
+                0.375
+            ],
+            "iconWarning.png": [
+                0.7890625,
+                0.25146484375,
+                0.9111328125,
+                0.31201171875
+            ],
+            "icon_category_misc.png": [
+                0.7890625,
+                0.12548828125,
+                0.9638671875,
+                0.25048828125
+            ],
+            "icon_errand_storage.png": [
+                0.001953125,
+                0.41796875,
+                0.251953125,
+                0.529296875
+            ],
+            "overlay_disease.png": [
+                0.25390625,
+                0.41796875,
+                0.4814453125,
+                0.54296875
+            ],
+            "starmap_telescope_target.png": [
+                0.7890625,
+                0.0009765625,
+                0.9951171875,
+                0.12451171875
+            ],
+            "temperature.png": [
+                0.7890625,
+                0.3759765625,
+                0.9052734375,
+                0.4990234375
+            ],
+            "ui_room_industrial.png": [
+                0.001953125,
+                0.0009765625,
+                0.787109375,
+                0.4169921875
+            ]
+        }
     }
 }

@@ -61,6 +61,7 @@ public:
     void addNode(AssetNode* node);
     AssetNode* createGroup(const std::string& name);
     void createResource(const std::string& identifier, const nlohmann::json& content);
+    void reimportResource(const std::string& identifier, const nlohmann::json& content);
     void removeNode(AssetNode* node);
     void move(const AssetNode* src, AssetNode* dst);
 

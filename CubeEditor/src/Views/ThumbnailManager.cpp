@@ -6,6 +6,10 @@
 #include <stb_image.h>
 #include <stb_image_resize2.h>
 
+ThumbnailManager::ThumbnailManager() {
+    worker = std::thread(&ThumbnailManager::workerLoop, this);
+}
+
 ThumbnailManager::ThumbnailManager(const Config& config) : config(config) {
     worker = std::thread(&ThumbnailManager::workerLoop, this);
 }

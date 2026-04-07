@@ -94,6 +94,11 @@ void AssetExplorer::createResource(const std::string& identifier, const nlohmann
     resetResourceManager();
 }
 
+void AssetExplorer::reimportResource(const std::string& identifier, const nlohmann::json& content) {
+    assetPathMap[identifier] = content;
+    resetResourceManager();
+}
+
 void AssetExplorer::removeNode(AssetNode* node) {
     _removeNode(node);
     resetResourceManager();

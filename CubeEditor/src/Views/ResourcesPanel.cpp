@@ -4,6 +4,7 @@
 #include <fstream>
 #include <memory>
 #include <stack>
+#include <unordered_set>
 
 #include "../App/EditorPage.h"
 #include "../App/EditorApp.h"
@@ -82,12 +83,18 @@ void ResourcesPanel::render(float deltaTime) {
     ImGui::BeginChild("Content", ImGui::GetContentRegionAvail());
     constexpr float imageSize = 128.0f;
     static SelectedManager selectedManager;
+    static std::unordered_set<std::string> expandedTextureNodes;
     struct {
         AssetNode* src = nullptr;
         AssetNode* dst = nullptr;
     } move;
     if(showMode == 0){
         for(const auto& entry : assetExplorer.getCurrentNode()->children) {
+            const bool isTexture = !entry->isGroup && entry->type == ResourceType::Texture;
+            const nlohmann::json* textureImporter = nullptr;
+            Texture2D* textureThumbnail = nullptr;
+            bool textureHasSprites = false;
+
             ImGui::SameLine();
             if(ImGui::GetContentRegionAvail().x < imageSize) {
                 ImGui::NewLine();
@@ -105,9 +112,11 @@ void ResourcesPanel::render(float deltaTime) {
                 switch(entry->type) {
                     case ResourceType::Texture:
                         {
-                            Texture2D* tex = thumbnailManager.request(assetExplorer.getAssetImporter(entry->identifier)["path"].get<std::string>());
-                            if(!tex) tex = file_png.get();
-                            iconTextButton(tex, entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
+                            textureImporter = &assetExplorer.getAssetImporter(entry->identifier);
+                            textureThumbnail = thumbnailManager.request((*textureImporter)["path"].get<std::string>());
+                            if(!textureThumbnail) textureThumbnail = file_png.get();
+                            textureHasSprites = textureImporter->contains("sprites") && (*textureImporter)["sprites"].is_object() && !(*textureImporter)["sprites"].empty();
+                            iconTextButton(textureThumbnail, entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
                         }
                         break;
                     case ResourceType::AnimationClip:
@@ -129,11 +138,13 @@ void ResourcesPanel::render(float deltaTime) {
                 ImGui::PopStyleVar();
                 ImGui::PopStyleColor();
             }
+
+            const bool leftClicked = ImGui::IsItemClicked(ImGuiMouseButton_Left);
             if(entry->isGroup && ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
                 assetExplorer.enterNode(entry.get());
                 selectedManager.cancel();
             }else{
-                if(ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+                if(leftClicked) {
                     if(ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
                         selectedManager.multiSelect(entry.get());
                     }else {
@@ -144,6 +155,42 @@ void ResourcesPanel::render(float deltaTime) {
             if(ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
                 selectedManager.singleSelect(entry.get());
                 ImGui::OpenPopup("NodeRightMenu");
+            }
+
+            if(isTexture && textureHasSprites && leftClicked) {
+                if(expandedTextureNodes.count(entry->identifier)) {
+                    expandedTextureNodes.erase(entry->identifier);
+                } else {
+                    expandedTextureNodes.insert(entry->identifier);
+                }
+            }
+
+            if(isTexture && textureHasSprites && expandedTextureNodes.count(entry->identifier)) {
+                const auto& sprites = (*textureImporter)["sprites"];
+                const float spriteItemSize = imageSize * 0.8f;
+                for(const auto& spriteEntry : sprites.items()) {
+                    ImGui::SameLine();
+                    if(ImGui::GetContentRegionAvail().x < spriteItemSize) {
+                        ImGui::NewLine();
+                    }
+
+                    TextureRegion region = {{0.0f, 0.0f}, {1.0f, 1.0f}};
+                    if(spriteEntry.value().is_array() && spriteEntry.value().size() >= 4) {
+                        region = {
+                            {spriteEntry.value()[0].get<float>(), spriteEntry.value()[1].get<float>()},
+                            {spriteEntry.value()[2].get<float>(), spriteEntry.value()[3].get<float>()}
+                        };
+                    }
+
+                    iconTextButton(textureThumbnail, spriteEntry.key(), false, ImVec2(spriteItemSize, spriteItemSize), region);
+                    if(ImGui::BeginDragDropSource()) {
+                        std::string payloadStr = entry->identifier + ":" + spriteEntry.key();
+                        ImGui::SetDragDropPayload("AssetSprite", payloadStr.c_str(), payloadStr.size());
+                        Texture2D* tex = thumbnailManager.request(assetExplorer.getAssetImporter(entry->identifier)["path"].get<std::string>());
+                        ImGui::Image(tex ? tex->getId() : file_png.get()->getId(), {64, 64}, toImVec2(region.uvMin), toImVec2(region.uvMax));
+                        ImGui::EndDragDropSource();
+                    }
+                }
             }
         }
     } else if(showMode == 1){

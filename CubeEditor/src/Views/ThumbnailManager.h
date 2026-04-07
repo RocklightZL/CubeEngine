@@ -19,7 +19,8 @@ public:
         int decodeQueueLimit = 512;
     };
 
-    explicit ThumbnailManager(const Config& config = {});
+    ThumbnailManager();
+    explicit ThumbnailManager(const Config& config);
     ~ThumbnailManager();
 
     ThumbnailManager(const ThumbnailManager&) = delete;

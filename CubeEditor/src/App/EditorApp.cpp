@@ -20,8 +20,8 @@ using namespace Cube;
 extern Project* proj;
 
 const std::string EditorApp::userConfigDir = []() {
-    std::string dir = getUserConfigDir() + "/CubeEngine";
-    Utils::normalizePath(dir);
+    std::string dir = ::Utils::getUserConfigDir() + "/CubeEngine";
+    Cube::Utils::normalizePath(dir);
     std::filesystem::create_directories(dir);
     return dir;
 }();
