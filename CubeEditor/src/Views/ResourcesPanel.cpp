@@ -4,6 +4,7 @@
 #include <fstream>
 #include <memory>
 #include <stack>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "../App/EditorPage.h"
@@ -84,6 +85,7 @@ void ResourcesPanel::render(float deltaTime) {
     constexpr float imageSize = 128.0f;
     static SelectedManager selectedManager;
     static std::unordered_set<std::string> expandedTextureNodes;
+    static std::unordered_map<std::string, std::unique_ptr<Texture2D>> spritePreviewTextureCache;
     struct {
         AssetNode* src = nullptr;
         AssetNode* dst = nullptr;
@@ -167,6 +169,18 @@ void ResourcesPanel::render(float deltaTime) {
 
             if(isTexture && textureHasSprites && expandedTextureNodes.count(entry->identifier)) {
                 const auto& sprites = (*textureImporter)["sprites"];
+                const std::string texturePath = (*textureImporter)["path"].get<std::string>();
+                Texture2D* spritePreviewTexture = nullptr;
+                auto it = spritePreviewTextureCache.find(texturePath);
+                if(it == spritePreviewTextureCache.end()) {
+                    spritePreviewTextureCache[texturePath] = std::make_unique<Texture2D>(texturePath);
+                    it = spritePreviewTextureCache.find(texturePath);
+                }
+                spritePreviewTexture = it->second.get();
+                if(!spritePreviewTexture) {
+                    spritePreviewTexture = file_png.get();
+                }
+
                 const float spriteItemSize = imageSize * 0.8f;
                 for(const auto& spriteEntry : sprites.items()) {
                     ImGui::SameLine();
@@ -182,12 +196,11 @@ void ResourcesPanel::render(float deltaTime) {
                         };
                     }
 
-                    iconTextButton(textureThumbnail, spriteEntry.key(), false, ImVec2(spriteItemSize, spriteItemSize), region);
+                    iconTextButton(spritePreviewTexture, spriteEntry.key(), false, ImVec2(spriteItemSize, spriteItemSize), region);
                     if(ImGui::BeginDragDropSource()) {
                         std::string payloadStr = entry->identifier + ":" + spriteEntry.key();
                         ImGui::SetDragDropPayload("AssetSprite", payloadStr.c_str(), payloadStr.size());
-                        Texture2D* tex = thumbnailManager.request(assetExplorer.getAssetImporter(entry->identifier)["path"].get<std::string>());
-                        ImGui::Image(tex ? tex->getId() : file_png.get()->getId(), {64, 64}, toImVec2(region.uvMin), toImVec2(region.uvMax));
+                        ImGui::Image((spritePreviewTexture ? spritePreviewTexture : file_png.get())->getId(), {64, 64}, toImVec2(region.uvMin), toImVec2(region.uvMax));
                         ImGui::EndDragDropSource();
                     }
                 }
