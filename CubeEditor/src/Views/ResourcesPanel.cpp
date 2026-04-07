@@ -105,7 +105,7 @@ void ResourcesPanel::render(float deltaTime) {
                 switch(entry->type) {
                     case ResourceType::Texture:
                         {
-                            Texture2D* tex = thumbnailManager.request(assetExplorer.getAssetPathMap().at(entry->identifier)["path"].get<std::string>());
+                            Texture2D* tex = thumbnailManager.request(assetExplorer.getAssetImporter(entry->identifier)["path"].get<std::string>());
                             if(!tex) tex = file_png.get();
                             iconTextButton(tex, entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
                         }
@@ -122,7 +122,7 @@ void ResourcesPanel::render(float deltaTime) {
                 if(ImGui::BeginDragDropSource()) {
                     AssetNode* src = entry.get();
                     ImGui::SetDragDropPayload("Asset", &src, sizeof(src));
-                    Texture2D* tex = thumbnailManager.request(assetExplorer.getAssetPathMap().at(src->identifier)["path"].get<std::string>());
+                    Texture2D* tex = thumbnailManager.request(assetExplorer.getAssetImporter(src->identifier)["path"].get<std::string>());
                     ImGui::Image(tex ? tex->getId() : file_png->getId(), {64, 64}, {0, 1}, {1, 0});
                     ImGui::EndDragDropSource();
                 }

@@ -26,7 +26,7 @@ namespace Cube {
             SpriteRender* spriteA = a->getComponent<SpriteRender>();
             SpriteRender* spriteB = b->getComponent<SpriteRender>();
             if(spriteA->order != spriteB->order) {
-                return spriteA < spriteB;
+                return spriteA->order < spriteB->order;
             }
             return (spriteA->sprite->getTexture() ? spriteA->sprite->getTexture()->getId() : -1) < (spriteB->sprite->getTexture() ? spriteB->sprite->getTexture()->getId() : -1);
         });
