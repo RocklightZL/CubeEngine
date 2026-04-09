@@ -217,12 +217,16 @@ void ResourcesPanel::render(float deltaTime) {
                     ImGui::BeginGroup();
                     ImGui::Dummy(ImVec2(0.0f, spriteVerticalPadding));
                     iconTextButton(spritePreviewTexture, spriteEntry.key(), false, ImVec2(spriteItemSize, spriteItemSize), region);
+                    ImGui::PushStyleColor(ImGuiCol_PopupBg, {0, 0, 0, 0});
+                    ImGui::PushStyleVar(ImGuiStyleVar_PopupBorderSize, 0);
                     if(ImGui::BeginDragDropSource()) {
-                        std::string payloadStr = entry->identifier + ":" + spriteEntry.key();
-                        ImGui::SetDragDropPayload("AssetSprite", payloadStr.c_str(), payloadStr.size());
-                        ImGui::Image((spritePreviewTexture ? spritePreviewTexture : file_png.get())->getId(), {64, 64}, toImVec2(region.uvMin), toImVec2(region.uvMax));
+                        std::string spriteIdentifier = "spr:" + entry->identifier + "#" + spriteEntry.key();
+                        ImGui::SetDragDropPayload("AssetSprite", spriteIdentifier.c_str(), spriteIdentifier.size());
+                        ImGui::Image((spritePreviewTexture ? spritePreviewTexture : file_png.get())->getId(), Utils::keepAspectRatio(toImVec2(spritePreviewTexture->getSize() * (region.uvMax - region.uvMin)), 64), {region.uvMin.x, region.uvMax.y}, {region.uvMax.x, region.uvMin.y});
                         ImGui::EndDragDropSource();
                     }
+                    ImGui::PopStyleVar();
+                    ImGui::PopStyleColor();
                     ImGui::Dummy(ImVec2(0.0f, spriteVerticalPadding));
                     ImGui::EndGroup();
                 }

@@ -34,11 +34,11 @@ namespace Cube {
     #define CB_CRITICAL(...)        ::Cube::Log::getClientLogger()->critical(__VA_ARGS__)
 
     // editor logger
-    #define CB_EDITOR_TRACE(...)    ::Cube::Log::getClientLogger()->trace(__VA_ARGS__)
-    #define CB_EDITOR_INFO(...)     ::Cube::Log::getClientLogger()->info(__VA_ARGS__)
-    #define CB_EDITOR_WARN(...)     ::Cube::Log::getClientLogger()->warn(__VA_ARGS__)
-    #define CB_EDITOR_ERROR(...)    ::Cube::Log::getClientLogger()->error(__VA_ARGS__)
-    #define CB_EDITOR_CRITICAL(...) ::Cube::Log::getClientLogger()->critical(__VA_ARGS__)
+    #define CB_EDITOR_TRACE(...)    ::Cube::Log::getEditorLogger()->trace(__VA_ARGS__)
+    #define CB_EDITOR_INFO(...)     ::Cube::Log::getEditorLogger()->info(__VA_ARGS__)
+    #define CB_EDITOR_WARN(...)     ::Cube::Log::getEditorLogger()->warn(__VA_ARGS__)
+    #define CB_EDITOR_ERROR(...)    ::Cube::Log::getEditorLogger()->error(__VA_ARGS__)
+    #define CB_EDITOR_CRITICAL(...) ::Cube::Log::getEditorLogger()->critical(__VA_ARGS__)
 
     // assert
     #define CB_ASSERT(...) assert(__VA_ARGS__)
@@ -54,6 +54,12 @@ namespace Cube {
     #define CB_WARN(...)
     #define CB_ERROR(...)
     #define CB_CRITICAL(...)
+
+    #define CB_EDITOR_TRACE(...)
+    #define CB_EDITOR_INFO(...)
+    #define CB_EDITOR_WARN(...)
+    #define CB_EDITOR_ERROR(...)
+    #define CB_EDITOR_CRITICAL(...)
 
     #define CB_ASSERT(...)
 #endif

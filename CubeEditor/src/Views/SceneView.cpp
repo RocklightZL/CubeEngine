@@ -43,8 +43,8 @@ void SceneView::render(float deltaTime) {
         }
         app->gameThread = std::thread(gameThreadFunction,
             app,
+            editorPage.getProject(),
             editorPage.selectedScene->scene,
-            editorPage.getProject()->getConfig().sceneDirectory,
             &isGameOver);
     }
     ImGui::SameLine();
@@ -91,6 +91,20 @@ void SceneView::render(float deltaTime) {
                     e->getTransform().setPosition(pos);
                     auto spriteRender = e->addComponent<SpriteRender>();
                     spriteRender->sprite = ResPtr<Sprite>("spr:" + asset->identifier);
+                }
+            }
+            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("AssetSprite")){
+                std::string spriteIdentifier((char*)payload->Data, payload->DataSize);
+                size_t posStr = spriteIdentifier.find('#');
+                if(posStr != std::string::npos) {
+                    glm::vec2 pos = glm::vec2(ImGui::GetMousePos().x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (ImGui::GetMousePos().y - ImGui::GetWindowPos().y));
+                    pos *= editorPage.editorCamera.zoom;
+                    pos += editorPage.editorCamera.position;
+                    std::string spriteName = spriteIdentifier.substr(posStr + 1);
+                    auto e = editorPage.selectedScene->scene->createEntity(spriteName);
+                    e->getTransform().setPosition(pos);
+                    auto spriteRender = e->addComponent<SpriteRender>();
+                    spriteRender->sprite = ResPtr<Sprite>(spriteIdentifier);
                 }
             }
             ImGui::EndDragDropTarget();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <intrin.h> // È¥µô¾Í¹ı²»ÁË±àÒë£¬²»ÖªµÀÎªÊ²Ã´
+#include <intrin.h> // å»æ‰å°±è¿‡ä¸äº†ç¼–è¯‘ï¼Œä¸çŸ¥é“ä¸ºä»€ä¹ˆ
 
 namespace Cube {
     class Layer {
@@ -8,8 +8,8 @@ namespace Cube {
         Layer() = default;
         virtual ~Layer() = default;
 
-        virtual void onAttach() {}  // Èë²ãÕ»Ê±µ÷ÓÃ
-        virtual void onDetach() {}  // ³öÕ»Ê±µ÷ÓÃ
+        virtual void onAttach() {}  // å…¥å±‚æ ˆæ—¶è°ƒç”¨
+        virtual void onDetach() {}  // å‡ºæ ˆæ—¶è°ƒç”¨
         virtual void onEvent() {}
         virtual void onUpdate(float deltaTime) {}
     };

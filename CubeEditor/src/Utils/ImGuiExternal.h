@@ -52,3 +52,12 @@ inline ImVec2 toImVec2(const glm::vec2& vec) {
 inline glm::vec2 toGlmVec2(const ImVec2& vec) {
     return glm::vec2(vec.x, vec.y);
 }
+
+namespace Utils {
+
+    // 保持长宽比的缩放
+    inline ImVec2 keepAspectRatio(const ImVec2& size, float maxDimension) {
+        float scale = maxDimension / std::max(size.x, size.y);
+        return ImVec2(size.x * scale, size.y * scale);
+    }
+}

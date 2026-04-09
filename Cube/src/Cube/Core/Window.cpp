@@ -15,7 +15,10 @@ namespace Cube {
 
     int Window::windowCnt = 0;
 
-    Window::Window(const WindowPros& pros, EventDispatcher* eventDispatcher, GLFWwindow* shareContext) : pros(pros), eventDispatcher(eventDispatcher) { init(shareContext); }
+    Window::Window(const WindowPros& pros, EventDispatcher* eventDispatcher, GLFWwindow* shareContext) : pros(pros), eventDispatcher(eventDispatcher) { 
+        init(shareContext); 
+        ++windowCnt;
+    }
 
     Window::~Window() {
         glfwMakeContextCurrent(window);

@@ -19,6 +19,7 @@ namespace Cube {
     }
 
     void ResourceManager::init(const std::string& pathMapFilePath) {
+        get().releaseAll();
         std::ifstream file(pathMapFilePath);
         if(!file.is_open()) {
             CB_CORE_ERROR("Failed to open resource path map file: {}", pathMapFilePath);
@@ -30,6 +31,7 @@ namespace Cube {
     }
 
     void ResourceManager::init(const std::unordered_map<std::string, nlohmann::json>& pathMap) {
+        get().releaseAll();
         get().pathMap = pathMap;                        
     }
 
@@ -56,6 +58,7 @@ namespace Cube {
     }
 
     void ResourceManager::reset(const std::unordered_map<std::string, nlohmann::json>& pathMap) {
+        releaseAll();
         this->pathMap = pathMap;
     }
 

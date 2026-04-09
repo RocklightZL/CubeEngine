@@ -17,6 +17,7 @@ namespace Cube {
     public:
         friend Context;
 
+        // TODO: 改成全局单例
         // thread-local singleton
         static ResourceManager& get();
         static void init(const std::string& pathMapFilePath);
@@ -28,6 +29,7 @@ namespace Cube {
         ResourceManager& operator=(ResourceManager&&) = delete;
         ResourceManager& operator=(const ResourceManager&) = delete;
 
+        // TODO: 将加载器解耦，支持用户从外部通过脚本注册加载器，自定义类型
         // load
         template<typename T>
         T* load(const std::string& identifier) {
