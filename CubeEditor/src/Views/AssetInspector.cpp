@@ -29,6 +29,9 @@ void AssetInspector::render(float deltaTime) {
 
         switch(node->type){
             case Cube::ResourceType::Texture:{
+                static int gridRows = 1;
+                static int gridCols = 1;
+
                 ImGui::Text("path:");
                 ImGui::Text("%s", editingImporter.value("path", "").c_str());
                 ImGui::Separator();
@@ -39,6 +42,44 @@ void AssetInspector::render(float deltaTime) {
                         editingImporter["sprites"] = Utils::parseAtlasFile(atlasPath);
                     }
                 }
+                ImGui::SameLine();
+                if(ImGui::Button("Grid Slice")) {
+                    gridRows = 1;
+                    gridCols = 1;
+                    ImGui::OpenPopup("Grid Slice Texture");
+                }
+
+                if(ImGui::BeginPopupModal("Grid Slice Texture", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+                    ImGui::Text("Split texture into row/column grid:");
+                    ImGui::InputInt("Rows", &gridRows);
+                    ImGui::InputInt("Columns", &gridCols);
+                    if(gridRows < 1) gridRows = 1;
+                    if(gridCols < 1) gridCols = 1;
+
+                    ImGui::Separator();
+                    if(ImGui::Button("Apply", ImVec2(120.0f, 0.0f))) {
+                        nlohmann::json sprites = nlohmann::json::object();
+                        for(int r = 0; r < gridRows; ++r) {
+                            for(int c = 0; c < gridCols; ++c) {
+                                const float u0 = static_cast<float>(c) / static_cast<float>(gridCols);
+                                const float v0 = static_cast<float>(r) / static_cast<float>(gridRows);
+                                const float u1 = static_cast<float>(c + 1) / static_cast<float>(gridCols);
+                                const float v1 = static_cast<float>(r + 1) / static_cast<float>(gridRows);
+                                const std::string name = "r" + std::to_string(r) + "_c" + std::to_string(c);
+                                sprites[name] = {u0, v0, u1, v1};
+                            }
+                        }
+                        editingImporter["sprites"] = std::move(sprites);
+                        ImGui::CloseCurrentPopup();
+                    }
+                    ImGui::SameLine();
+                    if(ImGui::Button("Cancel", ImVec2(120.0f, 0.0f))) {
+                        ImGui::CloseCurrentPopup();
+                    }
+
+                    ImGui::EndPopup();
+                }
+                
 
                 const std::string texturePath = editingImporter.value("path", "");
                 if(!texturePath.empty()) {
