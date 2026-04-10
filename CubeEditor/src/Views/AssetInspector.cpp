@@ -1,5 +1,6 @@
 #include "AssetInspector.h"
 
+#include <algorithm>
 #include <string>
 
 #include "Cube/UI/FileDialog.h"
@@ -7,6 +8,7 @@
 #include "../App/EditorApp.h"
 #include "../App/EditorPage.h"
 #include "../Project/Project.h"
+#include "../Utils/EditorTextureCache.h"
 #include "../Utils/misc.h"
 #include "imgui/imgui.h"
 
@@ -37,30 +39,54 @@ void AssetInspector::render(float deltaTime) {
                         editingImporter["sprites"] = Utils::parseAtlasFile(atlasPath);
                     }
                 }
-                ImGui::SameLine();
-                if(ImGui::Button("Clear Sprites")) {
-                    editingImporter.erase("sprites");
-                }
 
-                if(editingImporter.contains("sprites") && editingImporter["sprites"].is_object()) {
-                    ImGui::Text("sprites: %d", static_cast<int>(editingImporter["sprites"].size()));
-                    if(ImGui::TreeNode("Sprite UV List")) {
-                        for(auto& sprite : editingImporter["sprites"].items()) {
-                            if(!sprite.value().is_array() || sprite.value().size() < 4) {
-                                continue;
+                const std::string texturePath = editingImporter.value("path", "");
+                if(!texturePath.empty()) {
+                    Cube::Texture2D* previewTexture = EditorTextureCache::get().request(texturePath);
+
+                    if(previewTexture) {
+                        const float availWidth = ImGui::GetContentRegionAvail().x;
+                        const float texW = static_cast<float>(previewTexture->getWidth());
+                        const float texH = static_cast<float>(previewTexture->getHeight());
+                        const float scale = texW > 0.0f ? std::min(1.0f, availWidth / texW) : 1.0f;
+                        const ImVec2 previewSize = {texW * scale, texH * scale};
+
+                        ImGui::Text("Preview:");
+                        ImGui::Image(previewTexture->getId(), previewSize, {0, 1}, {1, 0});
+
+                        if(editingImporter.contains("sprites") && editingImporter["sprites"].is_object()) {
+                            const ImVec2 imageMin = ImGui::GetItemRectMin();
+                            const ImVec2 imageMax = ImGui::GetItemRectMax();
+                            const float imageW = imageMax.x - imageMin.x;
+                            const float imageH = imageMax.y - imageMin.y;
+                            ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+                            int idx = 0;
+                            for(const auto& spriteEntry : editingImporter["sprites"].items()) {
+                                const auto& v = spriteEntry.value();
+                                if(!v.is_array() || v.size() < 4) {
+                                    continue;
+                                }
+
+                                const float u0 = v[0].get<float>();
+                                const float v0 = 1 - v[3].get<float>();
+                                const float u1 = v[2].get<float>();
+                                const float v1 = 1 - v[1].get<float>();
+
+                                const ImVec2 p0 = {imageMin.x + u0 * imageW, imageMin.y + v0 * imageH};
+                                const ImVec2 p1 = {imageMin.x + u1 * imageW, imageMin.y + v1 * imageH};
+
+                                const ImU32 color = ImGui::GetColorU32(ImVec4(
+                                    0.2f + ((idx * 37) % 100) / 140.0f,
+                                    0.3f + ((idx * 53) % 100) / 160.0f,
+                                    0.7f + ((idx * 29) % 100) / 350.0f,
+                                    1.0f
+                                ));
+                                drawList->AddRect(p0, p1, color, 0.0f, 0, 1.5f);
+                                ++idx;
                             }
-                            float uv[4] = {
-                                sprite.value()[0].get<float>(),
-                                sprite.value()[1].get<float>(),
-                                sprite.value()[2].get<float>(),
-                                sprite.value()[3].get<float>()
-                            };
-                            ImGui::PushID(sprite.key().c_str());
-                            ImGui::InputFloat4(sprite.key().c_str(), uv, "%.4f");
-                            sprite.value() = {uv[0], uv[1], uv[2], uv[3]};
-                            ImGui::PopID();
+                            drawList->AddRect(imageMin, imageMax, ImGui::GetColorU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), 0.0f, 0, 1.5f);
                         }
-                        ImGui::TreePop();
                     }
                 }
                 break;
@@ -92,7 +118,9 @@ void AssetInspector::render(float deltaTime) {
         ImGui::Separator();
         // DEBUG
         ImGui::Text("importer:");
+        ImGui::BeginChild("importerJson", ImVec2(0, 500), true);
         ImGui::Text("%s", editingImporter.dump(4).c_str());
+        ImGui::EndChild();
     } else {
         ImGui::Text("No Asset Selected");
     }

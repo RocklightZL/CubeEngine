@@ -84,5 +84,6 @@ namespace Cube {
         Sprite* loadSprite(const std::string& identifier);
         AnimationClip* loadAnimationClip(const nlohmann::json& path);
         Font* loadFont(const nlohmann::json& path);
+
     };
 }  // namespace Cube

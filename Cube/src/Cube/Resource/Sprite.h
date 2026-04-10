@@ -13,7 +13,7 @@ namespace Cube {
 
         glm::vec2 getSize() const {
             if(texture) {
-                // TODO£ºÈç¹ûÓÐÐý×ª£¬¼ÆËã·½Ê½Òª¸Ä
+                // TODOï¼šå¦‚æžœæœ‰æ—‹è½¬ï¼Œè®¡ç®—æ–¹å¼è¦æ”¹
                 return glm::vec2(texture->getWidth(), texture->getHeight()) * (texRegion.uvMax - texRegion.uvMin);
             } else {
                 return glm::vec2(1.0f);

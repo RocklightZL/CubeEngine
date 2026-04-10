@@ -10,6 +10,7 @@
 #include "../Game.h"
 #include "../Project/Project.h"
 #include "../Utils/ImGuiExternal.h"
+#include "../Utils/EditorTextureCache.h"
 #include "../Utils/misc.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
@@ -29,6 +30,8 @@ SceneView::~SceneView() {
 }
 
 void SceneView::render(float deltaTime) {
+    Texture2D* play_png = EditorTextureCache::get().request("assets/icons/play.png");
+
     ImGui::Begin("Scene View");
     
     ImGui::BeginChild("ToolBar", {ImGui::GetWindowWidth(), 45});

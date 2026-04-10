@@ -1,21 +1,14 @@
 #include "ResourcesPanel.h"
 
 #include <filesystem>
-#include <fstream>
 #include <memory>
-#include <stack>
-#include <unordered_map>
 #include <unordered_set>
 
 #include "../App/EditorPage.h"
-#include "../App/EditorApp.h"
 #include "../Project/Project.h"
+#include "../Utils/EditorTextureCache.h"
 #include "../Utils/ImGuiExternal.h"
-#include "Cube/Core/Log.h"
-#include "Cube/Renderer/Renderer.h"
-#include "Cube/UI/FileDialog.h"
 #include "imgui/imgui.h"
-#include "imgui/imgui_internal.h"
 
 using namespace Cube;
 
@@ -53,6 +46,16 @@ struct SelectedManager {
 void ResourcesPanel::render(float deltaTime) {
     Project* project = editorPage.getProject();
     AssetExplorer& assetExplorer = project->getAssetExplorer();
+    EditorTextureCache& textureCache = EditorTextureCache::get();
+    Texture2D* back_png = textureCache.request("assets/icons/back.png");
+    Texture2D* icon_mode_png = textureCache.request("assets/icons/icon_mode.png");
+    Texture2D* list_mode_png = textureCache.request("assets/icons/list_mode.png");
+    Texture2D* directory_png = textureCache.request("assets/icons/directory.png");
+    Texture2D* file_png = textureCache.request("assets/icons/file.png");
+    if(!back_png || !icon_mode_png || !list_mode_png || !directory_png || !file_png) {
+        return;
+    }
+
     static int showMode = 0; // 0: icon mode 1: list mode
     ImGui::Begin("Resources Panel");
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -85,7 +88,6 @@ void ResourcesPanel::render(float deltaTime) {
     constexpr float imageSize = 128.0f;
     static SelectedManager selectedManager;
     static std::unordered_set<std::string> expandedTextureNodes;
-    static std::unordered_map<std::string, std::unique_ptr<Texture2D>> spritePreviewTextureCache;
     struct {
         AssetNode* src = nullptr;
         AssetNode* dst = nullptr;
@@ -102,7 +104,7 @@ void ResourcesPanel::render(float deltaTime) {
                 ImGui::NewLine();
             }
             if(entry->isGroup){
-                iconTextButton(directory_png.get(), entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
+                iconTextButton(directory_png, entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
                 if(ImGui::BeginDragDropTarget()) {
                     if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Asset")) {
                         move.src = *(AssetNode**)payload->Data;
@@ -116,7 +118,7 @@ void ResourcesPanel::render(float deltaTime) {
                         {
                             textureImporter = &assetExplorer.getAssetImporter(entry->identifier);
                             textureThumbnail = thumbnailManager.request((*textureImporter)["path"].get<std::string>());
-                            if(!textureThumbnail) textureThumbnail = file_png.get();
+                            if(!textureThumbnail) textureThumbnail = file_png;
                             textureHasSprites = textureImporter->contains("sprites") && (*textureImporter)["sprites"].is_object() && !(*textureImporter)["sprites"].empty();
                             iconTextButton(textureThumbnail, entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
 
@@ -138,10 +140,10 @@ void ResourcesPanel::render(float deltaTime) {
                         }
                         break;
                     case ResourceType::AnimationClip:
-                        iconTextButton(file_png.get(), entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
+                        iconTextButton(file_png, entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
                         break;
                     default:
-                        iconTextButton(file_png.get(), entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
+                        iconTextButton(file_png, entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
                         break;
                 }
                 ImGui::PushStyleColor(ImGuiCol_PopupBg, {0, 0, 0, 0});
@@ -187,15 +189,9 @@ void ResourcesPanel::render(float deltaTime) {
             if(isTexture && textureHasSprites && expandedTextureNodes.count(entry->identifier)) {
                 const auto& sprites = (*textureImporter)["sprites"];
                 const std::string texturePath = (*textureImporter)["path"].get<std::string>();
-                Texture2D* spritePreviewTexture = nullptr;
-                auto it = spritePreviewTextureCache.find(texturePath);
-                if(it == spritePreviewTextureCache.end()) {
-                    spritePreviewTextureCache[texturePath] = std::make_unique<Texture2D>(texturePath);
-                    it = spritePreviewTextureCache.find(texturePath);
-                }
-                spritePreviewTexture = it->second.get();
+                Texture2D* spritePreviewTexture = textureCache.request(texturePath);
                 if(!spritePreviewTexture) {
-                    spritePreviewTexture = file_png.get();
+                    spritePreviewTexture = file_png;
                 }
 
                 const float spriteItemSize = imageSize * 0.8f;
@@ -222,7 +218,7 @@ void ResourcesPanel::render(float deltaTime) {
                     if(ImGui::BeginDragDropSource()) {
                         std::string spriteIdentifier = "spr:" + entry->identifier + "#" + spriteEntry.key();
                         ImGui::SetDragDropPayload("AssetSprite", spriteIdentifier.c_str(), spriteIdentifier.size());
-                        ImGui::Image((spritePreviewTexture ? spritePreviewTexture : file_png.get())->getId(), Utils::keepAspectRatio(toImVec2(spritePreviewTexture->getSize() * (region.uvMax - region.uvMin)), 64), {region.uvMin.x, region.uvMax.y}, {region.uvMax.x, region.uvMin.y});
+                        ImGui::Image((spritePreviewTexture ? spritePreviewTexture : file_png)->getId(), Utils::keepAspectRatio(toImVec2(spritePreviewTexture->getSize() * (region.uvMax - region.uvMin)), 64), {region.uvMin.x, region.uvMax.y}, {region.uvMax.x, region.uvMin.y});
                         ImGui::EndDragDropSource();
                     }
                     ImGui::PopStyleVar();

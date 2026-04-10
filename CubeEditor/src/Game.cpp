@@ -9,6 +9,7 @@
 
 using namespace Cube;
 
+// TODO: 这里直接预览最终效果，改成独立进程
 void gameThreadFunction(EditorApp* app, Project* project, Scene* scene, bool* isGameOver) {
 	CB_EDITOR_TRACE("gameThread begin");
     Application game({1280, 720, scene->getName()});  // TODO: viewport size

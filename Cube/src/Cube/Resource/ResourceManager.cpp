@@ -19,7 +19,6 @@ namespace Cube {
     }
 
     void ResourceManager::init(const std::string& pathMapFilePath) {
-        get().releaseAll();
         std::ifstream file(pathMapFilePath);
         if(!file.is_open()) {
             CB_CORE_ERROR("Failed to open resource path map file: {}", pathMapFilePath);
@@ -31,7 +30,6 @@ namespace Cube {
     }
 
     void ResourceManager::init(const std::unordered_map<std::string, nlohmann::json>& pathMap) {
-        get().releaseAll();
         get().pathMap = pathMap;                        
     }
 
@@ -53,14 +51,14 @@ namespace Cube {
         }
     }
 
+    // releaseAll不应该被随意调用，因为可能有资源正在被使用，直接删除会导致悬空指针
     void ResourceManager::releaseAll() {
         resourcesCache.clear();
     }
 
     void ResourceManager::reset(const std::unordered_map<std::string, nlohmann::json>& pathMap) {
-        releaseAll();
         this->pathMap = pathMap;
-    }
+    } 
 
     Texture2D* ResourceManager::loadTexture2D(const nlohmann::json& path) {
         return new Texture2D(path["path"].get<std::string>());
