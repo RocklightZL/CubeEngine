@@ -155,6 +155,8 @@ void EditorPage::render(float deltaTime) {
         view->render(deltaTime);
     }
 
+    thumbnailManager.tick();
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

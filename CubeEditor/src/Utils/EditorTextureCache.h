@@ -8,6 +8,7 @@
 
 class EditorTextureCache {
 public:
+    // TODO: 不用单例，改成 EditorPage 的成员
     static EditorTextureCache& get() {
         static EditorTextureCache instance;
         return instance;

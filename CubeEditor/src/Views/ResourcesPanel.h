@@ -1,5 +1,4 @@
 #pragma once
-#include "ThumbnailManager.h"
 
 #include "View.h"
 
@@ -11,7 +10,4 @@ public:
 	~ResourcesPanel() override = default;
 
 	void render(float deltaTime) override;
-
-private:
-    ThumbnailManager thumbnailManager;
 };

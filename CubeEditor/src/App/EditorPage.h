@@ -7,6 +7,7 @@
 #include "Cube/Scene/Entity.h"
 #include "../Scene/EditorCamera.h"
 #include "../Project/AssetExplorer.h"
+#include "Views/ThumbnailManager.h"
 
 namespace Cube {
     class Scene;
@@ -32,6 +33,8 @@ public:
     Cube::Entity* selectedEntity = nullptr;
     AssetNode* selectedAssetNode = nullptr;
     EditorCamera editorCamera;
+
+    ThumbnailManager thumbnailManager;
 
 private:
     std::vector<std::unique_ptr<View>> views;

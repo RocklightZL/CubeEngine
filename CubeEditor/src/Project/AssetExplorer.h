@@ -65,6 +65,7 @@ public:
     void removeNode(AssetNode* node);
     void move(const AssetNode* src, AssetNode* dst);
 
+    AssetNode* getRootNode() const { return rootNode.get(); }
     const std::string& getCurrentPath() const { return currentPath; }
     const nlohmann::json& getAssetImporter(const std::string& identifier) const { return assetPathMap.at(identifier); }
     const std::unordered_map<std::string, nlohmann::json>& getAssetPathMap() const { return assetPathMap; }

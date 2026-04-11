@@ -221,10 +221,20 @@ void AnimationEditor::render(float deltaTime) {
 
     ImGui::Separator();
     if(ImGui::Button("Add Frame")) {
-        // TODO: frame insert workflow will be added next.
+        framePickerDialog.open("Select Frame Resource",
+                               editorPage.getProject()->getAssetExplorer().getRootNode(),
+                               Cube::ResourceType::Sprite);
     }
-    ImGui::SameLine();
-    ImGui::TextDisabled("(TODO)");
+
+    std::vector<std::string> pickedIdentifiers;
+    if(framePickerDialog.render(pickedIdentifiers, editorPage)) {
+        for(const auto& identifier : pickedIdentifiers) {
+            FrameViewData f;
+            f.frame = identifier;
+            f.duration = 0.1f;
+            frames.push_back(std::move(f));
+        }
+    }
 
     ImGui::Separator();
     ImGui::BeginChild("AnimationFrames", ImVec2(0, 360), true);

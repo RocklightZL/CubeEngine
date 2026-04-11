@@ -120,7 +120,7 @@ void ResourcesPanel::render(float deltaTime) {
                     case ResourceType::Texture:
                         {
                             textureImporter = &assetExplorer.getAssetImporter(entry->identifier);
-                            textureThumbnail = thumbnailManager.request((*textureImporter)["path"].get<std::string>());
+                            textureThumbnail = editorPage.thumbnailManager.request((*textureImporter)["path"].get<std::string>());
                             if(!textureThumbnail) textureThumbnail = file_png;
                             textureHasSprites = textureImporter->contains("sprites") && (*textureImporter)["sprites"].is_object() && !(*textureImporter)["sprites"].empty();
                             iconTextButton(textureThumbnail, entry->name, selectedManager.isSelected(entry.get()), ImVec2(imageSize, imageSize));
@@ -154,7 +154,7 @@ void ResourcesPanel::render(float deltaTime) {
                 if(ImGui::BeginDragDropSource()) {
                     AssetNode* src = entry.get();
                     ImGui::SetDragDropPayload("Asset", &src, sizeof(src));
-                    Texture2D* tex = thumbnailManager.request(assetExplorer.getAssetImporter(src->identifier)["path"].get<std::string>());
+                    Texture2D* tex = editorPage.thumbnailManager.request(assetExplorer.getAssetImporter(src->identifier)["path"].get<std::string>());
                     ImGui::Image(tex ? tex->getId() : file_png->getId(), {64, 64}, {0, 1}, {1, 0});
                     ImGui::EndDragDropSource();
                 }
@@ -285,7 +285,9 @@ void ResourcesPanel::render(float deltaTime) {
     static char inputBuf[50] = {};
     static std::unique_ptr<ModalPopup> renamePopup = std::make_unique<ModalPopup>("Rename", [] {
         ImGui::Text("Name:");
-        ImGui::SetKeyboardFocusHere();
+        if(ImGui::IsWindowAppearing()) {
+            ImGui::SetKeyboardFocusHere();
+        }
         ImGui::InputText("##rename", inputBuf, IM_ARRAYSIZE(inputBuf), ImGuiInputTextFlags_AutoSelectAll);
     }, [] {
         selectedManager.getSingleNode()->name = inputBuf;
@@ -332,7 +334,5 @@ void ResourcesPanel::render(float deltaTime) {
     // ImGui::Begin("ResourcesPreview");
     //
     // ImGui::End();
-
-    thumbnailManager.tick();
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "App/EditorApp.h"
+#include "ResourcePickerDialog.h"
 #include "View.h"
 
 #include "Cube/Event/Event.h"
@@ -42,4 +43,6 @@ private:
     float speed = 1.0f;
     float duration = 0.0f;
     std::vector<FrameViewData> frames;
+
+    ResourcePickerDialog framePickerDialog;
 };
