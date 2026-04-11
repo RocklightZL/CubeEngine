@@ -38,7 +38,7 @@ namespace Cube {
             return;
         resource->refCount--;
         if(resource->refCount == 0) {
-            resourcesCache.erase(resource->identifier);
+            markRelease(resource);
         }
     }
 
@@ -46,7 +46,7 @@ namespace Cube {
         auto it = resourcesCache.find(identifier);
         if(it != resourcesCache.end()) {
             if((--it->second->refCount) == 0) {
-                resourcesCache.erase(it);
+                markRelease(it->second.get());
             }
         }
     }
@@ -54,11 +54,37 @@ namespace Cube {
     // releaseAll不应该被随意调用，因为可能有资源正在被使用，直接删除会导致悬空指针
     void ResourceManager::releaseAll() {
         resourcesCache.clear();
+        toRelease.clear();
+        toReleaseMap.clear();
     }
 
     void ResourceManager::reset(const std::unordered_map<std::string, nlohmann::json>& pathMap) {
         this->pathMap = pathMap;
     } 
+
+    void ResourceManager::markRelease(ResourceBase* resource) {
+        if(toReleaseMap.count(resource)) {
+            return;
+        }
+        toRelease.push_back(resource);
+        toReleaseMap[resource] = std::prev(toRelease.end());
+        if(toRelease.size() > maxDelayedRelease) {
+            ResourceBase* toSave = toRelease.front();
+            saveFromRelease(toSave);
+            toRelease.pop_front();
+            toReleaseMap.erase(toSave);
+            resourcesCache.erase(toSave->identifier);
+        }
+    }
+
+    void ResourceManager::saveFromRelease(ResourceBase* resource) {
+        auto it = toReleaseMap.find(resource);
+        if(it != toReleaseMap.end()) {
+            toRelease.erase(it->second);
+            toReleaseMap.erase(it);
+        }
+    }
+        
 
     Texture2D* ResourceManager::loadTexture2D(const nlohmann::json& path) {
         return new Texture2D(path["path"].get<std::string>());

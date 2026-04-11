@@ -6,6 +6,7 @@
 #include "Cube/Animation/Animation.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Resource/ResourceManager.h"
+#include "Cube/Resource/Sprite.h"
 #include "Cube/Scene/Camera2D.h"
 #include "Cube/Scene/SpriteRender.h"
 #include "SceneView.h"
@@ -142,26 +143,33 @@ void EntityPropertyPanel::render(float deltaTime) {
                             tr.uvMax = {v4[2], v4[3]};
                             property->setValue(c, tr);
                         }
-                    } else if(property->getTypeID() == getTypeID<ResPtr<Texture2D>>()) {
-                        ResPtr<Texture2D> res = property->getValue(c).as<ResPtr<Texture2D>>();
+                    } else if(property->getTypeID() == getTypeID<ResPtr<Sprite>>()) {
+                        ResPtr<Sprite> res = property->getValue(c).as<ResPtr<Sprite>>();
                         if(res) {
-                            glm::vec2 size = res->getSize() * (100.0f / (float)std::max(res->getWidth(), res->getHeight()));
-                            ImGui::Image(res->getId(), toImVec2(size), {0, 1}, {1, 0});
+                            ImVec2 size = Utils::keepAspectRatio(toImVec2(res->getSize()), 100.0f);
+                            ImGui::Image(res->getTexture()->getId(), size, {res->getTexRegion().uvMin.x, res->getTexRegion().uvMax.y}, {res->getTexRegion().uvMax.x, res->getTexRegion().uvMin.y});
                         }else {
                             ImGui::Text("None");
                         }
-                        // if(ImGui::BeginDragDropTarget()) {
-                        //     if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("AssetRUID")) {
-                        //         RUID ruid = *(RUID*)payload->Data;
-                        //         if(getResourceType(ruid) == ResourceType::Texture) {
-                        //             proj->selectedScene->isSaved = false;
-                        //             property->setValue(c, ResPtr<Texture2D>(ruid));
-                        //         }
-                        //     }
-                        //     ImGui::EndDragDropTarget();
-                        // }
+                        if(ImGui::BeginDragDropTarget()) {
+                            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Asset")) {
+                                AssetNode* asset = *(AssetNode**)payload->Data;
+                                if(asset->type == ResourceType::Texture) {
+                                    property->setValue(c, ResPtr<Sprite>("spr:" + asset->identifier));
+                                    editorPage.selectedScene->isSaved = false;
+                                }
+                            }
+                            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("AssetSprite")){
+                                std::string spriteIdentifier((char*)payload->Data, payload->DataSize);
+                                property->setValue(c, ResPtr<Sprite>(spriteIdentifier));
+                                editorPage.selectedScene->isSaved = false;
+                            }
+                            ImGui::EndDragDropTarget();
+                        }
                     } else {
-                        ImGui::Text("Failed to display");
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+                        ImGui::Text("Failed to display property");
+                        ImGui::PopStyleColor();
                     }
                 }
                 ImGui::TreePop();

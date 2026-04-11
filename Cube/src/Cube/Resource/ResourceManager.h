@@ -2,8 +2,11 @@
 #include "Atlas.h"
 
 #include <json.hpp>
+#include <list>
+#include <unordered_map>
 
 #include "Cube/Core/Log.h"
+#include "Cube/Resource/Resource.h"
 #include "Resource.h"
 
 namespace Cube {
@@ -37,6 +40,9 @@ namespace Cube {
             auto it = resourcesCache.find(identifier);
             if(it != resourcesCache.end()) {
                 ResourceBase* resource = it->second.get();
+                if(resource->refCount == 0) {
+                    saveFromRelease(resource);
+                }
                 resource->refCount++;
                 return static_cast<T*>(resource);
             }
@@ -79,6 +85,13 @@ namespace Cube {
 
         std::unordered_map<std::string, std::unique_ptr<ResourceBase>> resourcesCache;
         std::unordered_map<std::string, nlohmann::json> pathMap;
+
+        static constexpr int maxDelayedRelease = 16;
+        std::list<ResourceBase*> toRelease; // for delayed release
+        std::unordered_map<ResourceBase*, std::list<ResourceBase*>::iterator> toReleaseMap;
+
+        void markRelease(ResourceBase* resource);
+        void saveFromRelease(ResourceBase* resource);
 
         Texture2D* loadTexture2D(const nlohmann::json& path);
         Sprite* loadSprite(const std::string& identifier);

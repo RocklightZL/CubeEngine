@@ -2,12 +2,13 @@
 
 #include <functional>
 #include <unordered_map>
+#include <string>
 
 #include "Cube/Reflection/Type.h"
 
 namespace Cube {
 
-#define EVENT_TYPE(type) virtual TypeID getType() const override { return getTypeID<type>(); }\
+#define EVENT_TYPE(type) virtual Cube::TypeID getType() const override { return Cube::getTypeID<type>(); }\
                          virtual std::string toString() const override { return #type; }
 
     class Event {
