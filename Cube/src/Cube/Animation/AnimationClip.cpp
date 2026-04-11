@@ -1,5 +1,6 @@
 #include "pch.h"
-#include "Animation.h"
+
+#include "AnimationClip.h"
 
 #include "Cube/Resource/ResourceManager.h"
 

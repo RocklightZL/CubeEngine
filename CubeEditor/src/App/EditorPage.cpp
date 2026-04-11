@@ -13,13 +13,15 @@
 #include "../Views/ScenePanel.h"
 #include "../Views/SceneSelectPanel.h"
 #include "../Views/SceneView.h"
+#include "../Views/AssetInspector.h"
+#include "../Views/LogView.h"
+#include "../Views/AnimationEditor.h"
 #include "Cube/Core/Application.h"
 #include "Cube/Core/Log.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/UI/FileDialog.h"
 #include "Cube/Utils/Utils.h"
 #include "EditorApp.h"
-#include "../Views/AssetInspector.h"
 #include "imgui/imgui_internal.h"
 
 using namespace Cube;
@@ -31,13 +33,8 @@ EditorPage::EditorPage(Project* project) : project(project) {
     views.push_back(std::make_unique<SceneSelectPanel>(*this));
     views.push_back(std::make_unique<ResourcesPanel>(*this));
     views.push_back(std::make_unique<AssetInspector>(*this));
-
-    const std::string resourcesCache = project->getConfig().projectDataDirectory + "/resources.cache";
-    if(std::filesystem::exists(resourcesCache)) {
-        project->getAssetExplorer().loadFromFile(resourcesCache, project->getConfig().assetPathMapFilePath);
-    } else {
-        project->getAssetExplorer().normalInit();
-    }
+    views.push_back(std::make_unique<AnimationEditor>(*this));
+    views.push_back(std::make_unique<LogView>(*this));
 
     auto& scenes = project->getScenes();
     if(!scenes.empty()) {

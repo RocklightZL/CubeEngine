@@ -18,7 +18,7 @@ public:
     void run();
 
     Cube::Window* getWindow() const;
-    Cube::EventDispatcher& getEventDispatcher();
+    Cube::EventDispatcher& getEventDispatcher(){ return eventDispatcher; }
 
     // global
     std::thread gameThread;

@@ -10,6 +10,7 @@
 #include "../Project/Project.h"
 #include "../Utils/EditorTextureCache.h"
 #include "../Utils/misc.h"
+#include "AnimationEditor.h"
 #include "imgui/imgui.h"
 
 void AssetInspector::render(float deltaTime) {
@@ -135,6 +136,9 @@ void AssetInspector::render(float deltaTime) {
             case Cube::ResourceType::AnimationClip:{
                 ImGui::Text("path:");
                 ImGui::Text("%s", editingImporter.value("path", "").c_str());
+                if(ImGui::Button("Edit in Animation Editor")) {
+                    EditorApp::get().getEventDispatcher().dispatch(AnimationEditor::TargetChangeEvent(editingImporter.value("path", "")));
+                }
                 break;
             } 
             case Cube::ResourceType::Font:{

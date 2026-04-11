@@ -22,6 +22,8 @@ Project::Project(const std::string& name, const std::string& rootPath) {
     std::filesystem::create_directories(config.sceneDirectory);
     std::filesystem::create_directories(config.assetsDirectory);
     writeToConfigFile(rootPath + "/" + name + ".cbproj");
+
+    assetExplorer.normalInit();
 }
 
 Project::Project(const std::string& configFilePath) {

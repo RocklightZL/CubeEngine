@@ -8,6 +8,9 @@
 #include "../Project/Project.h"
 #include "../Utils/EditorTextureCache.h"
 #include "../Utils/ImGuiExternal.h"
+#include "AnimationEditor.h"
+#include "App/EditorApp.h"
+#include "Cube/Resource/ResourceType.h"
 #include "imgui/imgui.h"
 
 using namespace Cube;
@@ -299,6 +302,11 @@ void ResourcesPanel::render(float deltaTime) {
         if(ImGui::MenuItem("Delete")) {
             assetExplorer.removeNode(selectedManager.getSingleNode());
             selectedManager.cancel();
+        }
+        if(selectedManager.getSingleNode()->type == ResourceType::AnimationClip){
+            if(ImGui::MenuItem("Edit")){
+                EditorApp::get().getEventDispatcher().dispatch(AnimationEditor::TargetChangeEvent(assetExplorer.getAssetImporter(selectedManager.getSingleNode()->identifier)["path"].get<std::string>()));
+            }
         }
         ImGui::EndPopup();
     }
