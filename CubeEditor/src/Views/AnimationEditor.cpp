@@ -204,6 +204,40 @@ bool AnimationEditor::loadTargetAnim() {
     return true;
 }
 
+bool AnimationEditor::saveTargetAnim() {
+    if(target.empty()) {
+        CB_EDITOR_ERROR("AnimationEditor: No target file to save");
+        return false;
+    }
+
+    nlohmann::json animData;
+    animData["name"] = name;
+    animData["looping"] = looping;
+    animData["speed"] = speed;
+
+    float totalDuration = 0.0f;
+    animData["frames"] = nlohmann::json::array();
+    for(const auto& frame : frames) {
+        nlohmann::json frameJson;
+        frameJson["frame"] = frame.frame;
+        frameJson["duration"] = std::max(0.0f, frame.duration);
+        totalDuration += frameJson["duration"].get<float>();
+        animData["frames"].push_back(std::move(frameJson));
+    }
+    animData["duration"] = totalDuration;
+
+    std::ofstream file(target);
+    if(!file.is_open()) {
+        CB_EDITOR_ERROR("AnimationEditor: Failed to open animation file for save {}", target);
+        return false;
+    }
+
+    file << animData.dump(4);
+    file.close();
+    duration = totalDuration;
+    return true;
+}
+
 void AnimationEditor::render(float deltaTime) {
     ImGui::Begin("Animation Editor");
 
@@ -211,6 +245,10 @@ void AnimationEditor::render(float deltaTime) {
 
     if(ImGui::Button("New AnimationClip")) {
         ImGui::OpenPopup("New AnimationClip");
+    }
+    ImGui::SameLine();
+    if(ImGui::Button("Save")) {
+        saveTargetAnim();
     }
 
     if(ImGui::BeginPopupModal("New AnimationClip", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -268,241 +306,241 @@ void AnimationEditor::render(float deltaTime) {
 
     ImGui::Separator();
 
-    ImGui::BeginTable("Anim", 2, ImGuiTableFlags_Resizable);
-    ImGui::TableSetupColumn("Properties", ImGuiTableColumnFlags_WidthFixed, 250.0f);
-    ImGui::TableSetupColumn("Frames", ImGuiTableColumnFlags_WidthStretch);
-    ImGui::TableNextColumn();
+    if(ImGui::BeginTable("Anim", 2, ImGuiTableFlags_Resizable)){
+        ImGui::TableSetupColumn("Properties", ImGuiTableColumnFlags_WidthFixed, 250.0f);
+        ImGui::TableSetupColumn("Frames", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableNextColumn();
 
-    ImGui::BeginChild("AnimationPropertiesPane", ImVec2(0, 0), false);
-    ImGui::BeginTable("AnimProperty", 2, ImGuiTableFlags_SizingFixedFit);
-    ImGui::TableNextRow();
-    ImGui::TableSetColumnIndex(0); ImGui::Text("Name");
-    ImGui::TableSetColumnIndex(1); ImGui::Text("%s", name.c_str());
+        ImGui::BeginChild("AnimationPropertiesPane", ImVec2(0, 0), false);
+        if(ImGui::BeginTable("AnimProperty", 2, ImGuiTableFlags_SizingFixedFit)){
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("Name");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%s", name.c_str());
 
-    ImGui::TableNextRow();
-    ImGui::TableSetColumnIndex(0); ImGui::Text("Looping");
-    ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##looping", &looping);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("Looping");
+            ImGui::TableSetColumnIndex(1); ImGui::Checkbox("##looping", &looping);
 
-    ImGui::TableNextRow();
-    ImGui::TableSetColumnIndex(0); ImGui::Text("Speed");
-    ImGui::TableSetColumnIndex(1);
-    if(ImGui::DragFloat("##speed", &speed, 0.01f, 0.01f, 10.0f, "%.3f")) {
-        if(speed < 0.0f) speed = 0.0f;
-    }
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("Speed");
+            ImGui::TableSetColumnIndex(1);
+            if(ImGui::DragFloat("##speed", &speed, 0.01f, 0.01f, 10.0f, "%.3f")) {
+                if(speed < 0.0f) speed = 0.0f;
+            }
 
-    ImGui::TableNextRow();
-    ImGui::TableSetColumnIndex(0); ImGui::Text("Duration (auto)");
-    ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", duration);
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("Duration (auto)");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%.3f", duration);
 
-    ImGui::TableNextRow();
-    ImGui::TableSetColumnIndex(0); ImGui::Text("Frames");
-    ImGui::TableSetColumnIndex(1); ImGui::Text("%d", static_cast<int>(frames.size()));
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0); ImGui::Text("Frames");
+            ImGui::TableSetColumnIndex(1); ImGui::Text("%d", static_cast<int>(frames.size()));
 
-    ImGui::EndTable();
-
-    ImGui::Separator();
-    ImGui::Text("Preview");
-    if(isPreviewPlaying) {
-        if(ImGui::Button("Stop")) {
+            ImGui::EndTable();
+        }
+        ImGui::Separator();
+        ImGui::Text("Preview");
+        if(isPreviewPlaying) {
+            if(ImGui::Button("Stop")) {
+                isPreviewPlaying = false;
+            }
+        } else {
+            if(ImGui::Button("Play")) {
+                if(!frames.empty()) {
+                    if(duration <= 0.0f || previewTime >= duration) {
+                        previewTime = 0.0f;
+                    }
+                    isPreviewPlaying = true;
+                }
+            }
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Reset")) {
             isPreviewPlaying = false;
+            previewTime = 0.0f;
         }
-    } else {
-        if(ImGui::Button("Play")) {
-            if(!frames.empty()) {
-                if(duration <= 0.0f || previewTime >= duration) {
-                    previewTime = 0.0f;
+
+        int previewFrameIndex = -1;
+        if(!frames.empty()) {
+            if(duration <= 0.0f) {
+                previewFrameIndex = 0;
+            } else {
+                float sampledTime = previewTime;
+                if(sampledTime >= duration) {
+                    sampledTime = duration - 0.0001f;
                 }
-                isPreviewPlaying = true;
-            }
-        }
-    }
-    ImGui::SameLine();
-    if(ImGui::Button("Reset")) {
-        isPreviewPlaying = false;
-        previewTime = 0.0f;
-    }
+                if(sampledTime < 0.0f) {
+                    sampledTime = 0.0f;
+                }
 
-    int previewFrameIndex = -1;
-    if(!frames.empty()) {
-        if(duration <= 0.0f) {
-            previewFrameIndex = 0;
-        } else {
-            float sampledTime = previewTime;
-            if(sampledTime >= duration) {
-                sampledTime = duration - 0.0001f;
-            }
-            if(sampledTime < 0.0f) {
-                sampledTime = 0.0f;
-            }
-
-            float cursor = 0.0f;
-            for(size_t i = 0; i < frames.size(); ++i) {
-                const float frameDuration = std::max(0.0f, frames[i].duration);
-                cursor += frameDuration;
-                if(sampledTime < cursor || i == frames.size() - 1) {
-                    previewFrameIndex = static_cast<int>(i);
-                    break;
+                float cursor = 0.0f;
+                for(size_t i = 0; i < frames.size(); ++i) {
+                    const float frameDuration = std::max(0.0f, frames[i].duration);
+                    cursor += frameDuration;
+                    if(sampledTime < cursor || i == frames.size() - 1) {
+                        previewFrameIndex = static_cast<int>(i);
+                        break;
+                    }
                 }
             }
         }
-    }
 
-    ImGui::Text("time: %.3f / %.3f", previewTime, duration);
-    if(previewFrameIndex >= 0 && previewFrameIndex < static_cast<int>(frames.size())) {
-        const auto& previewFrame = frames[previewFrameIndex];
-        Cube::Texture2D* previewTexture = nullptr;
-        Cube::TextureRegion region = {{0.0f, 0.0f}, {1.0f, 1.0f}};
-        if(resolveSpritePreview(previewFrame.frame, assetExplorer, previewTexture, region) && previewTexture) {
-            const float regionW = static_cast<float>(previewTexture->getWidth()) * (region.uvMax.x - region.uvMin.x);
-            const float regionH = static_cast<float>(previewTexture->getHeight()) * (region.uvMax.y - region.uvMin.y);
-            const float maxSize = 120.0f;
-            float scale = 1.0f;
-            if(regionW > 0.0f && regionH > 0.0f) {
-                scale = std::min(maxSize / regionW, maxSize / regionH);
+        ImGui::Text("time: %.3f / %.3f", previewTime, duration);
+        if(previewFrameIndex >= 0 && previewFrameIndex < static_cast<int>(frames.size())) {
+            const auto& previewFrame = frames[previewFrameIndex];
+            Cube::Texture2D* previewTexture = nullptr;
+            Cube::TextureRegion region = {{0.0f, 0.0f}, {1.0f, 1.0f}};
+            if(resolveSpritePreview(previewFrame.frame, assetExplorer, previewTexture, region) && previewTexture) {
+                const float regionW = static_cast<float>(previewTexture->getWidth()) * (region.uvMax.x - region.uvMin.x);
+                const float regionH = static_cast<float>(previewTexture->getHeight()) * (region.uvMax.y - region.uvMin.y);
+                const float maxSize = 120.0f;
+                float scale = 1.0f;
+                if(regionW > 0.0f && regionH > 0.0f) {
+                    scale = std::min(maxSize / regionW, maxSize / regionH);
+                }
+                const ImVec2 drawSize = {regionW * scale, regionH * scale};
+                ImGui::Image(previewTexture->getId(), drawSize, {region.uvMin.x, region.uvMax.y}, {region.uvMax.x, region.uvMin.y});
+            } else {
+                ImGui::TextDisabled("Preview unavailable");
             }
-            const ImVec2 drawSize = {regionW * scale, regionH * scale};
-            ImGui::Image(previewTexture->getId(), drawSize, {region.uvMin.x, region.uvMax.y}, {region.uvMax.x, region.uvMin.y});
+            ImGui::TextWrapped("frame: %s", getFrameDisplayName(previewFrame.frame).c_str());
         } else {
-            ImGui::TextDisabled("Preview unavailable");
+            ImGui::TextDisabled("No preview frame");
         }
-        ImGui::TextWrapped("frame: %s", getFrameDisplayName(previewFrame.frame).c_str());
-    } else {
-        ImGui::TextDisabled("No preview frame");
-    }
-    
-    ImGui::EndChild();
+        
+        ImGui::EndChild();
 
-    ImGui::TableNextColumn();
+        ImGui::TableNextColumn();
 
-    ImGui::BeginChild("AnimationFramesPane", ImVec2(0, 0), false);
-    ImGui::BeginGroup();
-    ImGui::Text("Frames");
-    ImGui::SameLine();
-    if(ImGui::Button("Add Frame")) {
-        framePickerDialog.open("Select Frame Resource",
-                               assetExplorer.getRootNode(),
-                               Cube::ResourceType::Sprite);
-    }
-    std::vector<std::string> pickedIdentifiers;
-    if(framePickerDialog.render(pickedIdentifiers, editorPage)) {
-        for(const auto& identifier : pickedIdentifiers) {
-            FrameViewData f;
-            f.frame = identifier;
-            f.duration = 0.1f;
-            frames.push_back(std::move(f));
-        }
-    }
-    ImGui::SameLine();
-
-    ImGui::EndGroup();
-    ImGui::Separator();
-    ImGui::BeginGroup();
-    if(selectedFrameIndex >= 0 && selectedFrameIndex < static_cast<int>(frames.size())) {
-        FrameViewData& selectedFrame = frames[selectedFrameIndex];
-        ImGui::BeginTable("selected", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInner);
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0); ImGui::Text("index: %d", selectedFrameIndex);
-        ImGui::TableSetColumnIndex(1); 
-        ImGui::Text("duration:");
+        ImGui::BeginChild("AnimationFramesPane", ImVec2(0, 0), false);
+        ImGui::BeginGroup();
+        ImGui::Text("Frames");
         ImGui::SameLine();
-        if(ImGui::InputFloat("##duration", &selectedFrame.duration, 0.01f, 0.1f, "%.3f")) {
-            if(selectedFrame.duration < 0.0f) {
-                selectedFrame.duration = 0.0f;
+        if(ImGui::Button("Add Frame")) {
+            framePickerDialog.open("Select Frame Resource",
+                                assetExplorer.getRootNode(),
+                                Cube::ResourceType::Sprite);
+        }
+        std::vector<std::string> pickedIdentifiers;
+        if(framePickerDialog.render(pickedIdentifiers, editorPage)) {
+            for(const auto& identifier : pickedIdentifiers) {
+                FrameViewData f;
+                f.frame = identifier;
+                f.duration = 0.1f;
+                frames.push_back(std::move(f));
             }
         }
-        ImGui::EndTable();
-
-        const bool canMoveLeft = selectedFrameIndex > 0;
-        const bool canMoveRight = selectedFrameIndex >= 0 && selectedFrameIndex < static_cast<int>(frames.size()) - 1;
-
-        if(!canMoveLeft) {
-            ImGui::BeginDisabled();
-        }
-        if(ImGui::Button("Move Left")) {
-            std::swap(frames[selectedFrameIndex], frames[selectedFrameIndex - 1]);
-            --selectedFrameIndex;
-        }
-        if(!canMoveLeft) {
-            ImGui::EndDisabled();
-        }
-
         ImGui::SameLine();
 
-        if(!canMoveRight) {
-            ImGui::BeginDisabled();
-        }
-        if(ImGui::Button("Move Right")) {
-            std::swap(frames[selectedFrameIndex], frames[selectedFrameIndex + 1]);
-            ++selectedFrameIndex;
-        }
-        if(!canMoveRight) {
-            ImGui::EndDisabled();
-        }
-
-        ImGui::SameLine();
-        if(ImGui::Button("Delete")) {
-            frames.erase(frames.begin() + selectedFrameIndex);
-            if(frames.empty()) {
-                selectedFrameIndex = -1;
-            } else if(selectedFrameIndex >= static_cast<int>(frames.size())) {
-                selectedFrameIndex = static_cast<int>(frames.size()) - 1;
+        ImGui::EndGroup();
+        ImGui::Separator();
+        ImGui::BeginGroup();
+        if(selectedFrameIndex >= 0 && selectedFrameIndex < static_cast<int>(frames.size())) {
+            FrameViewData& selectedFrame = frames[selectedFrameIndex];
+            if(ImGui::BeginTable("selected", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_BordersInner)){
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0); ImGui::Text("index: %d", selectedFrameIndex);
+                ImGui::TableSetColumnIndex(1); 
+                ImGui::Text("duration:");
+                ImGui::SameLine();
+                if(ImGui::InputFloat("##duration", &selectedFrame.duration, 0.01f, 0.1f, "%.3f")) {
+                    if(selectedFrame.duration < 0.0f) {
+                        selectedFrame.duration = 0.0f;
+                    }
+                }
+                ImGui::EndTable();
             }
-        }
-    } else {
-        ImGui::TextDisabled("No frame selected");
-    }
-    ImGui::EndGroup();
-    ImGui::Separator();
+            const bool canMoveLeft = selectedFrameIndex > 0;
+            const bool canMoveRight = selectedFrameIndex >= 0 && selectedFrameIndex < static_cast<int>(frames.size()) - 1;
 
-    ImGui::BeginChild("AnimationFrames", ImVec2(0, 0), true);
-
-    float itemWidth = 140.0f;
-    float itemHeight = 140.0f;
-    float padding = ImGui::GetStyle().ItemSpacing.x;
-    float availWidth = ImGui::GetContentRegionAvail().x;
-    float x = 0.0f;
-
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-    for(size_t i = 0; i < frames.size(); ++i) {
-        const auto& frame = frames[i];
-        ImGui::PushID(static_cast<int>(i));
-        const bool selected = (selectedFrameIndex == static_cast<int>(i));
-
-        Cube::Texture2D* previewTexture = nullptr;
-        Cube::TextureRegion region = {{0.0f, 0.0f}, {1.0f, 1.0f}};
-        const std::string displayName = getFrameDisplayName(frame.frame);
-        if(resolveSpritePreview(frame.frame, assetExplorer, previewTexture, region) && previewTexture) {
-            if(iconTextButton(previewTexture, displayName, selected, ImVec2(itemWidth, itemHeight), region)) {
-                selectedFrameIndex = static_cast<int>(i);
+            if(!canMoveLeft) {
+                ImGui::BeginDisabled();
             }
-        } else {
-            if(ImGui::Button(displayName.c_str(), ImVec2(itemWidth, itemHeight))) {
-                selectedFrameIndex = static_cast<int>(i);
+            if(ImGui::Button("Move Left")) {
+                std::swap(frames[selectedFrameIndex], frames[selectedFrameIndex - 1]);
+                --selectedFrameIndex;
             }
-        }
+            if(!canMoveLeft) {
+                ImGui::EndDisabled();
+            }
 
-        x += itemWidth + padding;
-        // If next item would exceed available width, move to next line
-        if(i + 1 < frames.size() && x + itemWidth > availWidth) {
-            x = 0.0f;
-            ImGui::NewLine();
-        } else {
             ImGui::SameLine();
+
+            if(!canMoveRight) {
+                ImGui::BeginDisabled();
+            }
+            if(ImGui::Button("Move Right")) {
+                std::swap(frames[selectedFrameIndex], frames[selectedFrameIndex + 1]);
+                ++selectedFrameIndex;
+            }
+            if(!canMoveRight) {
+                ImGui::EndDisabled();
+            }
+
+            ImGui::SameLine();
+            if(ImGui::Button("Delete")) {
+                frames.erase(frames.begin() + selectedFrameIndex);
+                if(frames.empty()) {
+                    selectedFrameIndex = -1;
+                } else if(selectedFrameIndex >= static_cast<int>(frames.size())) {
+                    selectedFrameIndex = static_cast<int>(frames.size()) - 1;
+                }
+            }
+        } else {
+            ImGui::TextDisabled("No frame selected");
+        }
+        ImGui::EndGroup();
+        ImGui::Separator();
+
+        ImGui::BeginChild("AnimationFrames", ImVec2(0, 0), true);
+
+        float itemWidth = 140.0f;
+        float itemHeight = 140.0f;
+        float padding = ImGui::GetStyle().ItemSpacing.x;
+        float availWidth = ImGui::GetContentRegionAvail().x;
+        float x = 0.0f;
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+        for(size_t i = 0; i < frames.size(); ++i) {
+            const auto& frame = frames[i];
+            ImGui::PushID(static_cast<int>(i));
+            const bool selected = (selectedFrameIndex == static_cast<int>(i));
+
+            Cube::Texture2D* previewTexture = nullptr;
+            Cube::TextureRegion region = {{0.0f, 0.0f}, {1.0f, 1.0f}};
+            const std::string displayName = getFrameDisplayName(frame.frame);
+            if(resolveSpritePreview(frame.frame, assetExplorer, previewTexture, region) && previewTexture) {
+                if(iconTextButton(previewTexture, displayName, selected, ImVec2(itemWidth, itemHeight), region)) {
+                    selectedFrameIndex = static_cast<int>(i);
+                }
+            } else {
+                if(ImGui::Button(displayName.c_str(), ImVec2(itemWidth, itemHeight))) {
+                    selectedFrameIndex = static_cast<int>(i);
+                }
+            }
+
+            x += itemWidth + padding;
+            // If next item would exceed available width, move to next line
+            if(i + 1 < frames.size() && x + itemWidth > availWidth) {
+                x = 0.0f;
+                ImGui::NewLine();
+            } else {
+                ImGui::SameLine();
+            }
+
+            ImGui::PopID();
+        }
+        ImGui::PopStyleColor();
+
+        if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) {
+            selectedFrameIndex = -1;
         }
 
-        ImGui::PopID();
+        ImGui::EndChild();
+        ImGui::EndChild();
+
+        ImGui::EndTable();
     }
-    ImGui::PopStyleColor();
-
-    if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered() && !ImGui::IsAnyItemHovered()) {
-        selectedFrameIndex = -1;
-    }
-
-    ImGui::EndChild();
-    ImGui::EndChild();
-
-    ImGui::EndTable();
-
     ImGui::End();
 }
 

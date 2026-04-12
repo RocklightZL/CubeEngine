@@ -33,6 +33,7 @@ private:
     };
 
     bool loadTargetAnim();
+    bool saveTargetAnim();
     bool createNewAnimationClip(const std::string& fileName);
 
     bool onTargetChange(const Cube::Event& e);
