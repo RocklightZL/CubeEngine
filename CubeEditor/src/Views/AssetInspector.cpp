@@ -63,9 +63,9 @@ void AssetInspector::render(float deltaTime) {
                         for(int r = 0; r < gridRows; ++r) {
                             for(int c = 0; c < gridCols; ++c) {
                                 const float u0 = static_cast<float>(c) / static_cast<float>(gridCols);
-                                const float v0 = static_cast<float>(r) / static_cast<float>(gridRows);
+                                const float v0 = static_cast<float>(gridRows - r - 1) / static_cast<float>(gridRows);
                                 const float u1 = static_cast<float>(c + 1) / static_cast<float>(gridCols);
-                                const float v1 = static_cast<float>(r + 1) / static_cast<float>(gridRows);
+                                const float v1 = static_cast<float>(gridRows - r) / static_cast<float>(gridRows);
                                 const std::string name = "r" + std::to_string(r) + "_c" + std::to_string(c);
                                 sprites[name] = {u0, v0, u1, v1};
                             }

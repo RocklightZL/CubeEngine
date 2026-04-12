@@ -32,9 +32,9 @@ private:
     ImVec4 highLightColor = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
 };
 
-bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_size, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {1, 1}, ImGuiButtonFlags flags = ImGuiButtonFlags_None);
+// bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_size, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {1, 1}, ImGuiButtonFlags flags = ImGuiButtonFlags_None);
 
-bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {1, 1}, const ImVec2& button_size = {0, 0}, const ImVec2& icon_size = ImVec2(ImGui::CalcTextSize("Text").y, ImGui::CalcTextSize("Text").y));
+// bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_min = {0, 0}, const ImVec2& uv_max = {1, 1}, const ImVec2& button_size = {0, 0}, const ImVec2& icon_size = ImVec2(ImGui::CalcTextSize("Text").y, ImGui::CalcTextSize("Text").y));
 
 bool iconTextButton(const Cube::Texture2D* icon, std::string_view label, bool isSelected = false, const ImVec2& size = {0, 0}, const Cube::TextureRegion& texUV = {{0, 0}, {1, 1}});
 bool iconTextButtonH(const Cube::Texture2D* icon, std::string_view label, bool isSelected = false, const Cube::TextureRegion& texUV = {{0, 0}, {1, 1}});

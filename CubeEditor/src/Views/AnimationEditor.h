@@ -43,6 +43,7 @@ private:
     float speed = 1.0f;
     float duration = 0.0f;
     std::vector<FrameViewData> frames;
+    int selectedFrameIndex = -1;
 
     ResourcePickerDialog framePickerDialog;
 };

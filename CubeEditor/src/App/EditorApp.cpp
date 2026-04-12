@@ -95,6 +95,11 @@ void EditorApp::imGuiInit() {
 
     io.Fonts->AddFontFromFileTTF("assets/fonts/SourceHanSansSC/SourceHanSansSC-Normal.otf", 30.0f);
     // TODO: 提供一个ImGui预设布局，当没有imgui.ini时加载这个预设布局
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.HoverDelayNormal = 0.8f;
+    style.HoverDelayShort = 0.5f;
+
     setDarkTheme();
 
     ImGui_ImplGlfw_InitForOpenGL(mainWindow->getNativeWindow(), true);

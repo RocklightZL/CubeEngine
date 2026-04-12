@@ -1,6 +1,7 @@
 #include "ImGuiExternal.h"
 
 #include "Cube/Core/Log.h"
+#include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 
 #include <cmath>
@@ -70,6 +71,7 @@ void ModalPopup::render() {
     ImGui::PopStyleColor();
 }
 
+/*
 bool IconTextButton(ImTextureID tex_id, const char* label, const ImVec2& icon_size, const ImVec2& uv_min, const ImVec2& uv_max, ImGuiButtonFlags flags) {
     float rounding = ImGui::GetStyle().FrameRounding;
     ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -168,6 +170,7 @@ bool IconTextButtonLeft(const char* label, ImTextureID tex_id, const ImVec2& uv_
 
     return is_clicked;
 }
+*/
 
 bool iconTextButton(const Cube::Texture2D* icon, std::string_view label, bool isSelected, const ImVec2& size, const Cube::TextureRegion& texUV) {
     float rounding = ImGui::GetStyle().FrameRounding;
@@ -217,13 +220,10 @@ bool iconTextButton(const Cube::Texture2D* icon, std::string_view label, bool is
     
     ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), bgColor, rounding);
 
-    if(isHovered || isActive) {
-        ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImGui::GetColorU32(ImGuiCol_Border), rounding, 0, 1.5f);
-        if(isTextHidden) {
-            ImGui::BeginTooltip();
-            ImGui::Text(label.data());
-            ImGui::EndTooltip();
-        }
+    if(isTextHidden && ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
+        ImGui::BeginTooltip();
+        ImGui::Text(label.data());
+        ImGui::EndTooltip();
     }
 
     ImVec2 iconPos = ImVec2(ImGui::GetItemRectMin().x + (itemSize.x - iconSize.x) * 0.5f, ImGui::GetItemRectMin().y + padding);
