@@ -44,6 +44,8 @@ private:
     float duration = 0.0f;
     std::vector<FrameViewData> frames;
     int selectedFrameIndex = -1;
+    bool isPreviewPlaying = false;
+    float previewTime = 0.0f;
 
     ResourcePickerDialog framePickerDialog;
 };
