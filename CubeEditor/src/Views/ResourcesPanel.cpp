@@ -154,8 +154,10 @@ void ResourcesPanel::render(float deltaTime) {
                 if(ImGui::BeginDragDropSource()) {
                     AssetNode* src = entry.get();
                     ImGui::SetDragDropPayload("Asset", &src, sizeof(src));
-                    Texture2D* tex = editorPage.thumbnailManager.request(assetExplorer.getAssetImporter(src->identifier)["path"].get<std::string>());
-                    ImGui::Image(tex ? tex->getId() : file_png->getId(), {64, 64}, {0, 1}, {1, 0});
+                    if(src->type == ResourceType::Texture) {
+                        Texture2D* tex = editorPage.thumbnailManager.request(assetExplorer.getAssetImporter(src->identifier)["path"].get<std::string>());
+                        ImGui::Image(tex ? tex->getId() : file_png->getId(), {64, 64}, {0, 1}, {1, 0});
+                    }
                     ImGui::EndDragDropSource();
                 }
                 ImGui::PopStyleVar();

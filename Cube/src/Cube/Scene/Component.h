@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Cube/Reflection/Type.h"
+
 namespace Cube {
     class Entity;
 
@@ -14,6 +16,7 @@ namespace Cube {
 
 		virtual void start(){}
 		virtual void update(float delta){}
+		virtual TypeID getType() const = 0;
 
 		Entity* getEntity() const { return entity; }
 

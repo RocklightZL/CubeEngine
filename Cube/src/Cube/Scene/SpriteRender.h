@@ -5,6 +5,7 @@
 #include "Cube/Renderer/TextureRegion.h"
 #include "Cube/Resource/ResPtr.h"
 #include "Cube/Resource/Sprite.h"
+#include "Transform.h"
 
 namespace Cube {
 
@@ -17,7 +18,7 @@ namespace Cube {
         SpriteRender() = default;
         SpriteRender(const std::string& sprite, const Color& tintColor)
             : sprite(sprite), tintColor(tintColor){}
-
+        TypeID getType() const override { return getTypeID<SpriteRender>(); }
     };
 
 }

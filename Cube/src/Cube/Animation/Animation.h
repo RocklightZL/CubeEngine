@@ -20,9 +20,10 @@ namespace Cube {
 
         void start() override;
         void update(float deltaTime) override;
+        TypeID getType() const override { return getTypeID<Animation>(); }
         Sprite* getCurrentFrame();
 
-        void addClip(const std::string& animClip);
+        AnimationClip* addClip(const std::string& animClip);
 
         void play(const std::string& clipName);
         void stop();

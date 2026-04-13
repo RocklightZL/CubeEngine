@@ -11,7 +11,8 @@ namespace Cube {
 	public:
 		Transform() = default;
 		explicit Transform(Entity* entity) : Component(entity) {}
-		~Transform();
+		~Transform() override;
+		TypeID getType() const override { return getTypeID<Transform>(); }
 
 		const glm::mat4& getLocalMatrix();
         const glm::mat4& getWorldMatrix();

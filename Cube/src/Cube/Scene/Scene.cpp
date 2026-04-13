@@ -33,17 +33,7 @@ namespace Cube {
         }
     }
 
-    void Scene::start() {
-        for(auto& entity: entities) {
-            entity->start();
-        }
-    }
-
     void Scene::update(float delta) {
-        if(!started) {
-            start();
-            started = true;
-        }
         for(auto& entity: entities) {
             entity->update(delta);
         }

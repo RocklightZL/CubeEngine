@@ -1,22 +1,20 @@
 #include "pch.h"
 #include "Entity.h"
 
+#include "Cube/Core/Log.h"
+
 #include "Cube/Reflection/Serializer.h"
 
 namespace Cube {
-
-    void Entity::start() {
-        for(auto& component : components) {
-            component->start();
-        }
-    }
 
     void Entity::update(float delta) {
         for(auto& component : components) {
             component->update(delta);
         }
+        processAddAndDestroy();
+        processStart();
     }
-
+    
     const std::string& Entity::getName() const {
         return name;
     }
@@ -68,6 +66,40 @@ namespace Cube {
             data["components"].push_back(c);
         }
         return data;
+    }
+
+    void Entity::processAddAndDestroy() {
+        int addIndex = 0;
+        int destroyIndex = 0;
+        for(auto& action : addOrDestroy) {
+            if(action == 0) { // add
+                auto& component = pendingAdd[addIndex++];
+                Component* ptr = component.get();
+                componentsMap[ptr->getType()] = ptr;
+                components.push_back(std::move(component));
+                pendingStart.push_back(ptr);
+            } else { // destroy
+                TypeID typeID = pendingDestroy[destroyIndex++];
+                auto it = componentsMap.find(typeID);
+                Component* compPtr = it->second;
+                componentsMap.erase(it);
+                components.erase(std::remove_if(components.begin(), components.end(), [compPtr](const std::unique_ptr<Component>& c) {
+                    return c.get() == compPtr;
+                }), components.end());
+                pendingStart.erase(std::remove(pendingStart.begin(), pendingStart.end(), compPtr), pendingStart.end());
+            }
+        }
+        CB_ASSERT(addIndex == pendingAdd.size() && destroyIndex == pendingDestroy.size() && "Entity::processAddAndDestroy(): add and destroy count mismatch");
+        pendingAdd.clear();
+        pendingDestroy.clear();
+        addOrDestroy.clear();
+    }
+
+    void Entity::processStart() {
+        for(Component* c : pendingStart) {
+            c->start();
+        }
+        pendingStart.clear();
     }
 
 }  // namespace Cube

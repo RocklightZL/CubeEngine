@@ -49,7 +49,7 @@ namespace Cube {
 			.serializer();
 
 		// Component
-	    ClassBuilder<Component>("Component").serializer();
+	    // ClassBuilder<Component>("Component").serializer(); // Component is abstract, no need to register
 		ClassBuilder<SpriteRender>("SpriteRender")
 			.base<Component>()
 			.property("sprite", &SpriteRender::sprite)

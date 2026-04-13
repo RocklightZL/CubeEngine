@@ -2,11 +2,14 @@
 #include <glm/glm.hpp>
 
 #include "Component.h"
+#include "Cube/Scene/Component.h"
 #include "Transform.h"
 #include "Cube/Reflection/ClassRegistry.h"
 #include "Cube/Reflection/Type.h"
 
 #include <json.hpp>
+#include <memory>
+#include <vector>
 
 namespace Cube {
 
@@ -17,7 +20,6 @@ namespace Cube {
 		Entity(const std::string& name) : name(name) {}
 		~Entity() = default;
 
-		void start();
 		void update(float delta);
 
 		template<typename T, typename... Args>
@@ -29,25 +31,21 @@ namespace Cube {
 				return static_cast<T*>(componentsMap[typeID]);
 			}
 			std::unique_ptr<Component> component = std::make_unique<T>(std::forward<Args>(args)...);
-            Component* ptr = component.get();
-            ptr->entity = this;
-            componentsMap[typeID] = ptr;
-            components.push_back(std::move(component));
+			Component* ptr = component.get();
+			ptr->entity = this;
+			pendingAdd.push_back(std::move(component));
+			addOrDestroy.push_back(0);
 			return static_cast<T*>(ptr);
         }
 
-		// TODO: Lazy deletion may be considered later.
 		void removeComponent(TypeID typeID) {
 			auto it = componentsMap.find(typeID);
 			if(it == componentsMap.end()) {
-				CB_CORE_ERROR("Entity::removeComponent<T>(): component of type '{}' not found", ClassRegistry::get().getClass(typeID)->getName());
+				CB_CORE_ERROR("Entity::removeComponent(): component of type '{}' does not exist", ClassRegistry::get().getClass(typeID)->getName());
 				return;
 			}
-			Component* compPtr = it->second;
-			componentsMap.erase(it);
-			components.erase(std::remove_if(components.begin(), components.end(), [compPtr](const std::unique_ptr<Component>& c) {
-				return c.get() == compPtr;
-			}), components.end());
+			pendingDestroy.push_back(typeID);
+			addOrDestroy.push_back(1);
 		}
 
 		template<typename T>
@@ -62,13 +60,14 @@ namespace Cube {
 			TypeID typeID = getTypeID<T>();
 			auto it = componentsMap.find(typeID);
 			if(it == componentsMap.end()) {
+				CB_CORE_ERROR("Entity::getComponent<T>(): component of type '{}' does not exist", ClassRegistry::get().getClass<T>()->getName());
 				return nullptr;
 			}
 			return static_cast<T*>(it->second);
         }
 
 		const std::vector<std::unique_ptr<Component>>& getComponents() const { return components; }
-        const std::unordered_map<TypeID, Component*>& getComponentsMap() const { return componentsMap; }
+        // const std::unordered_map<TypeID, Component*>& getComponentsMap() const { return componentsMap; }
 
 		template<typename T>
 		bool hasComponent() const {
@@ -93,6 +92,14 @@ namespace Cube {
         std::vector<std::unique_ptr<Component>> components;  // for iteration
         std::unordered_map<TypeID, Component*> componentsMap;  // for lookup
 		Transform transform = Transform(this);
+
+		std::vector<std::unique_ptr<Component>> pendingAdd;
+		std::vector<TypeID> pendingDestroy;
+		std::vector<char> addOrDestroy; // 0 for add, 1 for destroy  denote the order of add and destroy
+		std::vector<Component*> pendingStart;
+
+		void processStart();
+		void processAddAndDestroy();
 	};
 
 }

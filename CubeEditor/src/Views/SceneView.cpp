@@ -11,12 +11,11 @@
 #include "../Project/Project.h"
 #include "../Utils/ImGuiExternal.h"
 #include "../Utils/EditorTextureCache.h"
-#include "../Utils/misc.h"
-#include "Cube/Core/Log.h"
+#include "Cube/Animation/AnimationClip.h"
 #include "Cube/Renderer/Renderer.h"
 #include "Cube/Scene/Camera2D.h"
 #include "Cube/Scene/SpriteRender.h"
-#include "Cube/Utils/Utils.h"
+#include "Cube/Animation/Animation.h"
 
 using namespace Cube;
 
@@ -89,11 +88,26 @@ void SceneView::render(float deltaTime) {
                 glm::vec2 pos = glm::vec2(ImGui::GetMousePos().x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (ImGui::GetMousePos().y - ImGui::GetWindowPos().y));
                 pos *= editorPage.editorCamera.zoom;
                 pos += editorPage.editorCamera.position;
-                if(asset->type == ResourceType::Texture) {
-                    auto e = editorPage.selectedScene->scene->createEntity(asset->identifier);
-                    e->getTransform().setPosition(pos);
-                    auto spriteRender = e->addComponent<SpriteRender>();
-                    spriteRender->sprite = ResPtr<Sprite>("spr:" + asset->identifier);
+                switch(asset->type) {
+                    case ResourceType::Texture: {
+                        auto e = editorPage.selectedScene->scene->createEntity(asset->identifier);
+                        e->getTransform().setPosition(pos);
+                        auto spriteRender = e->addComponent<SpriteRender>();
+                        spriteRender->sprite = ResPtr<Sprite>("spr:" + asset->identifier);
+                        editorPage.selectedScene->isSaved = false;
+                    } break;
+                    case ResourceType::AnimationClip: {
+                        auto e = editorPage.selectedScene->scene->createEntity(asset->identifier);
+                        e->getTransform().setPosition(pos);
+                        e->addComponent<SpriteRender>();
+                        auto anim = e->addComponent<Animation>();
+                        AnimationClip* clip = anim->addClip(asset->identifier);
+                        if(clip) {
+                            anim->play(clip->getName());
+                        }
+                        editorPage.selectedScene->isSaved = false;
+                    } break;
+                    default: break;
                 }
             }
             if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("AssetSprite")){
@@ -108,25 +122,11 @@ void SceneView::render(float deltaTime) {
                     e->getTransform().setPosition(pos);
                     auto spriteRender = e->addComponent<SpriteRender>();
                     spriteRender->sprite = ResPtr<Sprite>(spriteIdentifier);
+                    editorPage.selectedScene->isSaved = false;
                 }
             }
             ImGui::EndDragDropTarget();
         }
-        // if(showSelectSubTexturePopup && textureData) {
-        //     if(auto* subTexture = selectSubTexturePopup(*textureData, &showSelectSubTexturePopup)) {
-        //         Texture2D* texture = ResourceManager::get().load<Texture2D>(texturePath)->data;
-        //         Scene* scene = proj->selectedScene->scene;
-        //         Entity* entity = scene->createEntity(subTexture->name);
-        //         TransformComponent* tc = entity->addComponent<TransformComponent>();
-        //         tc->scale = subTexture->size;
-        //         tc->position = pos;
-        //         SpriteComponent* sc = entity->addComponent<SpriteComponent>();
-        //         sc->texture = texture;
-        //         sc->region = {subTexture->uvMin, subTexture->uvMax};
-        //         proj->selectedScene->isSaved = false;
-        //     }
-        // }
-    
         if(ImGui::IsWindowFocused() && ImGui::IsWindowHovered()) {
             EditorCamera& editorCamera = editorPage.editorCamera;
             if(ImGui::IsKeyDown(ImGuiKey_LeftArrow)) {
@@ -166,6 +166,7 @@ void SceneView::render(float deltaTime) {
                 editorCamera.position = mouseWorldPos - mousePos * editorCamera.zoom;
             }
             static bool isDragging = false;
+            static bool isScaling = false;
             if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered()) {
                 bool choose = false;
                 glm::vec2 mousePos = {io.MousePos.x - ImGui::GetWindowPos().x, ImGui::GetWindowSize().y - (io.MousePos.y - ImGui::GetWindowPos().y)};
@@ -188,12 +189,22 @@ void SceneView::render(float deltaTime) {
                 }
                 if(selected) {
                     if(editorPage.selectedEntity == selected) {
-                        isDragging = true;
+                        if(io.KeyShift) {
+                            isScaling = true;
+                            isDragging = false;
+                        } else {
+                            isDragging = true;
+                            isScaling = false;
+                        }
                     }
                     editorPage.selectedEntity = selected;
                     choose = true;
                 }
-                if(!choose) editorPage.selectedEntity = nullptr;
+                if(!choose) {
+                    editorPage.selectedEntity = nullptr;
+                    isDragging = false;
+                    isScaling = false;
+                }
             }
             if(isDragging) {
                 ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
@@ -207,6 +218,26 @@ void SceneView::render(float deltaTime) {
                     isDragging = false;
                 }
             }
+            if(isScaling) {
+                ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNWSE);
+                if(editorPage.selectedEntity) {
+                    Transform& tc = editorPage.selectedEntity->getTransform();
+                    glm::vec2 scale = tc.getScale();
+
+                    const float scaleFactor = 1.0f + (io.MouseDelta.x - io.MouseDelta.y) * 0.01f;
+                    const float safeScaleFactor = scaleFactor < 0.01f ? 0.01f : scaleFactor;
+
+                    scale *= safeScaleFactor;
+                    if(scale.x < 0.01f) scale.x = 0.01f;
+                    if(scale.y < 0.01f) scale.y = 0.01f;
+
+                    tc.setScale(scale);
+                    editorPage.selectedScene->isSaved = false;
+                }
+                if(!ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
+                    isScaling = false;
+                }
+            }
         }
     }
     ImGui::EndChild();
@@ -216,6 +247,10 @@ void SceneView::render(float deltaTime) {
 void SceneView::sceneRender(float deltaTime) {
     Scene* scene = editorPage.selectedScene->scene;
     auto sprites = scene->getEntitiesWith<SpriteRender>();
+    sprites.erase(std::remove_if(sprites.begin(), sprites.end(), [](Entity* e) {
+        SpriteRender* sr = e->getComponent<SpriteRender>();
+        return !sr->sprite;
+    }), sprites.end());
     std::sort(sprites.begin(), sprites.end(), [](const Entity* a, const Entity* b) {
         SpriteRender* spriteA = a->getComponent<SpriteRender>();
         SpriteRender* spriteB = b->getComponent<SpriteRender>();
@@ -252,7 +287,7 @@ void SceneView::sceneRender(float deltaTime) {
     }
 
     // the outline of selected entity
-    if(editorPage.selectedEntity && editorPage.selectedEntity->hasComponent<SpriteRender>()) {
+    if(editorPage.selectedEntity && editorPage.selectedEntity->hasComponent<SpriteRender>() && editorPage.selectedEntity->getComponent<SpriteRender>()->sprite) {
         auto* selectEntityTC = &editorPage.selectedEntity->getTransform();
         glm::vec2 spriteSize = editorPage.selectedEntity->getComponent<SpriteRender>()->sprite->getSize();
         Renderer2D::drawQuad(selectEntityTC->getWorldPos(), glm::vec2(selectEntityTC->getWorldScale().x * spriteSize.x, 1) * glm::vec2(1, editorCamera.zoom), nullptr, {1.0f, 1.0f, 0.0f, 1.0f});

@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "AnimationClip.h"
 
 #include "Animation.h"
 
@@ -32,11 +33,14 @@ namespace Cube {
         return nullptr;
     }
 
-    void Animation::addClip(const std::string& animClip) {
+    AnimationClip* Animation::addClip(const std::string& animClip) {
         ResPtr<AnimationClip> clip(animClip);
+        AnimationClip* clipPtr = clip.get();
         if(clip) {
             clips[clip->getName()] = std::move(clip);
+            return clipPtr;
         }
+        return nullptr;
     }
 
     void Animation::play(const std::string& clipName) {

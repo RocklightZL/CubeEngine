@@ -40,9 +40,7 @@ namespace Cube {
     private:
         std::string name;
         std::vector<std::unique_ptr<Entity>> entities;
-        bool started = false;
 
-        void start();
         void processDestroy();
     };
 

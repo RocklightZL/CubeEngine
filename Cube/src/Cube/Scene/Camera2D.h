@@ -14,6 +14,8 @@ namespace Cube {
         bool available = true;
 
         Camera2D() = default;
+        TypeID getType() const override { return getTypeID<Camera2D>(); }
+
         glm::mat4 getPVMatrix() const {
             glm::mat4 pvMatrix = glm::ortho(0.0f, viewport.x, 0.0f, viewport.y, -0.1f, 1.0f);
             glm::vec2 position = entity->getTransform().getWorldPos();
