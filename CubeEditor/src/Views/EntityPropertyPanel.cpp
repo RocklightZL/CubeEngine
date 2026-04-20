@@ -1,5 +1,6 @@
 #include "EntityPropertyPanel.h"
 #include <unordered_map>
+#include <vector>
 
 #include "../App/EditorPage.h"
 #include "../Project/Project.h"
@@ -182,6 +183,28 @@ void EntityPropertyPanel::render(float deltaTime) {
                             }
                         }
                         ImGui::EndTable();
+                        if(ImGui::Button("Add Clip")){
+                            resourcePickerDialog.open("Select Animation Clip", editorPage.getProject()->getAssetExplorer().getRootNode(), ResourceType::AnimationClip);
+                        }
+                        if(ImGui::BeginDragDropTarget()) {
+                            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Asset")) {
+                                AssetNode* asset = *(AssetNode**)payload->Data;
+                                if(asset->type == ResourceType::AnimationClip) {
+                                    animClips[asset->identifier] = ResPtr<AnimationClip>(asset->identifier);
+                                    property->setValue(c, animClips);
+                                    editorPage.selectedScene->isSaved = false;
+                                }
+                            }
+                            ImGui::EndDragDropTarget();
+                        }
+                        std::vector<std::string> pickedIdentifiers;
+                        if(resourcePickerDialog.render(pickedIdentifiers, editorPage)) {
+                            for(const auto& identifier : pickedIdentifiers) {
+                                animClips[identifier] = ResPtr<AnimationClip>(identifier);
+                            }
+                            property->setValue(c, animClips);
+                            editorPage.selectedScene->isSaved = false;
+                        }
                     } else {
                         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
                         ImGui::Text("Failed to display property");

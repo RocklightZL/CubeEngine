@@ -1,6 +1,7 @@
 #pragma once
 #include "Cube/Scene/Entity.h"
 #include "View.h"
+#include "Views/ResourcePickerDialog.h"
 
 class EntityPropertyPanel : public View{
 public:
@@ -8,4 +9,7 @@ public:
 	~EntityPropertyPanel() override = default;
 
 	void render(float deltaTime) override;
+
+private:
+	ResourcePickerDialog resourcePickerDialog;
 };
