@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(MyQtApp)
+project(CubeEditor_qt)
 
 if(MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:>")
@@ -26,3 +26,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 qt_import_plugins(${PROJECT_NAME}
     INCLUDE Qt6::QWindowsIntegrationPlugin
 )
+
+# target_compile_definitions(${PROJECT_NAME} PRIVATE
+#     $<$<CONFIG:Debug>:CB_DEBUG>
+#     $<$<CONFIG:Release>:CB_RELEASE>
+# )

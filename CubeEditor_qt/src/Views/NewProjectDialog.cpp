@@ -32,6 +32,10 @@ NewProjectDialog::NewProjectDialog(QWidget* parent)
     pathRow->addWidget(m_pathEdit, 1);
     pathRow->addWidget(browseButton);
 
+    m_locationHintLabel = new QLabel(this);
+    m_locationHintLabel->setObjectName("locationHint");
+    m_locationHintLabel->setWordWrap(true);
+
     auto* actionRow = new QHBoxLayout();
     actionRow->addStretch(1);
     auto* cancelButton = new QPushButton("Cancel", this);
@@ -44,6 +48,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent)
     root->addWidget(m_nameEdit);
     root->addWidget(pathLabel);
     root->addLayout(pathRow);
+    root->addWidget(m_locationHintLabel);
     root->addStretch(1);
     root->addLayout(actionRow);
 
@@ -55,6 +60,10 @@ NewProjectDialog::NewProjectDialog(QWidget* parent)
         QLabel {
             color: #f3f3f3;
             font-size: 13px;
+        }
+        QLabel#locationHint {
+            color: #b0b0b5;
+            font-size: 12px;
         }
         QLineEdit {
             min-height: 28px;
@@ -92,10 +101,15 @@ NewProjectDialog::NewProjectDialog(QWidget* parent)
         const QString dir = QFileDialog::getExistingDirectory(this, "Select Project Location", m_pathEdit->text());
         if(!dir.isEmpty()) {
             m_pathEdit->setText(dir);
+            updateLocationHint();
         }
     });
     connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
     connect(createButton, &QPushButton::clicked, this, &QDialog::accept);
+    connect(m_nameEdit, &QLineEdit::textChanged, this, [this] { updateLocationHint(); });
+    connect(m_pathEdit, &QLineEdit::textChanged, this, [this] { updateLocationHint(); });
+
+    updateLocationHint();
 }
 
 QString NewProjectDialog::projectName() const {
@@ -104,4 +118,17 @@ QString NewProjectDialog::projectName() const {
 
 QString NewProjectDialog::projectDirectory() const {
     return m_pathEdit->text();
+}
+
+void NewProjectDialog::updateLocationHint() {
+    const QString name = m_nameEdit->text().trimmed();
+    const QString location = m_pathEdit->text().trimmed();
+
+    if(location.isEmpty()) {
+        m_locationHintLabel->setText("A project subdirectory will be created in the selected location.");
+        return;
+    }
+
+    const QString folderName = name.isEmpty() ? QStringLiteral("<ProjectName>") : name;
+    m_locationHintLabel->setText("A subdirectory \"" + folderName + "/\" will be created under: " + location);
 }

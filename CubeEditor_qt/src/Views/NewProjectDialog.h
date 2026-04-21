@@ -2,6 +2,7 @@
 
 #include <QDialog>
 
+class QLabel;
 class QLineEdit;
 
 class NewProjectDialog final : public QDialog {
@@ -12,6 +13,10 @@ public:
     QString projectDirectory() const;
 
 private:
+    void updateLocationHint();
+
+private:
+    QLabel* m_locationHintLabel = nullptr;
     QLineEdit* m_nameEdit = nullptr;
     QLineEdit* m_pathEdit = nullptr;
 };

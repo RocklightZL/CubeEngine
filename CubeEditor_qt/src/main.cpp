@@ -1,15 +1,16 @@
+#include <qapplication.h>
+#include <qnamespace.h>
 #include <QApplication>
 #include <QMainWindow>
 
 #include <memory>
 
-#include "App/EditorWindow.h"
 #include "App/ProjectRepository.h"
+#include "Views/EditorWindow.h"
 #include "Views/GuidancePage.h"
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
-
     QMainWindow window;
     window.setWindowTitle("CubeEditor - Guidance");
     window.resize(980, 620);
