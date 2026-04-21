@@ -11,6 +11,7 @@
 
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
+    app.setApplicationName("CubeEditor");
     QMainWindow window;
     window.setWindowTitle("CubeEditor - Guidance");
     window.resize(980, 620);

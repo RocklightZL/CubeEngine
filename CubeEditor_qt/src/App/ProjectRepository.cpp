@@ -178,8 +178,6 @@ QString ProjectRepository::configFilePath() {
     QString configDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     if(configDir.isEmpty()) {
         configDir = QDir::homePath() + "/CubeEditor";
-    }else{
-        configDir += "/CubeEditor";
     }
 
     QDir dir(configDir);

@@ -45,15 +45,13 @@ void EditorWindow::setupMenuBar() {
 }
 
 void EditorWindow::setupLayout(const QString& projectFilePath) {
-    Q_UNUSED(projectFilePath)
-
     auto* rootSplitter = new QSplitter(Qt::Horizontal, this);
     rootSplitter->setObjectName("rootSplitter");
 
     auto* leftTabs = new QTabWidget(rootSplitter);
     leftTabs->setObjectName("leftTabs");
     leftTabs->setTabsClosable(false);
-    leftTabs->addTab(new SceneHierarchyView(leftTabs), "Scene");
+    leftTabs->addTab(new SceneHierarchyView(projectFilePath, leftTabs), "Scene");
 
     auto* centerSplitter = new QSplitter(Qt::Vertical, rootSplitter);
     centerSplitter->setObjectName("centerSplitter");

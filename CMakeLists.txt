@@ -10,6 +10,8 @@ add_compile_definitions(EDITOR)
 
 if(MSVC)
     add_compile_options("/utf-8")
+    
+    # set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
