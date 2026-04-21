@@ -1,5 +1,6 @@
 #include "GuidancePage.h"
 
+#include "Cube/Core/Log.h"
 #include "../App/ProjectRepository.h"
 #include "NewProjectDialog.h"
 
@@ -117,8 +118,8 @@ QWidget* GuidancePage::buildRightPanel() {
         return btn;
     };
 
-    auto* newProjectBtn = buildQuickAction("[+] 创建新项目");
-    auto* openProjectBtn = buildQuickAction("[P] 打开项目");
+    auto* newProjectBtn = buildQuickAction("[+] Create Project");
+    auto* openProjectBtn = buildQuickAction("[P] Open Project");
 
     layout->addWidget(newProjectBtn);
     layout->addWidget(openProjectBtn);
@@ -138,6 +139,7 @@ void GuidancePage::reloadRecentProjects() {
     m_recentList->clear();
 
     const QStringList recentProjects = m_repository->recentProjects();
+    CB_EDITOR_INFO("Reload recent projects. Count={}", static_cast<int>(recentProjects.size()));
     for(const QString& projectPath : recentProjects) {
         QFileInfo info(projectPath);
         const QString displayName = info.completeBaseName().isEmpty() ? info.fileName() : info.completeBaseName();
@@ -154,20 +156,24 @@ void GuidancePage::reloadRecentProjects() {
 
 void GuidancePage::onCreateProject() {
     if(!m_repository) {
+        CB_EDITOR_ERROR("Create project action ignored: repository is null.");
         return;
     }
 
     NewProjectDialog dialog(this);
     if(dialog.exec() != QDialog::Accepted) {
+        CB_EDITOR_INFO("Create project dialog canceled.");
         return;
     }
 
     const auto result = m_repository->createProject(dialog.projectName(), dialog.projectDirectory());
     if(!result.ok) {
-        QMessageBox::warning(this, "创建项目失败", result.error);
+        CB_EDITOR_WARN("Create project failed: {}", result.error.toStdString());
+        QMessageBox::warning(this, "Create Project Failed", result.error);
         return;
     }
 
+    CB_EDITOR_INFO("Create project succeeded: {}", result.projectFilePath.toStdString());
     reloadRecentProjects();
     if(m_openEditorCallback) {
         m_openEditorCallback(result.projectFilePath);
@@ -176,20 +182,29 @@ void GuidancePage::onCreateProject() {
 
 void GuidancePage::onOpenProject() {
     if(!m_repository) {
+        CB_EDITOR_ERROR("Open project action ignored: repository is null.");
         return;
     }
 
     const QString projectPath = QFileDialog::getOpenFileName(this,
-                                                             "打开项目",
+                                                             "Open Project",
                                                              QString(),
                                                              "Cube Project File (*.cbproj)");
     if(projectPath.isEmpty()) {
+        CB_EDITOR_INFO("Open project dialog canceled.");
+        return;
+    }
+
+    if(!QFileInfo::exists(projectPath)) {
+        CB_EDITOR_WARN("Selected project file does not exist: {}", projectPath.toStdString());
+        QMessageBox::warning(this, "Open Project Failed", "The selected project file does not exist.");
         return;
     }
 
     m_repository->addRecentProject(projectPath);
     reloadRecentProjects();
 
+    CB_EDITOR_INFO("Project opened from dialog: {}", projectPath.toStdString());
     if(m_openEditorCallback) {
         m_openEditorCallback(projectPath);
     }
@@ -202,6 +217,16 @@ void GuidancePage::onRecentProjectActivated(QListWidgetItem* item) {
 
     const QString projectPath = item->data(Qt::UserRole).toString();
     if(projectPath.isEmpty()) {
+        CB_EDITOR_WARN("Recent project item missing path data.");
+        return;
+    }
+
+    if(!QFileInfo::exists(projectPath)) {
+        CB_EDITOR_WARN("Recent project file missing: {}", projectPath.toStdString());
+        QMessageBox::warning(this, "Open Project Failed", "The selected recent project file does not exist anymore.");
+        if(m_repository) {
+            reloadRecentProjects();
+        }
         return;
     }
 
@@ -210,5 +235,6 @@ void GuidancePage::onRecentProjectActivated(QListWidgetItem* item) {
         reloadRecentProjects();
     }
 
+    CB_EDITOR_INFO("Project opened from recent list: {}", projectPath.toStdString());
     m_openEditorCallback(projectPath);
 }

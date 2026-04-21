@@ -1,5 +1,7 @@
 #include "ProjectRepository.h"
 
+#include "Cube/Core/Log.h"
+
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -19,6 +21,7 @@ QStringList ProjectRepository::recentProjects() const {
 bool ProjectRepository::addRecentProject(const QString& projectFilePath) {
     const QString normalizedPath = QDir::fromNativeSeparators(projectFilePath).trimmed();
     if(normalizedPath.isEmpty()) {
+        CB_EDITOR_WARN("Skip adding recent project: empty project path.");
         return false;
     }
 
@@ -31,6 +34,7 @@ bool ProjectRepository::addRecentProject(const QString& projectFilePath) {
     }
 
     save();
+    CB_EDITOR_INFO("Recent project added: {}", normalizedPath.toStdString());
     return true;
 }
 
@@ -41,31 +45,61 @@ ProjectRepository::CreateProjectResult ProjectRepository::createProject(const QS
     const QString cleanDir = QDir::fromNativeSeparators(projectDir).trimmed();
 
     if(cleanName.isEmpty()) {
-        result.error = "项目名不能为空";
+        result.error = "Project name cannot be empty.";
+        CB_EDITOR_WARN("Create project failed: empty project name.");
         return result;
     }
 
-    QDir dir(cleanDir);
-    if(!dir.exists()) {
-        result.error = "项目路径不存在";
+    const QDir workspaceDir(cleanDir);
+    if(!workspaceDir.exists()) {
+        result.error = "Project location does not exist.";
+        CB_EDITOR_WARN("Create project failed: project location does not exist: {}", cleanDir.toStdString());
         return result;
     }
 
-    const QString projectFilePath = dir.filePath(cleanName + ".cbproj");
-    if(QFileInfo::exists(projectFilePath)) {
-        result.error = "项目文件已存在";
+    const QString projectRootPath = workspaceDir.filePath(cleanName);
+    QDir projectRootDir(projectRootPath);
+
+    if(projectRootDir.exists()) {
+        result.error = "Project root directory already exists.";
+        CB_EDITOR_WARN("Create project failed: project root already exists: {}", projectRootPath.toStdString());
         return result;
     }
+
+    if(!workspaceDir.mkpath(cleanName)) {
+        result.error = "Cannot create project root directory.";
+        CB_EDITOR_ERROR("Create project failed: cannot create project root: {}", projectRootPath.toStdString());
+        return result;
+    }
+
+    projectRootDir = QDir(projectRootPath);
+
+    const QString cacheDirPath = projectRootDir.filePath(".cube");
+    const QString scenesDirPath = projectRootDir.filePath("Scenes");
+    const QString assetsDirPath = projectRootDir.filePath("Assets");
+
+    if(!projectRootDir.mkpath(".cube") || !projectRootDir.mkpath("Scenes") || !projectRootDir.mkpath("Assets")) {
+        result.error = "Cannot create required project directories.";
+        CB_EDITOR_ERROR("Create project failed: cannot create required directories under {}", projectRootPath.toStdString());
+        return result;
+    }
+
+    const QString projectFilePath = projectRootDir.filePath(cleanName + ".cbproj");
 
     QFile file(projectFilePath);
     if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        result.error = "无法创建项目文件";
+        result.error = "Cannot create project file.";
+        CB_EDITOR_ERROR("Create project failed: cannot create file {}", projectFilePath.toStdString());
         return result;
     }
 
     QJsonObject projectObject;
     projectObject.insert("name", cleanName);
-    projectObject.insert("path", cleanDir);
+    projectObject.insert("root", QDir::fromNativeSeparators(projectRootPath));
+    projectObject.insert("cacheDir", QDir::fromNativeSeparators(cacheDirPath));
+    projectObject.insert("scenesDir", QDir::fromNativeSeparators(scenesDirPath));
+    projectObject.insert("assetsDir", QDir::fromNativeSeparators(assetsDirPath));
+    projectObject.insert("version", 1);
 
     QJsonObject rootObject;
     rootObject.insert("project", projectObject);
@@ -78,6 +112,7 @@ ProjectRepository::CreateProjectResult ProjectRepository::createProject(const QS
 
     result.ok = true;
     result.projectFilePath = QDir::fromNativeSeparators(projectFilePath);
+    CB_EDITOR_INFO("Project created: {}", result.projectFilePath.toStdString());
     return result;
 }
 
@@ -87,10 +122,12 @@ void ProjectRepository::load() {
     QFile file(configFilePath());
     if(!file.exists()) {
         save();
+        CB_EDITOR_INFO("Project cache initialized.");
         return;
     }
 
     if(!file.open(QIODevice::ReadOnly)) {
+        CB_EDITOR_WARN("Cannot open project cache for reading.");
         return;
     }
 
@@ -98,6 +135,7 @@ void ProjectRepository::load() {
     file.close();
 
     if(!doc.isObject()) {
+        CB_EDITOR_WARN("Invalid project cache format.");
         return;
     }
 
@@ -110,11 +148,14 @@ void ProjectRepository::load() {
             }
         }
     }
+
+    CB_EDITOR_INFO("Loaded {} cached projects.", static_cast<int>(m_recentProjects.size()));
 }
 
 void ProjectRepository::save() const {
     QFile file(configFilePath());
     if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        CB_EDITOR_WARN("Cannot open project cache for writing.");
         return;
     }
 
@@ -129,12 +170,16 @@ void ProjectRepository::save() const {
     const QJsonDocument doc(rootObject);
     file.write(doc.toJson(QJsonDocument::Indented));
     file.close();
+
+    CB_EDITOR_INFO("Project cache saved. Count={}", static_cast<int>(m_recentProjects.size()));
 }
 
 QString ProjectRepository::configFilePath() {
     QString configDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     if(configDir.isEmpty()) {
-        configDir = QDir::homePath() + "/.cube_editor_qt";
+        configDir = QDir::homePath() + "/CubeEditor";
+    }else{
+        configDir += "/CubeEditor";
     }
 
     QDir dir(configDir);

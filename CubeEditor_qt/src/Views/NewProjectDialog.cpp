@@ -9,7 +9,7 @@
 
 NewProjectDialog::NewProjectDialog(QWidget* parent)
     : QDialog(parent) {
-    setWindowTitle("创建新项目");
+    setWindowTitle("Create New Project");
     setModal(true);
     resize(520, 210);
 
@@ -17,16 +17,16 @@ NewProjectDialog::NewProjectDialog(QWidget* parent)
     root->setContentsMargins(16, 14, 16, 14);
     root->setSpacing(8);
 
-    auto* nameLabel = new QLabel("项目名称", this);
+    auto* nameLabel = new QLabel("Project Name", this);
     m_nameEdit = new QLineEdit(this);
-    m_nameEdit->setPlaceholderText("输入项目名称...");
+    m_nameEdit->setPlaceholderText("Enter project name...");
 
-    auto* pathLabel = new QLabel("项目路径", this);
+    auto* pathLabel = new QLabel("Project Location", this);
     auto* pathRow = new QHBoxLayout();
     pathRow->setSpacing(6);
     m_pathEdit = new QLineEdit(this);
-    m_pathEdit->setPlaceholderText("选择项目目录...");
-    auto* browseButton = new QPushButton("浏览", this);
+    m_pathEdit->setPlaceholderText("Select project location...");
+    auto* browseButton = new QPushButton("Browse", this);
     browseButton->setFixedWidth(76);
 
     pathRow->addWidget(m_pathEdit, 1);
@@ -34,8 +34,8 @@ NewProjectDialog::NewProjectDialog(QWidget* parent)
 
     auto* actionRow = new QHBoxLayout();
     actionRow->addStretch(1);
-    auto* cancelButton = new QPushButton("取消", this);
-    auto* createButton = new QPushButton("创建", this);
+    auto* cancelButton = new QPushButton("Cancel", this);
+    auto* createButton = new QPushButton("Create", this);
     createButton->setProperty("role", "primary");
     actionRow->addWidget(cancelButton);
     actionRow->addWidget(createButton);
@@ -89,7 +89,7 @@ NewProjectDialog::NewProjectDialog(QWidget* parent)
     )");
 
     connect(browseButton, &QPushButton::clicked, this, [this] {
-        const QString dir = QFileDialog::getExistingDirectory(this, "选择项目目录", m_pathEdit->text());
+        const QString dir = QFileDialog::getExistingDirectory(this, "Select Project Location", m_pathEdit->text());
         if(!dir.isEmpty()) {
             m_pathEdit->setText(dir);
         }

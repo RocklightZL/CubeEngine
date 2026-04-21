@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
     QMainWindow window;
-    window.setWindowTitle("CubeEditor (Qt) - Guidance");
+    window.setWindowTitle("CubeEditor - Guidance");
     window.resize(980, 620);
 
     auto repository = std::make_shared<ProjectRepository>();

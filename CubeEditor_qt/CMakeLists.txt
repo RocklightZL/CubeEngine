@@ -20,6 +20,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE QT_STATIC)
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core
     Qt6::Widgets
+    Cube
 )
 
 qt_import_plugins(${PROJECT_NAME}
