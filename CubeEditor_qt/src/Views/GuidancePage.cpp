@@ -1,15 +1,24 @@
 #include "GuidancePage.h"
 
+#include "../App/ProjectRepository.h"
 #include "NewProjectDialog.h"
 
+#include <QAbstractItemView>
+#include <QFileDialog>
+#include <QFileInfo>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QListWidget>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
 
-GuidancePage::GuidancePage(QWidget* parent)
-    : QWidget(parent) {
+GuidancePage::GuidancePage(std::shared_ptr<ProjectRepository> repository,
+                           std::function<void(const QString&)> openEditorCallback,
+                           QWidget* parent)
+    : QWidget(parent)
+    , m_repository(std::move(repository))
+    , m_openEditorCallback(std::move(openEditorCallback)) {
     auto* root = new QVBoxLayout(this);
     root->setContentsMargins(24, 20, 24, 20);
     root->setSpacing(14);
@@ -66,6 +75,7 @@ GuidancePage::GuidancePage(QWidget* parent)
         }
     )");
 
+    reloadRecentProjects();
 }
 
 QWidget* GuidancePage::buildLeftPanel() {
@@ -81,16 +91,13 @@ QWidget* GuidancePage::buildLeftPanel() {
     panelLayout->setContentsMargins(8, 8, 8, 8);
     panelLayout->setSpacing(0);
 
-    auto* recentList = new QListWidget(recentPanel);
-    recentList->setObjectName("recentList");
-    recentList->addItem("CubeEngine");
-    recentList->addItem("MSBuild.sln");
-    recentList->addItem("freetype-2.14.3");
-    recentList->addItem("CMakeLists.txt");
-    recentList->setSelectionMode(QAbstractItemView::SingleSelection);
-    recentList->setCurrentRow(0);
+    m_recentList = new QListWidget(recentPanel);
+    m_recentList->setObjectName("recentList");
+    m_recentList->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    panelLayout->addWidget(recentList);
+    connect(m_recentList, &QListWidget::itemClicked, this, &GuidancePage::onRecentProjectActivated);
+
+    panelLayout->addWidget(m_recentList);
     layout->addWidget(recentPanel, 1);
 
     return wrapper;
@@ -117,15 +124,91 @@ QWidget* GuidancePage::buildRightPanel() {
     layout->addWidget(openProjectBtn);
     layout->addStretch(1);
 
-    connect(newProjectBtn, &QPushButton::clicked, this, [this] {
-        NewProjectDialog dialog(this);
-        dialog.exec();
-    });
-
-    connect(openProjectBtn, &QPushButton::clicked, this, [] {
-        // Reserved for open project action.
-    });
+    connect(newProjectBtn, &QPushButton::clicked, this, &GuidancePage::onCreateProject);
+    connect(openProjectBtn, &QPushButton::clicked, this, &GuidancePage::onOpenProject);
 
     return wrapper;
 }
 
+void GuidancePage::reloadRecentProjects() {
+    if(!m_recentList || !m_repository) {
+        return;
+    }
+
+    m_recentList->clear();
+
+    const QStringList recentProjects = m_repository->recentProjects();
+    for(const QString& projectPath : recentProjects) {
+        QFileInfo info(projectPath);
+        const QString displayName = info.completeBaseName().isEmpty() ? info.fileName() : info.completeBaseName();
+
+        auto* item = new QListWidgetItem(displayName, m_recentList);
+        item->setData(Qt::UserRole, projectPath);
+        item->setToolTip(projectPath);
+    }
+
+    if(m_recentList->count() > 0) {
+        m_recentList->setCurrentRow(0);
+    }
+}
+
+void GuidancePage::onCreateProject() {
+    if(!m_repository) {
+        return;
+    }
+
+    NewProjectDialog dialog(this);
+    if(dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    const auto result = m_repository->createProject(dialog.projectName(), dialog.projectDirectory());
+    if(!result.ok) {
+        QMessageBox::warning(this, "创建项目失败", result.error);
+        return;
+    }
+
+    reloadRecentProjects();
+    if(m_openEditorCallback) {
+        m_openEditorCallback(result.projectFilePath);
+    }
+}
+
+void GuidancePage::onOpenProject() {
+    if(!m_repository) {
+        return;
+    }
+
+    const QString projectPath = QFileDialog::getOpenFileName(this,
+                                                             "打开项目",
+                                                             QString(),
+                                                             "Cube Project File (*.cbproj)");
+    if(projectPath.isEmpty()) {
+        return;
+    }
+
+    m_repository->addRecentProject(projectPath);
+    reloadRecentProjects();
+
+    if(m_openEditorCallback) {
+        m_openEditorCallback(projectPath);
+    }
+}
+
+void GuidancePage::onRecentProjectActivated(QListWidgetItem* item) {
+    if(!item || !m_openEditorCallback) {
+        return;
+    }
+
+    const QString projectPath = item->data(Qt::UserRole).toString();
+    if(projectPath.isEmpty()) {
+        return;
+    }
+
+    if(m_repository) {
+        m_repository->addRecentProject(projectPath);
+        reloadRecentProjects();
+    }
+
+    m_openEditorCallback(projectPath);
+}

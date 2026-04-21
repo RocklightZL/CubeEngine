@@ -97,3 +97,11 @@ NewProjectDialog::NewProjectDialog(QWidget* parent)
     connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
     connect(createButton, &QPushButton::clicked, this, &QDialog::accept);
 }
+
+QString NewProjectDialog::projectName() const {
+    return m_nameEdit->text();
+}
+
+QString NewProjectDialog::projectDirectory() const {
+    return m_pathEdit->text();
+}
