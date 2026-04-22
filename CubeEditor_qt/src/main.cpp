@@ -6,10 +6,12 @@
 #include <memory>
 
 #include "App/ProjectRepository.h"
+#include "Cube/Core/Engine.h"
 #include "Views/EditorWindow.h"
 #include "Views/GuidancePage.h"
 
 int main(int argc, char* argv[]) {
+    Cube::Engine::init();
     QApplication app(argc, argv);
     app.setApplicationName("CubeEditor");
     QMainWindow window;
