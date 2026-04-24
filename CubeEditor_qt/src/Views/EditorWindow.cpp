@@ -29,9 +29,15 @@ EditorWindow::EditorWindow(const QString& projectFilePath, QWidget* parent)
 void EditorWindow::setupMenuBar() {
     auto* fileMenu = menuBar()->addMenu("File");
     fileMenu->addAction("New Scene");
-    fileMenu->addAction("Save Scene");
+    auto* saveSceneAction = fileMenu->addAction("Save Scene");
     fileMenu->addSeparator();
     fileMenu->addAction("Exit");
+
+    connect(saveSceneAction, &QAction::triggered, this, [this] {
+        if(m_sceneHierarchyView) {
+            m_sceneHierarchyView->saveSelectedScene();
+        }
+    });
 
     auto* editMenu = menuBar()->addMenu("Edit");
     editMenu->addAction("Undo");
@@ -51,7 +57,8 @@ void EditorWindow::setupLayout(const QString& projectFilePath) {
     auto* leftTabs = new QTabWidget(rootSplitter);
     leftTabs->setObjectName("leftTabs");
     leftTabs->setTabsClosable(false);
-    leftTabs->addTab(new SceneHierarchyView(projectFilePath, leftTabs), "Scene");
+    m_sceneHierarchyView = new SceneHierarchyView(projectFilePath, leftTabs);
+    leftTabs->addTab(m_sceneHierarchyView, "Scene");
 
     auto* centerSplitter = new QSplitter(Qt::Vertical, rootSplitter);
     centerSplitter->setObjectName("centerSplitter");
