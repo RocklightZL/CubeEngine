@@ -4,6 +4,8 @@
 
 #include "Cube/Reflection/Type.h"
 
+#include <vector>
+
 namespace Cube {
     class Entity;
     class Scene;
@@ -25,7 +27,16 @@ private:
     void refresh();
     void appendTransform(QTreeWidgetItem* root);
     void appendComponent(QTreeWidgetItem* root, const QString& componentName, void* componentData, const Cube::Class* classInfo);
-    void appendPropertyRecursive(QTreeWidgetItem* parent, const Cube::Property* property, const Cube::Any& value, int depth);
+    void appendPropertyRecursive(QTreeWidgetItem* parent,
+                                 void* rootObjectData,
+                                 const std::vector<const Cube::Property*>& propertyPath,
+                                 const Cube::Any& value,
+                                 int depth);
+    bool setPropertyByPath(void* rootObjectData, const std::vector<const Cube::Property*>& propertyPath, Cube::Any&& newValue);
+    bool setPropertyByPathRecursive(void* ownerObjectData,
+                                    const std::vector<const Cube::Property*>& propertyPath,
+                                    int pathIndex,
+                                    Cube::Any&& newValue);
     QString anyToString(const Cube::Any& value, Cube::TypeID typeID) const;
 
 private:

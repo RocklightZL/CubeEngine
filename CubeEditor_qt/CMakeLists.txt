@@ -4,6 +4,7 @@ project(CubeEditor_qt)
 set(CMAKE_PREFIX_PATH "D:/GitHubRepo/Qt_6.10.3-static-Release_msvc2022_64_RP_MD" ${CMAKE_PREFIX_PATH})
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+set(CMAKE_AUTOMOC ON)
 
 file(GLOB_RECURSE EDITOR_SRC
     src/*.cpp

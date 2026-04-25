@@ -1,5 +1,7 @@
 #include "EntityPropertyView.h"
 
+#include "../Utils/NumericDragEdit.h"
+
 #include "Cube/Reflection/Any.h"
 #include "Cube/Reflection/Class.h"
 #include "Cube/Reflection/ClassRegistry.h"
@@ -9,13 +11,34 @@
 #include "Cube/Scene/Scene.h"
 #include "Cube/Scene/Transform.h"
 
+#include <QCheckBox>
 #include <QJsonDocument>
 #include <QJsonValue>
+#include <QLineEdit>
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
 namespace {
 constexpr int kMaxReflectionDepth = 3;
+
+bool isIntegerType(Cube::TypeID typeID) {
+    return typeID == Cube::getTypeID<int8_t>() ||
+           typeID == Cube::getTypeID<uint8_t>() ||
+           typeID == Cube::getTypeID<int16_t>() ||
+           typeID == Cube::getTypeID<uint16_t>() ||
+           typeID == Cube::getTypeID<int32_t>() ||
+           typeID == Cube::getTypeID<uint32_t>() ||
+           typeID == Cube::getTypeID<int64_t>() ||
+           typeID == Cube::getTypeID<uint64_t>();
+}
+
+bool isFloatingType(Cube::TypeID typeID) {
+    return typeID == Cube::getTypeID<float>() || typeID == Cube::getTypeID<double>();
+}
+
+bool isNumericType(Cube::TypeID typeID) {
+    return isIntegerType(typeID) || isFloatingType(typeID);
+}
 }
 
 EntityPropertyView::EntityPropertyView(QWidget* parent)
@@ -107,21 +130,56 @@ void EntityPropertyView::appendTransform(QTreeWidgetItem* root) {
     transformItem->setText(0, "Transform");
     transformItem->setExpanded(true);
 
-    const Cube::Transform& transform = m_entity->getTransform();
+    auto& transform = m_entity->getTransform();
+
+    auto createFloatEditor = [this](QTreeWidgetItem* item, double value, const std::function<void(double)>& onCommit) {
+        auto* editor = new NumericDragEdit(false, m_tree);
+        editor->setValue(value);
+        connect(editor, &NumericDragEdit::valueCommitted, this, [onCommit](double v) {
+            onCommit(v);
+        });
+        m_tree->setItemWidget(item, 1, editor);
+    };
 
     const glm::vec2 position = transform.getPosition();
-    auto* posItem = new QTreeWidgetItem(transformItem);
-    posItem->setText(0, "Position");
-    posItem->setText(1, QString("(%1, %2)").arg(position.x, 0, 'f', 3).arg(position.y, 0, 'f', 3));
+    auto* posXItem = new QTreeWidgetItem(transformItem);
+    posXItem->setText(0, "Position.x");
+    createFloatEditor(posXItem, position.x, [this](double v) {
+        auto p = m_entity->getTransform().getPosition();
+        p.x = static_cast<float>(v);
+        m_entity->getTransform().setPosition(p);
+    });
+
+    auto* posYItem = new QTreeWidgetItem(transformItem);
+    posYItem->setText(0, "Position.y");
+    createFloatEditor(posYItem, position.y, [this](double v) {
+        auto p = m_entity->getTransform().getPosition();
+        p.y = static_cast<float>(v);
+        m_entity->getTransform().setPosition(p);
+    });
 
     auto* rotItem = new QTreeWidgetItem(transformItem);
     rotItem->setText(0, "Rotation");
-    rotItem->setText(1, QString::number(transform.getRotation(), 'f', 3));
+    createFloatEditor(rotItem, transform.getRotation(), [this](double v) {
+        m_entity->getTransform().setRotation(static_cast<float>(v));
+    });
 
     const glm::vec2 scale = transform.getScale();
-    auto* scaleItem = new QTreeWidgetItem(transformItem);
-    scaleItem->setText(0, "Scale");
-    scaleItem->setText(1, QString("(%1, %2)").arg(scale.x, 0, 'f', 3).arg(scale.y, 0, 'f', 3));
+    auto* scaleXItem = new QTreeWidgetItem(transformItem);
+    scaleXItem->setText(0, "Scale.x");
+    createFloatEditor(scaleXItem, scale.x, [this](double v) {
+        auto s = m_entity->getTransform().getScale();
+        s.x = static_cast<float>(v);
+        m_entity->getTransform().setScale(s);
+    });
+
+    auto* scaleYItem = new QTreeWidgetItem(transformItem);
+    scaleYItem->setText(0, "Scale.y");
+    createFloatEditor(scaleYItem, scale.y, [this](double v) {
+        auto s = m_entity->getTransform().getScale();
+        s.y = static_cast<float>(v);
+        m_entity->getTransform().setScale(s);
+    });
 }
 
 void EntityPropertyView::appendComponent(QTreeWidgetItem* root,
@@ -150,14 +208,21 @@ void EntityPropertyView::appendComponent(QTreeWidgetItem* root,
             continue;
         }
         Cube::Any value = property->getValue(componentData);
-        appendPropertyRecursive(componentItem, property, value, 0);
+        appendPropertyRecursive(componentItem, componentData, std::vector<const Cube::Property*>{property}, value, 0);
     }
 }
 
 void EntityPropertyView::appendPropertyRecursive(QTreeWidgetItem* parent,
-                                                 const Cube::Property* property,
+                                                 void* rootObjectData,
+                                                 const std::vector<const Cube::Property*>& propertyPath,
                                                  const Cube::Any& value,
                                                  int depth) {
+    if(propertyPath.empty()) {
+        return;
+    }
+
+    const Cube::Property* property = propertyPath.back();
+
     auto* item = new QTreeWidgetItem(parent);
     item->setText(0, QString::fromStdString(property->getName()));
 
@@ -176,12 +241,126 @@ void EntityPropertyView::appendPropertyRecursive(QTreeWidgetItem* parent,
                 continue;
             }
             Cube::Any nestedValue = nestedProp->getValue(value.getData());
-            appendPropertyRecursive(item, nestedProp, nestedValue, depth + 1);
+            auto childPath = propertyPath;
+            childPath.push_back(nestedProp);
+            appendPropertyRecursive(item, rootObjectData, childPath, nestedValue, depth + 1);
         }
         return;
     }
 
+    if(isNumericType(typeID)) {
+        auto* editor = new NumericDragEdit(isIntegerType(typeID), m_tree);
+        if(isFloatingType(typeID)) {
+            if(typeID == Cube::getTypeID<float>()) {
+                editor->setValue(value.as<float>());
+            } else {
+                editor->setValue(value.as<double>());
+            }
+        } else {
+            if(typeID == Cube::getTypeID<int8_t>()) {
+                editor->setValue(value.as<int8_t>());
+            } else if(typeID == Cube::getTypeID<uint8_t>()) {
+                editor->setValue(value.as<uint8_t>());
+            } else if(typeID == Cube::getTypeID<int16_t>()) {
+                editor->setValue(value.as<int16_t>());
+            } else if(typeID == Cube::getTypeID<uint16_t>()) {
+                editor->setValue(value.as<uint16_t>());
+            } else if(typeID == Cube::getTypeID<int32_t>()) {
+                editor->setValue(value.as<int32_t>());
+            } else if(typeID == Cube::getTypeID<uint32_t>()) {
+                editor->setValue(value.as<uint32_t>());
+            } else if(typeID == Cube::getTypeID<int64_t>()) {
+                editor->setValue(static_cast<double>(value.as<int64_t>()));
+            } else if(typeID == Cube::getTypeID<uint64_t>()) {
+                editor->setValue(static_cast<double>(value.as<uint64_t>()));
+            }
+        }
+
+        connect(editor, &NumericDragEdit::valueCommitted, this, [this, rootObjectData, propertyPath, typeID](double v) {
+            if(typeID == Cube::getTypeID<float>()) {
+                setPropertyByPath(rootObjectData, propertyPath, Cube::Any(static_cast<float>(v)));
+            } else if(typeID == Cube::getTypeID<double>()) {
+                setPropertyByPath(rootObjectData, propertyPath, Cube::Any(static_cast<double>(v)));
+            } else if(typeID == Cube::getTypeID<int8_t>()) {
+                setPropertyByPath(rootObjectData, propertyPath, Cube::Any(static_cast<int8_t>(v)));
+            } else if(typeID == Cube::getTypeID<uint8_t>()) {
+                setPropertyByPath(rootObjectData, propertyPath, Cube::Any(static_cast<uint8_t>(v)));
+            } else if(typeID == Cube::getTypeID<int16_t>()) {
+                setPropertyByPath(rootObjectData, propertyPath, Cube::Any(static_cast<int16_t>(v)));
+            } else if(typeID == Cube::getTypeID<uint16_t>()) {
+                setPropertyByPath(rootObjectData, propertyPath, Cube::Any(static_cast<uint16_t>(v)));
+            } else if(typeID == Cube::getTypeID<int32_t>()) {
+                setPropertyByPath(rootObjectData, propertyPath, Cube::Any(static_cast<int32_t>(v)));
+            } else if(typeID == Cube::getTypeID<uint32_t>()) {
+                setPropertyByPath(rootObjectData, propertyPath, Cube::Any(static_cast<uint32_t>(v)));
+            } else if(typeID == Cube::getTypeID<int64_t>()) {
+                setPropertyByPath(rootObjectData, propertyPath, Cube::Any(static_cast<int64_t>(v)));
+            } else if(typeID == Cube::getTypeID<uint64_t>()) {
+                setPropertyByPath(rootObjectData, propertyPath, Cube::Any(static_cast<uint64_t>(v)));
+            }
+        });
+
+        m_tree->setItemWidget(item, 1, editor);
+        return;
+    }
+
+    if(typeID == Cube::getTypeID<bool>()) {
+        auto* check = new QCheckBox(m_tree);
+        check->setChecked(value.as<bool>());
+        connect(check, &QCheckBox::toggled, this, [this, rootObjectData, propertyPath](bool checked) {
+            setPropertyByPath(rootObjectData, propertyPath, Cube::Any(checked));
+        });
+        m_tree->setItemWidget(item, 1, check);
+        return;
+    }
+
+    if(typeID == Cube::getTypeID<std::string>()) {
+        auto* edit = new QLineEdit(QString::fromStdString(value.as<std::string>()), m_tree);
+        edit->setFrame(false);
+        connect(edit, &QLineEdit::editingFinished, this, [this, rootObjectData, propertyPath, edit] {
+            setPropertyByPath(rootObjectData, propertyPath, Cube::Any(edit->text().toStdString()));
+        });
+        m_tree->setItemWidget(item, 1, edit);
+        return;
+    }
+
     item->setText(1, anyToString(value, typeID));
+}
+
+bool EntityPropertyView::setPropertyByPath(void* rootObjectData,
+                                           const std::vector<const Cube::Property*>& propertyPath,
+                                           Cube::Any&& newValue) {
+    if(!rootObjectData || propertyPath.empty()) {
+        return false;
+    }
+
+    return setPropertyByPathRecursive(rootObjectData, propertyPath, 0, std::move(newValue));
+}
+
+bool EntityPropertyView::setPropertyByPathRecursive(void* ownerObjectData,
+                                                    const std::vector<const Cube::Property*>& propertyPath,
+                                                    int pathIndex,
+                                                    Cube::Any&& newValue) {
+    if(pathIndex < 0 || pathIndex >= static_cast<int>(propertyPath.size())) {
+        return false;
+    }
+
+    const Cube::Property* property = propertyPath[pathIndex];
+    if(!property) {
+        return false;
+    }
+
+    if(pathIndex == static_cast<int>(propertyPath.size()) - 1) {
+        property->setValue(ownerObjectData, std::move(newValue));
+        return true;
+    }
+
+    Cube::Any child = property->getValue(ownerObjectData);
+    const bool ok = setPropertyByPathRecursive(child.getData(), propertyPath, pathIndex + 1, std::move(newValue));
+    if(ok) {
+        property->setValue(ownerObjectData, std::move(child));
+    }
+    return ok;
 }
 
 QString EntityPropertyView::anyToString(const Cube::Any& value, Cube::TypeID typeID) const {
