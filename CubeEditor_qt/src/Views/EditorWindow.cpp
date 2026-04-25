@@ -23,7 +23,6 @@ EditorWindow::EditorWindow(const QString& projectFilePath, QWidget* parent)
 
     setupMenuBar();
     setupLayout(projectFilePath);
-    setupStyle();
 }
 
 void EditorWindow::setupMenuBar() {
@@ -103,62 +102,4 @@ void EditorWindow::setupLayout(const QString& projectFilePath) {
     rootSplitter->setSizes({260, 860, 320});
 
     setCentralWidget(rootSplitter);
-}
-
-void EditorWindow::setupStyle() {
-    setStyleSheet(R"(
-        QMainWindow {
-            background: #252526;
-            color: #f3f3f3;
-        }
-        QMenuBar {
-            background: #252526;
-            color: #f3f3f3;
-            border-bottom: 1px solid #3a3a3d;
-        }
-        QMenuBar::item {
-            padding: 4px 10px;
-            background: transparent;
-        }
-        QMenuBar::item:selected {
-            background: #313136;
-        }
-        QMenu {
-            background: #252526;
-            color: #f3f3f3;
-            border: 1px solid #3a3a3d;
-        }
-        QMenu::item:selected {
-            background: #313136;
-        }
-        QSplitter::handle {
-            background: #2f2f31;
-        }
-        QSplitter::handle:hover {
-            background: #3a3a40;
-        }
-        QTabWidget::pane {
-            border: 1px solid #3a3a3d;
-            background: #252526;
-        }
-        QTabBar::tab {
-            background: #2d2d30;
-            color: #d6d6d6;
-            border: 1px solid #3f3f46;
-            border-bottom: none;
-            border-top-left-radius: 3px;
-            border-top-right-radius: 3px;
-            padding: 4px 10px;
-            margin-right: 2px;
-            min-height: 22px;
-        }
-        QTabBar::tab:selected {
-            background: #252526;
-            color: #ffffff;
-            border-color: #5a5a62;
-        }
-        QTabBar::tab:hover {
-            background: #3a3a40;
-        }
-    )");
 }

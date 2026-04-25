@@ -14,32 +14,9 @@
 NumericDragEdit::NumericDragEdit(bool integerMode, QWidget* parent)
     : QWidget(parent)
     , m_integerMode(integerMode) {
+    setObjectName("numericDragEdit");
     m_dragStep = m_integerMode ? 1.0 : 0.05;
     setFixedHeight(22);
-    setStyleSheet(""
-                  "NumericDragEdit {"
-                  "  background: #252526;"
-                  "  border: 1px solid #3f3f46;"
-                  "  border-radius: 3px;"
-                  "}"
-                  "NumericDragEdit:hover {"
-                  "  border: 1px solid #5a5a60;"
-                  "}"
-                  "QLabel {"
-                  "  color: #f3f3f3;"
-                  "  background: transparent;"
-                  "  border: none;"
-                  "}"
-                  "QLineEdit {"
-                  "  color: #f3f3f3;"
-                  "  background: transparent;"
-                  "  border: none;"
-                  "  padding-left: 4px;"
-                  "  padding-right: 4px;"
-                  "}"
-                  "QLineEdit:focus {"
-                  "  color: #ffffff;"
-                  "}");
 
     auto* outer = new QHBoxLayout(this);
     outer->setContentsMargins(0, 0, 0, 0);

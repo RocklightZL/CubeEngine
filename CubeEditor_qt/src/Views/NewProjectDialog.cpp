@@ -9,6 +9,7 @@
 
 NewProjectDialog::NewProjectDialog(QWidget* parent)
     : QDialog(parent) {
+    setObjectName("newProjectDialog");
     setWindowTitle("Create New Project");
     setModal(true);
     resize(520, 210);
@@ -51,51 +52,6 @@ NewProjectDialog::NewProjectDialog(QWidget* parent)
     root->addWidget(m_locationHintLabel);
     root->addStretch(1);
     root->addLayout(actionRow);
-
-    setStyleSheet(R"(
-        QDialog {
-            background: #252526;
-            color: #f3f3f3;
-        }
-        QLabel {
-            color: #f3f3f3;
-            font-size: 13px;
-        }
-        QLabel#locationHint {
-            color: #b0b0b5;
-            font-size: 12px;
-        }
-        QLineEdit {
-            min-height: 28px;
-            padding: 0 8px;
-            border: 1px solid #3f3f46;
-            border-radius: 3px;
-            background: #1f1f1f;
-            color: #f3f3f3;
-        }
-        QPushButton {
-            min-height: 28px;
-            min-width: 76px;
-            padding: 0 10px;
-            border: 1px solid #4a4a52;
-            border-radius: 3px;
-            background: #2d2d30;
-            color: #f3f3f3;
-        }
-        QPushButton:hover {
-            background: #37373c;
-        }
-        QPushButton:pressed {
-            background: #202024;
-        }
-        QPushButton[role="primary"] {
-            background: #0e639c;
-            border: 1px solid #1177bb;
-        }
-        QPushButton[role="primary"]:hover {
-            background: #1177bb;
-        }
-    )");
 
     connect(browseButton, &QPushButton::clicked, this, [this] {
         const QString dir = QFileDialog::getExistingDirectory(this, "Select Project Location", m_pathEdit->text());

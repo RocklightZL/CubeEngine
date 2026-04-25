@@ -39,24 +39,6 @@ SceneHierarchyView::SceneHierarchyView(const QString& projectFilePath, QWidget* 
     m_tree->setIndentation(14);
     m_tree->setRootIsDecorated(true);
     m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
-    m_tree->setStyleSheet(R"(
-        QTreeWidget#sceneHierarchyTree {
-            border: none;
-            background: transparent;
-            outline: none;
-            color: #f3f3f3;
-        }
-        QTreeWidget#sceneHierarchyTree::item {
-            height: 26px;
-        }
-        QTreeWidget#sceneHierarchyTree::item:hover {
-            background: #313136;
-        }
-        QTreeWidget#sceneHierarchyTree::item:selected {
-            background: #094771;
-            color: #ffffff;
-        }
-    )");
 
     connect(m_tree, &QTreeWidget::customContextMenuRequested, this, &SceneHierarchyView::onCustomContextMenuRequested);
     connect(m_tree, &QTreeWidget::currentItemChanged, this, [this](QTreeWidgetItem*, QTreeWidgetItem*) {

@@ -20,6 +20,8 @@ GuidancePage::GuidancePage(std::shared_ptr<ProjectRepository> repository,
     : QWidget(parent)
     , m_repository(std::move(repository))
     , m_openEditorCallback(std::move(openEditorCallback)) {
+    setObjectName("guidancePage");
+
     auto* root = new QVBoxLayout(this);
     root->setContentsMargins(24, 20, 24, 20);
     root->setSpacing(14);
@@ -29,52 +31,6 @@ GuidancePage::GuidancePage(std::shared_ptr<ProjectRepository> repository,
     mainLayout->addWidget(buildLeftPanel(), 1);
     mainLayout->addWidget(buildRightPanel());
     root->addLayout(mainLayout, 1);
-
-    setStyleSheet(R"(
-        QWidget {
-            background: #252526;
-            color: #f3f3f3;
-            font-size: 13px;
-        }
-        QFrame#recentPanel {
-            border: 1px solid #3a3a3d;
-            border-radius: 0px;
-            background: #252526;
-        }
-        QListWidget#recentList {
-            border: none;
-            background: transparent;
-            outline: none;
-        }
-        QListWidget#recentList::item {
-            height: 30px;
-            padding-left: 8px;
-        }
-        QListWidget#recentList::item:hover {
-            background: #313136;
-        }
-        QListWidget#recentList::item:selected {
-            background: #094771;
-            color: #ffffff;
-        }
-        QPushButton#quickAction {
-            border: 1px solid #3f3f46;
-            border-radius: 3px;
-            text-align: left;
-            padding: 0 10px;
-            color: #f3f3f3;
-            background: #2d2d30;
-            min-height: 32px;
-        }
-        QPushButton#quickAction:hover {
-            border: 1px solid #83838a;
-            background: #3a3a40;
-        }
-        QPushButton#quickAction:pressed {
-            background: #1f1f24;
-            border: 1px solid #6a6a70;
-        }
-    )");
 
     reloadRecentProjects();
 }

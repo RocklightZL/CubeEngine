@@ -12,7 +12,6 @@ public:
 private:
     void setupMenuBar();
     void setupLayout(const QString& projectFilePath);
-    void setupStyle();
 
     SceneHierarchyView* m_sceneHierarchyView = nullptr;
     EntityPropertyView* m_entityPropertyView = nullptr;

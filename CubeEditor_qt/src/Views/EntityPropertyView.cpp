@@ -53,31 +53,6 @@ EntityPropertyView::EntityPropertyView(QWidget* parent)
     m_tree->setHeaderLabels(QStringList{"Property", "Value"});
     m_tree->setRootIsDecorated(true);
     m_tree->setAlternatingRowColors(false);
-    m_tree->setStyleSheet(R"(
-        QTreeWidget#entityPropertyTree {
-            border: none;
-            background: transparent;
-            outline: none;
-            color: #f3f3f3;
-        }
-        QTreeWidget#entityPropertyTree::item {
-            height: 24px;
-        }
-        QTreeWidget#entityPropertyTree::item:hover {
-            background: #313136;
-        }
-        QTreeWidget#entityPropertyTree::item:selected {
-            background: #094771;
-            color: #ffffff;
-        }
-        QHeaderView::section {
-            background: #2d2d30;
-            color: #d6d6d6;
-            border: 1px solid #3f3f46;
-            padding-left: 6px;
-            height: 22px;
-        }
-    )");
 
     layout->addWidget(m_tree);
     refresh();

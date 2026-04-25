@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "App/ProjectRepository.h"
+#include "App/ThemeManager.h"
 #include "Cube/Core/Engine.h"
 #include "Views/EditorWindow.h"
 #include "Views/GuidancePage.h"
@@ -14,6 +15,7 @@ int main(int argc, char* argv[]) {
     Cube::Engine::init();
     QApplication app(argc, argv);
     app.setApplicationName("CubeEditor");
+    AppTheme::applyGlobalTheme(app);
     QMainWindow window;
     window.setWindowTitle("CubeEditor - Guidance");
     window.resize(980, 620);
