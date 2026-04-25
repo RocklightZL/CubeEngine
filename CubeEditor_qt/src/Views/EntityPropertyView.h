@@ -15,6 +15,7 @@ namespace Cube {
 class QTreeWidget;
 class QTreeWidgetItem;
 class QLabel;
+class QPushButton;
 
 class EntityPropertyView final : public QWidget {
 public:
@@ -26,6 +27,8 @@ private:
     void refresh();
     void appendTransform();
     void appendComponent(const QString& componentName, void* componentData, const Cube::Class* classInfo);
+    void showAddComponentMenu(const QPoint& globalPos);
+    void addComponentByName(const QString& componentName);
     void appendPropertyFlat(QTreeWidgetItem* parent,
                             void* componentData,
                             const Cube::Property* property,
@@ -37,4 +40,5 @@ private:
     Cube::Entity* m_entity = nullptr;
     QLabel* m_entityNameLabel = nullptr;
     QTreeWidget* m_tree = nullptr;
+    QPushButton* m_addComponentButton = nullptr;
 };

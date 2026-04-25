@@ -7,16 +7,20 @@
 #include "Cube/Reflection/ClassRegistry.h"
 #include "Cube/Renderer/Color.h"
 #include "Cube/Renderer/TextureRegion.h"
+#include "Cube/Scene/Camera2D.h"
 #include "Cube/Scene/Component.h"
 #include "Cube/Scene/Entity.h"
 #include "Cube/Scene/Scene.h"
+#include "Cube/Scene/SpriteRender.h"
 #include "Cube/Scene/Transform.h"
+#include "Cube/Animation/Animation.h"
 
 #include <QCheckBox>
 #include <QColorDialog>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMenu>
 #include <QPushButton>
 #include <QTreeWidget>
 #include <QVBoxLayout>
@@ -62,6 +66,7 @@ EntityPropertyView::EntityPropertyView(QWidget* parent)
     m_tree->setRootIsDecorated(true);
     m_tree->setAlternatingRowColors(false);
     m_tree->setExpandsOnDoubleClick(false);
+    m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
 
     const auto toggleExpanded = [](QTreeWidgetItem* item) {
         if(!item || item->childCount() == 0) {
@@ -76,8 +81,19 @@ EntityPropertyView::EntityPropertyView(QWidget* parent)
     connect(m_tree, &QTreeWidget::itemDoubleClicked, this, [toggleExpanded](QTreeWidgetItem* item, int) {
         toggleExpanded(item);
     });
+    connect(m_tree, &QTreeWidget::customContextMenuRequested, this, [this](const QPoint& pos) {
+        showAddComponentMenu(m_tree->viewport()->mapToGlobal(pos));
+    });
 
     layout->addWidget(m_tree);
+
+    m_addComponentButton = new QPushButton("Add Component", this);
+    m_addComponentButton->setObjectName("addComponentButton");
+    connect(m_addComponentButton, &QPushButton::clicked, this, [this] {
+        showAddComponentMenu(m_addComponentButton->mapToGlobal(QPoint(0, m_addComponentButton->height())));
+    });
+    layout->addWidget(m_addComponentButton);
+
     refresh();
 }
 
@@ -92,10 +108,16 @@ void EntityPropertyView::refresh() {
 
     if(!m_scene || !m_entity) {
         m_entityNameLabel->setText("No entity selected.");
+        if(m_addComponentButton) {
+            m_addComponentButton->setEnabled(false);
+        }
         return;
     }
 
     m_entityNameLabel->setText(QString::fromStdString(m_entity->getName()));
+    if(m_addComponentButton) {
+        m_addComponentButton->setEnabled(true);
+    }
 
     appendTransform();
 
@@ -112,6 +134,57 @@ void EntityPropertyView::refresh() {
 
     m_tree->expandAll();
     m_tree->resizeColumnToContents(0);
+}
+
+void EntityPropertyView::showAddComponentMenu(const QPoint& globalPos) {
+    if(!m_entity || !m_scene) {
+        return;
+    }
+
+    QMenu menu(this);
+    auto* addMenu = menu.addMenu("Add Component");
+
+    auto* cameraAction = addMenu->addAction("Camera2D");
+    cameraAction->setEnabled(!m_entity->hasComponent<Cube::Camera2D>());
+
+    auto* spriteAction = addMenu->addAction("SpriteRender");
+    spriteAction->setEnabled(!m_entity->hasComponent<Cube::SpriteRender>());
+
+    auto* animationAction = addMenu->addAction("Animation");
+    animationAction->setEnabled(!m_entity->hasComponent<Cube::Animation>());
+
+    QAction* picked = menu.exec(globalPos);
+    if(!picked) {
+        return;
+    }
+
+    if(picked == cameraAction) {
+        addComponentByName("Camera2D");
+    } else if(picked == spriteAction) {
+        addComponentByName("SpriteRender");
+    } else if(picked == animationAction) {
+        addComponentByName("Animation");
+    }
+}
+
+void EntityPropertyView::addComponentByName(const QString& componentName) {
+    if(!m_entity || !m_scene) {
+        return;
+    }
+
+    if(componentName == "Camera2D") {
+        m_entity->addComponent<Cube::Camera2D>();
+    } else if(componentName == "SpriteRender") {
+        m_entity->addComponent<Cube::SpriteRender>();
+    } else if(componentName == "Animation") {
+        m_entity->addComponent<Cube::Animation>();
+    } else {
+        return;
+    }
+
+    // Flush entity pending add queue so the new component becomes visible immediately.
+    m_scene->update(0.0f);
+    refresh();
 }
 
 void EntityPropertyView::appendTransform() {
