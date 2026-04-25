@@ -15,6 +15,7 @@ NumericDragEdit::NumericDragEdit(bool integerMode, QWidget* parent)
     : QWidget(parent)
     , m_integerMode(integerMode) {
     setObjectName("numericDragEdit");
+    setProperty("integerMode", m_integerMode);
     m_dragStep = m_integerMode ? 1.0 : 0.05;
     setFixedHeight(22);
 
@@ -37,7 +38,7 @@ NumericDragEdit::NumericDragEdit(bool integerMode, QWidget* parent)
         m_editor->setValidator(new QIntValidator(m_editor));
     } else {
         auto* validator = new QDoubleValidator(m_editor);
-        validator->setDecimals(6);
+        validator->setDecimals(3);
         m_editor->setValidator(validator);
     }
     m_stack->addWidget(m_editor);
@@ -112,7 +113,7 @@ void NumericDragEdit::mouseDoubleClickEvent(QMouseEvent* event) {
 void NumericDragEdit::beginTextEdit() {
     m_editingText = true;
     m_editor->setText(m_integerMode ? QString::number(static_cast<qint64>(std::llround(m_value)))
-                                    : QString::number(m_value, 'g', 12));
+                                    : QString::number(m_value, 'f', 3));
     m_stack->setCurrentWidget(m_editor);
     m_editor->setFocus();
     m_editor->selectAll();
@@ -138,6 +139,6 @@ void NumericDragEdit::updateDisplayText() {
     if(m_integerMode) {
         m_label->setText(QString::number(static_cast<qint64>(std::llround(m_value))));
     } else {
-        m_label->setText(QString::number(m_value, 'f', 6));
+        m_label->setText(QString::number(m_value, 'f', 3));
     }
 }
