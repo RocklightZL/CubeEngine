@@ -2,6 +2,7 @@
 
 #include <QWidget>
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -18,6 +19,7 @@ public:
     ~SceneHierarchyView() override;
 
     bool saveSelectedScene();
+    void setSelectionChangedCallback(std::function<void(Cube::Scene*, Cube::Entity*)> callback);
 
 private:
     void loadFromProject(const QString& projectFilePath);
@@ -31,6 +33,7 @@ private:
     void onOpenScene();
     void onSaveScene(QTreeWidgetItem* sceneItem);
     void saveSceneByIndex(int sceneIndex);
+    void notifySelectionChanged();
     int sceneIndexFromItem(QTreeWidgetItem* item) const;
     QTreeWidgetItem* resolveSceneItem(QTreeWidgetItem* item) const;
 
@@ -45,4 +48,5 @@ private:
     QString m_editorStateFilePath;
     QTreeWidget* m_tree = nullptr;
     std::vector<SceneDocument> m_openScenes;
+    std::function<void(Cube::Scene*, Cube::Entity*)> m_selectionChangedCallback;
 };

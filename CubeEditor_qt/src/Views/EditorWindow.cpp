@@ -84,8 +84,15 @@ void EditorWindow::setupLayout(const QString& projectFilePath) {
     auto* rightTabs = new QTabWidget(rootSplitter);
     rightTabs->setObjectName("rightTabs");
     rightTabs->setTabsClosable(false);
-    rightTabs->addTab(new EntityPropertyView(rightTabs), "Entity Property");
+    m_entityPropertyView = new EntityPropertyView(rightTabs);
+    rightTabs->addTab(m_entityPropertyView, "Entity Property");
     rightTabs->addTab(new AssetPropertyView(rightTabs), "Asset Property");
+
+    m_sceneHierarchyView->setSelectionChangedCallback([this](Cube::Scene* scene, Cube::Entity* entity) {
+        if(m_entityPropertyView) {
+            m_entityPropertyView->setSelection(scene, entity);
+        }
+    });
 
     rootSplitter->addWidget(leftTabs);
     rootSplitter->addWidget(centerSplitter);

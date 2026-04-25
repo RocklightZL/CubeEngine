@@ -19,6 +19,7 @@
 
 namespace {
 constexpr int kRoleSceneIndex = Qt::UserRole + 1;
+constexpr int kRoleEntityName = Qt::UserRole + 2;
 
 QString normalizePath(const QString& path) {
     return QDir::fromNativeSeparators(QFileInfo(path).absoluteFilePath());
@@ -58,6 +59,9 @@ SceneHierarchyView::SceneHierarchyView(const QString& projectFilePath, QWidget* 
     )");
 
     connect(m_tree, &QTreeWidget::customContextMenuRequested, this, &SceneHierarchyView::onCustomContextMenuRequested);
+    connect(m_tree, &QTreeWidget::currentItemChanged, this, [this](QTreeWidgetItem*, QTreeWidgetItem*) {
+        notifySelectionChanged();
+    });
 
     layout->addWidget(m_tree);
 
@@ -190,6 +194,7 @@ void SceneHierarchyView::refreshTree() {
             const QString entityName = QString::fromStdString(entity->getName());
             entityItem->setText(0, entityName.isEmpty() ? QStringLiteral("<Unnamed Entity>") : entityName);
             entityItem->setData(0, kRoleSceneIndex, static_cast<int>(i));
+            entityItem->setData(0, kRoleEntityName, entityName);
         }
 
         sceneItem->setExpanded(true);
@@ -200,6 +205,8 @@ void SceneHierarchyView::refreshTree() {
         hintItem->setText(0, "No scene opened. Right click to open or create a scene.");
         hintItem->setData(0, kRoleSceneIndex, -1);
     }
+
+    notifySelectionChanged();
 }
 
 void SceneHierarchyView::openSceneFromFile(const QString& sceneFilePath, bool showUiError, bool refreshAfterOpen) {
@@ -448,6 +455,47 @@ void SceneHierarchyView::saveSceneByIndex(int sceneIndex) {
     CB_EDITOR_INFO("Scene saved: {}", targetFilePath.toStdString());
     refreshTree();
     saveEditorState();
+}
+
+void SceneHierarchyView::setSelectionChangedCallback(std::function<void(Cube::Scene*, Cube::Entity*)> callback) {
+    m_selectionChangedCallback = std::move(callback);
+    notifySelectionChanged();
+}
+
+void SceneHierarchyView::notifySelectionChanged() {
+    if(!m_selectionChangedCallback) {
+        return;
+    }
+
+    QTreeWidgetItem* current = m_tree ? m_tree->currentItem() : nullptr;
+    QTreeWidgetItem* sceneItem = resolveSceneItem(current);
+    if(!sceneItem) {
+        m_selectionChangedCallback(nullptr, nullptr);
+        return;
+    }
+
+    const int sceneIndex = sceneIndexFromItem(sceneItem);
+    if(sceneIndex < 0 || sceneIndex >= static_cast<int>(m_openScenes.size())) {
+        m_selectionChangedCallback(nullptr, nullptr);
+        return;
+    }
+
+    SceneDocument& doc = m_openScenes[sceneIndex];
+    Cube::Scene* scene = doc.scene.get();
+    if(!scene) {
+        m_selectionChangedCallback(nullptr, nullptr);
+        return;
+    }
+
+    Cube::Entity* entity = nullptr;
+    if(current && current->parent()) {
+        const QString entityName = current->data(0, kRoleEntityName).toString();
+        if(!entityName.isEmpty()) {
+            entity = scene->getEntity(entityName.toStdString());
+        }
+    }
+
+    m_selectionChangedCallback(scene, entity);
 }
 
 int SceneHierarchyView::sceneIndexFromItem(QTreeWidgetItem* item) const {
