@@ -130,29 +130,23 @@ const char* kGlobalThemeQss = R"(
         color: #f3f3f3;
     }
 
-    QTreeWidget#sceneHierarchyTree,
-    QTreeWidget#entityPropertyTree {
+    QTreeWidget {
         border: none;
         background: transparent;
         outline: none;
         color: #f3f3f3;
     }
-    QTreeWidget#sceneHierarchyTree::item {
-        height: 26px;
-    }
-    QTreeWidget#entityPropertyTree::item {
+    QTreeWidget::item {
         height: 24px;
     }
-    QTreeWidget#sceneHierarchyTree::item:hover,
-    QTreeWidget#entityPropertyTree::item:hover {
+    QTreeWidget::item:hover {
         background: #313136;
     }
-    QTreeWidget#sceneHierarchyTree::item:selected,
-    QTreeWidget#entityPropertyTree::item:selected {
+    QTreeWidget::item:selected {
         background: #094771;
         color: #ffffff;
     }
-    QTreeWidget#entityPropertyTree QHeaderView::section {
+    QTreeWidget QHeaderView::section {
         background: #2d2d30;
         color: #d6d6d6;
         border: 1px solid #3f3f46;

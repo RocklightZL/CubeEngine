@@ -62,6 +62,7 @@ EntityPropertyView::EntityPropertyView(QWidget* parent)
     layout->addWidget(m_entityNameLabel);
 
     m_tree = new QTreeWidget(this);
+    m_tree->setIndentation(15);
     m_tree->setObjectName("entityPropertyTree");
     m_tree->setColumnCount(2);
     m_tree->setHeaderHidden(true);
