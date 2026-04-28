@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 
+#include <QJsonObject>
+#include <QString>
+
 namespace CubeEditor {
 
 class AssetNode {
@@ -34,6 +37,7 @@ public:
 
     AssetGroup* addGroup(const std::string& groupName);
     AssetItem* addResource(const std::string& identifier);
+    AssetGroup* findGroup(const std::string& groupName);
 
     const std::vector<std::unique_ptr<AssetNode>>& getChildren() const;
     void clear();
@@ -65,12 +69,32 @@ public:
 
     AssetItem* findResource(const std::string& identifier);
 
+    bool loadFromProject(const QString& projectFilePath);
+    bool importFile(const QString& filePath, QString* error = nullptr);
+    bool saveAssetMap(QString* error = nullptr) const;
+
+    const QString& getProjectRootPath() const;
+    const QString& getAssetsDirPath() const;
+    const QString& getAssetMapFilePath() const;
+    const QJsonObject& getAssetMap() const;
+
     void reset();
 
 private:
     AssetSystem();
+    bool loadAssetMap(QString* error);
+    void rebuildTreeFromAssetMap();
+    AssetGroup* ensureGroupPath(const std::vector<std::string>& segments);
+
+    static QString normalizePath(const QString& path);
+    QJsonObject defaultImportConfigFor(const QString& filePath, QString* error) const;
+    static std::string toIdentifier(const QString& filePath);
 
     AssetGroup root;
+    QJsonObject assetMap;
+    QString projectRootPath;
+    QString assetsDirPath;
+    QString assetMapFilePath;
 };
 
 } // namespace CubeEditor

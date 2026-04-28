@@ -71,7 +71,7 @@ void EditorWindow::setupLayout(const QString& projectFilePath) {
     auto* bottomTabs = new QTabWidget(centerSplitter);
     bottomTabs->setObjectName("bottomTabs");
     bottomTabs->setTabsClosable(false);
-    bottomTabs->addTab(new AssetBrowserView(bottomTabs), "Asset Browser");
+    bottomTabs->addTab(new AssetBrowserView(projectFilePath, bottomTabs), "Asset Browser");
     bottomTabs->addTab(new AnimationEditorView(bottomTabs), "Animation Editor");
 
     centerSplitter->addWidget(workspaceTabs);

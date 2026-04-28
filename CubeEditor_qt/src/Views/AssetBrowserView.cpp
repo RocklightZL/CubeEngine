@@ -3,10 +3,13 @@
 #include "../App/AssetSystem.h"
 
 #include <functional>
+#include <QFileDialog>
+#include <QMenu>
+#include <QMessageBox>
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
-AssetBrowserView::AssetBrowserView(QWidget* parent)
+AssetBrowserView::AssetBrowserView(const QString& projectFilePath, QWidget* parent)
     : QWidget(parent) {
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(8, 8, 8, 8);
@@ -14,16 +17,14 @@ AssetBrowserView::AssetBrowserView(QWidget* parent)
     m_tree = new QTreeWidget(this);
     m_tree->setIndentation(15);
     m_tree->setHeaderHidden(true);
+    m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
     layout->addWidget(m_tree);
 
-    auto& assets = CubeEditor::AssetSystem::get();
-    if(assets.getRoot()->getChildren().empty()) {
-        auto* textures = assets.createGroup(nullptr, "Textures");
-        assets.createResource(textures, "texture/brick");
-        assets.createResource(textures, "texture/metal");
+    connect(m_tree, &QTreeWidget::customContextMenuRequested, this, &AssetBrowserView::onCustomContextMenuRequested);
 
-        auto* sprites = assets.createGroup(nullptr, "Sprites");
-        assets.createResource(sprites, "sprite/hero");
+    auto& assets = CubeEditor::AssetSystem::get();
+    if(!assets.loadFromProject(projectFilePath)) {
+        QMessageBox::warning(this, "Asset Browser", "Failed to load AssetMap.json.");
     }
 
     rebuildTree();
@@ -65,4 +66,32 @@ void AssetBrowserView::rebuildTree() {
     addGroup(rootItem, root);
     m_tree->expandAll();
     m_tree->resizeColumnToContents(0);
+}
+
+void AssetBrowserView::onCustomContextMenuRequested(const QPoint& pos) {
+    QMenu menu(this);
+    QAction* importAction = menu.addAction("Import Asset...");
+
+    QAction* picked = menu.exec(m_tree->viewport()->mapToGlobal(pos));
+    if(picked == importAction) {
+        importAssetFromFile();
+    }
+}
+
+void AssetBrowserView::importAssetFromFile() {
+    auto& assets = CubeEditor::AssetSystem::get();
+    const QString assetsDir = assets.getAssetsDirPath();
+    const QString filePath = QFileDialog::getOpenFileName(this, "Import Asset", assetsDir);
+    if(filePath.isEmpty()) {
+        return;
+    }
+
+    QString error;
+    if(!assets.importFile(filePath, &error)) {
+        const QString message = error.isEmpty() ? "Import failed." : error;
+        QMessageBox::warning(this, "Import Asset", message);
+        return;
+    }
+
+    rebuildTree();
 }
