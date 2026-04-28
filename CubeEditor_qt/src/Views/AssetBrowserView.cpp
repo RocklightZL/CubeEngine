@@ -6,6 +6,7 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
+
 AssetBrowserView::AssetBrowserView(QWidget* parent)
     : QWidget(parent) {
     auto* layout = new QVBoxLayout(this);
