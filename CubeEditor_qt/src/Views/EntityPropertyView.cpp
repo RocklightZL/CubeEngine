@@ -27,6 +27,8 @@
 
 #include <glm/glm.hpp>
 
+#include <utility>
+
 namespace {
 bool isIntegerType(Cube::TypeID typeID) {
     return typeID == Cube::getTypeID<int8_t>() ||
@@ -101,6 +103,16 @@ void EntityPropertyView::setSelection(Cube::Scene* scene, Cube::Entity* entity) 
     m_scene = scene;
     m_entity = entity;
     refresh();
+}
+
+void EntityPropertyView::setSceneDirtyCallback(std::function<void(Cube::Scene*)> callback) {
+    m_sceneDirtyCallback = std::move(callback);
+}
+
+void EntityPropertyView::notifySceneDirty() {
+    if(m_sceneDirtyCallback && m_scene) {
+        m_sceneDirtyCallback(m_scene);
+    }
 }
 
 void EntityPropertyView::refresh() {
@@ -184,6 +196,7 @@ void EntityPropertyView::addComponentByName(const QString& componentName) {
 
     // Flush entity pending add queue so the new component becomes visible immediately.
     m_scene->update(0.0f);
+    notifySceneDirty();
     refresh();
 }
 
@@ -231,12 +244,14 @@ void EntityPropertyView::appendTransform() {
     positionItem->setText(0, "Position");
     createVec2Editor(positionItem, position, [this](const glm::vec2& v) {
         m_entity->getTransform().setPosition(v);
+        notifySceneDirty();
     });
 
     auto* rotItem = new QTreeWidgetItem(transformItem);
     rotItem->setText(0, "Rotation");
     createFloatEditor(rotItem, transform.getRotation(), [this](double v) {
         m_entity->getTransform().setRotation(static_cast<float>(v));
+        notifySceneDirty();
     });
 
     const glm::vec2 scale = transform.getScale();
@@ -244,6 +259,7 @@ void EntityPropertyView::appendTransform() {
     scaleItem->setText(0, "Scale");
     createVec2Editor(scaleItem, scale, [this](const glm::vec2& v) {
         m_entity->getTransform().setScale(v);
+        notifySceneDirty();
     });
 }
 
@@ -317,7 +333,7 @@ void EntityPropertyView::appendPropertyFlat(QTreeWidgetItem* parent,
             }
         }
 
-        connect(editor, &NumericDragEdit::valueCommitted, this, [property, componentData, typeID](double v) {
+        connect(editor, &NumericDragEdit::valueCommitted, this, [this, property, componentData, typeID](double v) {
             if(typeID == Cube::getTypeID<float>()) {
                 property->setValue(componentData, Cube::Any(static_cast<float>(v)));
             } else if(typeID == Cube::getTypeID<double>()) {
@@ -339,6 +355,7 @@ void EntityPropertyView::appendPropertyFlat(QTreeWidgetItem* parent,
             } else if(typeID == Cube::getTypeID<uint64_t>()) {
                 property->setValue(componentData, Cube::Any(static_cast<uint64_t>(v)));
             }
+            notifySceneDirty();
         });
 
         m_tree->setItemWidget(item, 1, editor);
@@ -348,8 +365,9 @@ void EntityPropertyView::appendPropertyFlat(QTreeWidgetItem* parent,
     if(typeID == Cube::getTypeID<bool>()) {
         auto* check = new QCheckBox(m_tree);
         check->setChecked(value.as<bool>());
-        connect(check, &QCheckBox::toggled, this, [property, componentData](bool checked) {
+        connect(check, &QCheckBox::toggled, this, [this, property, componentData](bool checked) {
             property->setValue(componentData, Cube::Any(checked));
+            notifySceneDirty();
         });
         m_tree->setItemWidget(item, 1, check);
         return;
@@ -358,8 +376,9 @@ void EntityPropertyView::appendPropertyFlat(QTreeWidgetItem* parent,
     if(typeID == Cube::getTypeID<std::string>()) {
         auto* edit = new QLineEdit(QString::fromStdString(value.as<std::string>()), m_tree);
         edit->setFrame(false);
-        connect(edit, &QLineEdit::editingFinished, this, [property, componentData, edit] {
+        connect(edit, &QLineEdit::editingFinished, this, [this, property, componentData, edit] {
             property->setValue(componentData, Cube::Any(edit->text().toStdString()));
+            notifySceneDirty();
         });
         m_tree->setItemWidget(item, 1, edit);
         return;
@@ -368,9 +387,10 @@ void EntityPropertyView::appendPropertyFlat(QTreeWidgetItem* parent,
     if(typeID == Cube::getTypeID<glm::vec1>()) {
         auto* editor = new NumericDragEdit(false, m_tree);
         editor->setValue(value.as<glm::vec1>().x);
-        connect(editor, &NumericDragEdit::valueCommitted, this, [property, componentData](double v) {
+        connect(editor, &NumericDragEdit::valueCommitted, this, [this, property, componentData](double v) {
             glm::vec1 next(static_cast<float>(v));
             property->setValue(componentData, Cube::Any(next));
+            notifySceneDirty();
         });
         m_tree->setItemWidget(item, 1, editor);
         return;
@@ -390,9 +410,10 @@ void EntityPropertyView::appendPropertyFlat(QTreeWidgetItem* parent,
         rowLayout->addWidget(xEdit);
         rowLayout->addWidget(yEdit);
 
-        auto commit = [property, componentData, xEdit, yEdit]() {
+        auto commit = [this, property, componentData, xEdit, yEdit]() {
             glm::vec2 next(static_cast<float>(xEdit->value()), static_cast<float>(yEdit->value()));
             property->setValue(componentData, Cube::Any(next));
+            notifySceneDirty();
         };
         connect(xEdit, &NumericDragEdit::valueCommitted, this, [commit](double) { commit(); });
         connect(yEdit, &NumericDragEdit::valueCommitted, this, [commit](double) { commit(); });
@@ -418,9 +439,10 @@ void EntityPropertyView::appendPropertyFlat(QTreeWidgetItem* parent,
         rowLayout->addWidget(yEdit);
         rowLayout->addWidget(zEdit);
 
-        auto commit = [property, componentData, xEdit, yEdit, zEdit]() {
+        auto commit = [this, property, componentData, xEdit, yEdit, zEdit]() {
             glm::vec3 next(static_cast<float>(xEdit->value()), static_cast<float>(yEdit->value()), static_cast<float>(zEdit->value()));
             property->setValue(componentData, Cube::Any(next));
+            notifySceneDirty();
         };
         connect(xEdit, &NumericDragEdit::valueCommitted, this, [commit](double) { commit(); });
         connect(yEdit, &NumericDragEdit::valueCommitted, this, [commit](double) { commit(); });
@@ -450,9 +472,10 @@ void EntityPropertyView::appendPropertyFlat(QTreeWidgetItem* parent,
         rowLayout->addWidget(zEdit);
         rowLayout->addWidget(wEdit);
 
-        auto commit = [property, componentData, xEdit, yEdit, zEdit, wEdit]() {
+        auto commit = [this, property, componentData, xEdit, yEdit, zEdit, wEdit]() {
             glm::vec4 next(static_cast<float>(xEdit->value()), static_cast<float>(yEdit->value()), static_cast<float>(zEdit->value()), static_cast<float>(wEdit->value()));
             property->setValue(componentData, Cube::Any(next));
+            notifySceneDirty();
         };
         connect(xEdit, &NumericDragEdit::valueCommitted, this, [commit](double) { commit(); });
         connect(yEdit, &NumericDragEdit::valueCommitted, this, [commit](double) { commit(); });
@@ -483,11 +506,12 @@ void EntityPropertyView::appendPropertyFlat(QTreeWidgetItem* parent,
         rowLayout->addWidget(maxX);
         rowLayout->addWidget(maxY);
 
-        auto commit = [property, componentData, minX, minY, maxX, maxY]() {
+        auto commit = [this, property, componentData, minX, minY, maxX, maxY]() {
             Cube::TextureRegion next;
             next.uvMin = glm::vec2(static_cast<float>(minX->value()), static_cast<float>(minY->value()));
             next.uvMax = glm::vec2(static_cast<float>(maxX->value()), static_cast<float>(maxY->value()));
             property->setValue(componentData, Cube::Any(next));
+            notifySceneDirty();
         };
         connect(minX, &NumericDragEdit::valueCommitted, this, [commit](double) { commit(); });
         connect(minY, &NumericDragEdit::valueCommitted, this, [commit](double) { commit(); });
@@ -526,6 +550,7 @@ void EntityPropertyView::appendPropertyFlat(QTreeWidgetItem* parent,
 
             Cube::Color next(picked.redF(), picked.greenF(), picked.blueF(), picked.alphaF());
             property->setValue(componentData, Cube::Any(next));
+            notifySceneDirty();
             refreshButton(next);
             button->setText(QString("rgba(%1, %2, %3, %4)")
                                 .arg(picked.red())

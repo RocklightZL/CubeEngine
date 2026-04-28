@@ -388,6 +388,32 @@ bool SceneHierarchyView::saveSelectedScene() {
     return true;
 }
 
+void SceneHierarchyView::markSceneDirty(Cube::Scene* scene) {
+    if(!scene) {
+        return;
+    }
+
+    for(size_t i = 0; i < m_openScenes.size(); ++i) {
+        SceneDocument& doc = m_openScenes[i];
+        if(doc.scene.get() != scene) {
+            continue;
+        }
+
+        if(doc.dirty) {
+            return;
+        }
+
+        doc.dirty = true;
+        QTreeWidgetItem* sceneItem = m_tree ? m_tree->topLevelItem(static_cast<int>(i)) : nullptr;
+        if(sceneItem) {
+            const QString sceneName = QString::fromStdString(scene->getName());
+            sceneItem->setText(0, sceneName + " *");
+        }
+        saveEditorState();
+        return;
+    }
+}
+
 void SceneHierarchyView::saveSceneByIndex(int sceneIndex) {
     if(sceneIndex < 0 || sceneIndex >= static_cast<int>(m_openScenes.size())) {
         return;

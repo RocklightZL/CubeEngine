@@ -84,6 +84,11 @@ void EditorWindow::setupLayout(const QString& projectFilePath) {
     rightTabs->setObjectName("rightTabs");
     rightTabs->setTabsClosable(false);
     m_entityPropertyView = new EntityPropertyView(rightTabs);
+    m_entityPropertyView->setSceneDirtyCallback([this](Cube::Scene* scene) {
+        if(m_sceneHierarchyView) {
+            m_sceneHierarchyView->markSceneDirty(scene);
+        }
+    });
     rightTabs->addTab(m_entityPropertyView, "Entity Property");
     rightTabs->addTab(new AssetPropertyView(rightTabs), "Asset Property");
 

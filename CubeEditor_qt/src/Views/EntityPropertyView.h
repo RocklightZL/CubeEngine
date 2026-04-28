@@ -2,6 +2,8 @@
 
 #include <QWidget>
 
+#include <functional>
+
 #include "Cube/Reflection/Type.h"
 
 namespace Cube {
@@ -22,9 +24,11 @@ public:
     explicit EntityPropertyView(QWidget* parent = nullptr);
 
     void setSelection(Cube::Scene* scene, Cube::Entity* entity);
+    void setSceneDirtyCallback(std::function<void(Cube::Scene*)> callback);
 
 private:
     void refresh();
+    void notifySceneDirty();
     void appendTransform();
     void appendComponent(const QString& componentName, void* componentData, const Cube::Class* classInfo);
     void showAddComponentMenu(const QPoint& globalPos);
@@ -38,6 +42,7 @@ private:
 private:
     Cube::Scene* m_scene = nullptr;
     Cube::Entity* m_entity = nullptr;
+    std::function<void(Cube::Scene*)> m_sceneDirtyCallback;
     QLabel* m_entityNameLabel = nullptr;
     QTreeWidget* m_tree = nullptr;
     QPushButton* m_addComponentButton = nullptr;

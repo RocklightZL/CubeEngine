@@ -19,6 +19,7 @@ public:
     ~SceneHierarchyView() override;
 
     bool saveSelectedScene();
+    void markSceneDirty(Cube::Scene* scene);
     void setSelectionChangedCallback(std::function<void(Cube::Scene*, Cube::Entity*)> callback);
 
 private:
